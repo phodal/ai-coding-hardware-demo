@@ -15,6 +15,8 @@ XIAOZHI_FIRMWARE_DIR="${XIAOZHI_FIRMWARE_DIR:-$XIAOZHI_WORK_DIR/firmware}"
 XIAOZHI_FLASH_ADDRESS="${XIAOZHI_FLASH_ADDRESS:-0x0}"
 XIAOZHI_BAUD="${XIAOZHI_BAUD:-921600}"
 XIAOZHI_SDKCONFIG_DEFAULTS="${XIAOZHI_SDKCONFIG_DEFAULTS:-sdkconfig.defaults;sdkconfig.defaults.esp32s3;$ROOT_DIR/config/xiaozhi-sdkconfig.defaults}"
+XIAOZHI_IDF_PATH="${XIAOZHI_IDF_PATH:-$ROOT_DIR/.vendor/esp-idf-v5.5.4}"
+XIAOZHI_IDF_PYTHON_ENV_PATH="${XIAOZHI_IDF_PYTHON_ENV_PATH:-}"
 
 usage() {
   cat >&2 <<'EOF'
@@ -27,6 +29,7 @@ Usage:
   scripts/xiaozhi.sh erase --yes
   scripts/xiaozhi.sh source-clone
   scripts/xiaozhi.sh source-check
+  scripts/xiaozhi.sh idf-env
   scripts/xiaozhi.sh idf-build
   scripts/xiaozhi.sh idf-flash
   scripts/xiaozhi.sh idf-monitor
@@ -53,6 +56,56 @@ require_yes() {
     echo "This action flashes or erases the board. Re-run with --yes when ready." >&2
     exit 2
   fi
+}
+
+detect_idf_python_env() {
+  if [[ -n "$XIAOZHI_IDF_PYTHON_ENV_PATH" ]]; then
+    printf '%s\n' "$XIAOZHI_IDF_PYTHON_ENV_PATH"
+    return
+  fi
+
+  local idf_version idf_minor env_dir
+  idf_version="$(basename "$XIAOZHI_IDF_PATH" | sed -n 's/.*v\([0-9][0-9.]*\).*/\1/p')"
+  idf_minor="${idf_version%.*}"
+  env_dir="$(find "$HOME/.espressif/python_env" -maxdepth 1 -type d -name "idf${idf_minor}_py*_env" 2>/dev/null | sort | tail -n 1 || true)"
+  if [[ -n "$env_dir" && -x "$env_dir/bin/python" ]]; then
+    printf '%s\n' "$env_dir"
+  fi
+}
+
+source_idf() {
+  local mode="${1:-optional}"
+  if command -v idf.py >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local export_script="$XIAOZHI_IDF_PATH/export.sh"
+  if [[ ! -f "$export_script" ]]; then
+    if [[ "$mode" == "required" ]]; then
+      echo "ESP-IDF export script is missing: $export_script" >&2
+      echo "Install ESP-IDF v5.5.x or set XIAOZHI_IDF_PATH before building XiaoZhi from source." >&2
+      exit 1
+    fi
+    return 1
+  fi
+
+  local python_env
+  python_env="$(detect_idf_python_env || true)"
+  if [[ -n "$python_env" ]]; then
+    export IDF_PYTHON_ENV_PATH="$python_env"
+  fi
+
+  # shellcheck disable=SC1090
+  if source "$export_script" >/tmp/xiaozhi-idf-export.log 2>&1; then
+    return 0
+  fi
+
+  if [[ "$mode" == "required" ]]; then
+    echo "Failed to activate ESP-IDF from $export_script." >&2
+    echo "See /tmp/xiaozhi-idf-export.log for the ESP-IDF export output." >&2
+    exit 1
+  fi
+  return 1
 }
 
 find_esptool() {
@@ -168,6 +221,7 @@ preflight() {
     source_status="missing"
   fi
 
+  source_idf optional || true
   if command -v idf.py >/dev/null 2>&1; then
     idf_status="$(command -v idf.py)"
   else
@@ -186,6 +240,51 @@ print(
     f"source={sys.argv[5]} idf={sys.argv[6]} destructive=0 audio=0"
 )
 PY
+}
+
+idf_env_summary() {
+  source_idf required
+  local idf_path idf_py idf_version
+  idf_path="${IDF_PATH:-$XIAOZHI_IDF_PATH}"
+  idf_py="${IDF_PYTHON_ENV_PATH:-missing}"
+  idf_version="$(idf.py --version 2>/dev/null | tr ' ' '_')"
+  printf 'xiaozhi_idf_summary idf=%s path=%s python_env=%s destructive=0 audio=0\n' \
+    "$idf_version" "$idf_path" "$idf_py"
+}
+
+prepare_idf_build_dir() {
+  local build_dir="$XIAOZHI_SOURCE_DIR/build"
+  if [[ -d "$build_dir" && ! -f "$build_dir/CMakeCache.txt" ]]; then
+    echo "Removing incomplete XiaoZhi IDF build directory: $build_dir" >&2
+    rm -rf "$build_dir"
+  fi
+}
+
+idf_build_summary() {
+  local build_dir="$XIAOZHI_SOURCE_DIR/build"
+  local app_bin="$build_dir/xiaozhi.bin"
+  local bootloader_bin="$build_dir/bootloader/bootloader.bin"
+  local partition_bin="$build_dir/partition_table/partition-table.bin"
+  local assets_bin="$build_dir/generated_assets.bin"
+  if [[ ! -f "$app_bin" ]]; then
+    echo "Expected XiaoZhi app binary after build: $app_bin" >&2
+    exit 1
+  fi
+  printf 'xiaozhi_idf_build_summary idf=%s app_bin=%s app_size=%s bootloader_size=%s partition_size=%s assets_size=%s destructive=0 audio=0\n' \
+    "$(idf.py --version 2>/dev/null | tr ' ' '_')" \
+    "$app_bin" \
+    "$(wc -c < "$app_bin" | tr -d ' ')" \
+    "$(if [[ -f "$bootloader_bin" ]]; then wc -c < "$bootloader_bin" | tr -d ' '; else printf missing; fi)" \
+    "$(if [[ -f "$partition_bin" ]]; then wc -c < "$partition_bin" | tr -d ' '; else printf missing; fi)" \
+    "$(if [[ -f "$assets_bin" ]]; then wc -c < "$assets_bin" | tr -d ' '; else printf missing; fi)"
+}
+
+run_idf_build() {
+  if [[ -f "$XIAOZHI_SOURCE_DIR/sdkconfig" ]] && grep -q '^CONFIG_IDF_TARGET="esp32s3"$' "$XIAOZHI_SOURCE_DIR/sdkconfig"; then
+    (cd "$XIAOZHI_SOURCE_DIR" && idf.py -DSDKCONFIG_DEFAULTS="$XIAOZHI_SDKCONFIG_DEFAULTS" build)
+    return
+  fi
+  (cd "$XIAOZHI_SOURCE_DIR" && idf.py -DSDKCONFIG_DEFAULTS="$XIAOZHI_SDKCONFIG_DEFAULTS" set-target esp32s3 build)
 }
 
 extract_merged_binary() {
@@ -247,27 +346,23 @@ case "$ACTION" in
       "$XIAOZHI_SOURCE_DIR/main/boards/waveshare/esp32-s3-touch-amoled-1.75" \
       "$ROOT_DIR/config/xiaozhi-sdkconfig.defaults"
     ;;
+  idf-env)
+    idf_env_summary
+    ;;
   idf-build)
-    if ! command -v idf.py >/dev/null 2>&1; then
-      echo "idf.py is missing. Install/source ESP-IDF before building XiaoZhi from source." >&2
-      exit 1
-    fi
-    (cd "$XIAOZHI_SOURCE_DIR" && idf.py -DSDKCONFIG_DEFAULTS="$XIAOZHI_SDKCONFIG_DEFAULTS" set-target esp32s3 build)
+    source_idf required
+    prepare_idf_build_dir
+    run_idf_build
+    idf_build_summary
     ;;
   idf-flash)
     require_port
-    if ! command -v idf.py >/dev/null 2>&1; then
-      echo "idf.py is missing. Install/source ESP-IDF before flashing XiaoZhi from source." >&2
-      exit 1
-    fi
+    source_idf required
     (cd "$XIAOZHI_SOURCE_DIR" && idf.py -p "$ARDUINO_PORT" flash)
     ;;
   idf-monitor)
     require_port
-    if ! command -v idf.py >/dev/null 2>&1; then
-      echo "idf.py is missing. Install/source ESP-IDF before monitoring XiaoZhi from source." >&2
-      exit 1
-    fi
+    source_idf required
     (cd "$XIAOZHI_SOURCE_DIR" && idf.py -p "$ARDUINO_PORT" monitor)
     ;;
   help|-h|--help)

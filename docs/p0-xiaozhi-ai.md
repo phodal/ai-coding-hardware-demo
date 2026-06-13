@@ -14,6 +14,8 @@ make xiaozhi-latest
 make xiaozhi-download
 make xiaozhi-inspect
 make xiaozhi-preflight
+make xiaozhi-idf-env
+make xiaozhi-idf-build
 CONFIRM=--yes make xiaozhi-flash
 ```
 
@@ -37,13 +39,16 @@ This writes the latest `waveshare-esp32-s3-touch-amoled-1.75c` merged binary to 
 ```bash
 make xiaozhi-source-clone
 make xiaozhi-source-check
-scripts/xiaozhi.sh idf-build
+make xiaozhi-idf-env
+make xiaozhi-idf-build
 scripts/xiaozhi.sh idf-flash
 scripts/xiaozhi.sh idf-monitor
 ```
 
-The source build route requires an ESP-IDF shell where `idf.py` is available. The script checks for `idf.py` and fails early when ESP-IDF is not sourced.
+The source build route uses the local ESP-IDF checkout by default. XiaoZhi source `v2.2.6-37-g3f9e5fc` declares `idf >=5.5.2`, so the local automation defaults to `.vendor/esp-idf-v5.5.4` and `~/.espressif/python_env/idf5.5_py3.14_env`.
+`make xiaozhi-idf-env` is non-destructive and emits `xiaozhi_idf_summary ... destructive=0 audio=0`.
 The local source-build defaults include `config/xiaozhi-sdkconfig.defaults`, which selects `CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C=y`.
+`make xiaozhi-idf-build` compiles the source only; it does not flash the board or open audio devices, and it emits `xiaozhi_idf_build_summary ... destructive=0 audio=0` after a successful build.
 
 Useful overrides:
 
@@ -54,6 +59,8 @@ XIAOZHI_WORK_DIR=.vendor/xiaozhi
 XIAOZHI_FLASH_ADDRESS=0x0
 XIAOZHI_BAUD=921600
 XIAOZHI_SDKCONFIG_DEFAULTS='sdkconfig.defaults;sdkconfig.defaults.esp32s3;/absolute/path/to/config/xiaozhi-sdkconfig.defaults'
+XIAOZHI_IDF_PATH=.vendor/esp-idf-v5.5.4
+XIAOZHI_IDF_PYTHON_ENV_PATH=~/.espressif/python_env/idf5.5_py3.14_env
 ```
 
 ## Device Onboarding After Flash
@@ -74,15 +81,20 @@ Flashing XiaoZhi replaces the Arduino demo currently on the board. To return to 
 - Matched asset: `v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip`.
 - `make xiaozhi-inspect` confirmed the downloaded asset contains `merged-binary.bin` with size `11240285` bytes.
 - `make xiaozhi-preflight` verifies the current release asset, `merged-binary.bin` SHA-256, esptool path, serial port, source checkout marker, and ESP-IDF availability without flashing firmware or using audio hardware.
-- Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=missing destructive=0 audio=0`.
+- Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=/Users/phodal/hardware/arduino/.vendor/esp-idf-v5.5.4/tools/idf.py destructive=0 audio=0`.
 - Latest `merged-binary.bin` SHA-256: `c08f389e2650b2076d2155fa62c0b34c5f3359e07833a8fca5f0f53c6e8bf7dd`.
 - Standalone `esptool.py` is not installed, but Arduino ESP32 core provides `~/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool`.
 - `make xiaozhi-source-clone` cloned official source to `.vendor/xiaozhi/source` at `v2.2.6-37-g3f9e5fc`.
 - `make xiaozhi-source-check` confirmed the source tree contains `CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C`.
-- `scripts/xiaozhi.sh idf-build` currently fails early because `idf.py` is not available in this shell; source compilation is gated on installing/sourcing ESP-IDF.
+- `make xiaozhi-idf-env` on 2026-06-14 activated ESP-IDF `v5.5.4` from `.vendor/esp-idf-v5.5.4` with Python env `~/.espressif/python_env/idf5.5_py3.14_env`.
+- `make xiaozhi-idf-build` on 2026-06-14 compiled the official XiaoZhi source without flashing firmware or using audio hardware.
+- Latest `xiaozhi_idf_build_summary`: `idf=ESP-IDF_v5.5.4 app_bin=/Users/phodal/hardware/arduino/.vendor/xiaozhi/source/build/xiaozhi.bin app_size=2944176 bootloader_size=16256 partition_size=3072 assets_size=2851677 destructive=0 audio=0`.
+- Earlier ESP-IDF `v5.4.4` was rejected by the XiaoZhi component solver because `main/idf_component.yml` requires `idf >=5.5.2`.
+- `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino idf-build`: passed through the repo Skill helper.
+- `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino idf-build`: passed through the global Skill helper.
 - Flashing was not run during this documentation update.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external --per-target-timeout 180 --max-failures 1"`: ran the non-destructive `xiaozhi-preflight` suite target without flashing firmware or using audio hardware.
-- Latest suite summary: `.logs/hardware-smoke-suite/20260614-062838/summary.json`.
-- Latest suite target log: `.logs/hardware-smoke-suite/20260614-062838/xiaozhi-ai.log`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-071849/summary.json`.
+- Latest suite target log: `.logs/hardware-smoke-suite/20260614-071849/xiaozhi-ai.log`.
 - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino preflight`: passed through the repo Skill helper.
 - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino preflight`: passed through the global Skill helper.

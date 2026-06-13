@@ -73,7 +73,9 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make xiaozhi-preflight` for the non-destructive readiness gate; it hashes `merged-binary.bin`, reports esptool/serial/source/ESP-IDF readiness, and confirms `destructive=0 audio=0`.
    - Run `make xiaozhi-flash` only when the user is ready to replace the current Arduino demo with XiaoZhi firmware.
    - For source builds, run `make xiaozhi-source-clone` then `make xiaozhi-source-check`; the local defaults select `CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C=y`.
-   - If `idf.py` is missing, stop at source-check and tell the user to install/source ESP-IDF before `scripts/xiaozhi.sh idf-build`.
+   - Run `make xiaozhi-idf-env` to prove the local ESP-IDF shell can be activated without flashing firmware or using audio hardware.
+   - Run `make xiaozhi-idf-build` to compile XiaoZhi from source without flashing; the script prints `xiaozhi_idf_build_summary ... destructive=0 audio=0` on success.
+   - The current source requires ESP-IDF `>=5.5.2`; the local default is `.vendor/esp-idf-v5.5.4` with `~/.espressif/python_env/idf5.5_py3.14_env`.
 
 10. For the self-developed cloud AI terminal:
    - Run `make cloud-ai-build` to compile the board-side display/serial terminal.
@@ -253,6 +255,8 @@ make xiaozhi-latest
 make xiaozhi-inspect
 make xiaozhi-preflight
 make xiaozhi-source-check
+make xiaozhi-idf-env
+make xiaozhi-idf-build
 make cloud-ai-build
 make cloud-ai-smoke
 make cloud-ai-pipeline-smoke
