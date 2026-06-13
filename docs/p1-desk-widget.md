@@ -14,10 +14,25 @@ The `desk_widget` sketch is a serial-driven desktop AI widget surface for the Wa
 ```bash
 make desk-widget-build
 make desk-widget-smoke
+make desk-widget-relay-smoke
 DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make desk-widget-smoke
 ```
 
 The smoke script uploads the sketch, waits for `WIDGET_READY`, sends CI/GitHub/alert/timer/summary commands, and verifies `WIDGET_STATE` plus the serial page flow.
+
+`make desk-widget-relay-smoke` uploads the same sketch and runs `scripts/desk-widget-relay.py`. The relay turns mock, JSON-file, or HTTP event payloads into the board serial protocol. This is the host-side adapter gate before using real GitHub, CI, calendar, or LLM credentials.
+
+Relay payload shape:
+
+```json
+{
+  "ci": {"state": "FAIL", "label": "build red"},
+  "github": {"count": 7},
+  "alerts": ["review needed"],
+  "timer": {"minutes": 25, "start": true},
+  "summary": "AI summary ready for standup"
+}
+```
 
 ## Serial Protocol
 
@@ -33,3 +48,11 @@ The smoke script uploads the sketch, waits for `WIDGET_READY`, sends CI/GitHub/a
 ## Notes
 
 This is a control-plane and UI slice. It does not require Wi-Fi credentials yet; a future host relay can translate GitHub, calendar, CI, or LLM events into the same serial protocol before moving the device to direct Wi-Fi integrations.
+
+## Verified Locally
+
+- `make desk-widget-build`: passed.
+- `make desk-widget-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated direct serial commands for CI/GitHub/alert/timer/summary.
+- `SKIP_BUILD=1 make desk-widget-relay-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated mock event relay for CI/GitHub/alert/timer/summary.
+- `SKIP_BUILD=1 skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh desk-widget /Users/phodal/hardware/arduino relay`: passed through the repo Skill helper.
+- `SKIP_BUILD=1 /Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh desk-widget /Users/phodal/hardware/arduino relay`: passed through the global Skill helper.

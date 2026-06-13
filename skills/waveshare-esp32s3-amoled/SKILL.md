@@ -132,6 +132,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 20. For desktop AI widget validation:
    - Run `make desk-widget-build` to compile the serial-driven desktop widget.
    - Run `make desk-widget-smoke` to upload it and validate CI/GitHub/alert/timer/AI-summary pages without network credentials.
+   - Run `make desk-widget-relay-smoke` to validate the host event adapter that maps mock, JSON, or HTTP events into the widget serial protocol.
    - Use `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make desk-widget-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
@@ -180,6 +181,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
      `IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh imu-interaction <project-dir> smoke`
      `LVGL_VISUAL_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh lvgl-visual-agent <project-dir> smoke`
      `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh desk-widget <project-dir> smoke`
+     `scripts/waveshare-arduino-cli.sh desk-widget <project-dir> relay`
      `IOT_PANEL_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh iot-panel <project-dir> smoke`
      `OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh offline-voice <project-dir> smoke`
      `TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh tinyml-imu <project-dir> smoke`
@@ -249,6 +251,7 @@ make lvgl-visual-agent-build
 make lvgl-visual-agent-smoke
 make desk-widget-build
 make desk-widget-smoke
+make desk-widget-relay-smoke
 make iot-panel-build
 make iot-panel-smoke
 make offline-voice-build

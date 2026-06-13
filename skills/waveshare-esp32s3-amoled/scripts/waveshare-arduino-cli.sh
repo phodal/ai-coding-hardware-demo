@@ -304,6 +304,10 @@ case "$ACTION" in
         smoke)
           exec "$PROJECT_DIR/scripts/desk-widget-smoke.sh"
           ;;
+        relay)
+          cd "$PROJECT_DIR"
+          exec make desk-widget-relay-smoke
+          ;;
         check)
           exec python3 "$PROJECT_DIR/scripts/desk-widget-check.py" "${EXTRA_ARGS[@]:1}"
           ;;

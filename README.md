@@ -129,6 +129,7 @@ make imu-interaction-build
 make imu-interaction-smoke
 make desk-widget-build
 make desk-widget-smoke
+make desk-widget-relay-smoke
 make iot-panel-build
 make iot-panel-smoke
 make tinyml-imu-build
@@ -159,7 +160,7 @@ make lvgl-visual-agent-smoke
 
 `make imu-interaction-smoke` uploads the dedicated QMI8658 interaction probe and validates wrist wake, shake-to-switch, posture menu, and step counting through deterministic serial-injected IMU samples. Use `IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make imu-interaction-smoke` when camera OCR should also verify the screen reaches `OK`; details are in `docs/p1-imu-interaction-probe.md`.
 
-`make desk-widget-smoke` uploads the serial-driven desk widget and validates CI/GitHub/alert/timer/AI-summary pages without network credentials or audio devices. Use `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make desk-widget-smoke` when camera OCR should also verify the screen reaches `OK`; details are in `docs/p1-desk-widget.md`.
+`make desk-widget-smoke` uploads the serial-driven desk widget and validates CI/GitHub/alert/timer/AI-summary pages without network credentials or audio devices. `make desk-widget-relay-smoke` validates the host adapter that turns mock, JSON, or HTTP events into the same widget protocol. Use `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make desk-widget-smoke` when camera OCR should also verify the screen reaches `OK`; details are in `docs/p1-desk-widget.md`.
 
 `make iot-panel-smoke` uploads the serial-driven IoT control panel and validates device state changes, MQTT-style inbound updates, HTTP-style outbound actions, and scene changes without Wi-Fi credentials. Use `IOT_PANEL_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make iot-panel-smoke` when camera OCR should also verify the screen reaches `OK`; details are in `docs/p1-iot-control-panel.md`.
 
