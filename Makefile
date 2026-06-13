@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: setup build upload monitor smoke board-list clean
+.PHONY: setup build upload monitor smoke visual-smoke camera-ocr board-list clean
 
 setup:
 	./scripts/setup.sh
@@ -17,10 +17,15 @@ monitor:
 smoke:
 	./scripts/smoke.sh
 
+visual-smoke:
+	./scripts/visual-smoke.sh
+
+camera-ocr:
+	./scripts/camera-ocr.sh
+
 board-list:
 	arduino-cli board list
 	arduino-cli board listall | rg -i 'waveshare|amoled|esp32.?s3|touch' || true
 
 clean:
 	rm -rf .arduino-build .logs
-

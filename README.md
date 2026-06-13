@@ -9,6 +9,7 @@ This workspace automates build, upload, and serial monitoring for the Waveshare 
 - Port: `/dev/cu.usbmodem83101`
 - Sketch: `sketches/codex_hello_world`
 - Serial diagnostic sketch: `sketches/serial_probe`
+- Visual OCR sketch: `sketches/display_ocr_check`
 - Vendor examples/libraries: `/Users/phodal/Downloads/ESP32-S3-Touch-AMOLED-1.75C-main/examples/Arduino-v3.3.5`
 
 The installed ESP32 core does not currently expose a dedicated `ESP32-S3-Touch-AMOLED-1.75C` FQBN. The scripts use `esp32:esp32:esp32s3` with explicit board options and the Waveshare 1.75C `pin_config.h`.
@@ -21,6 +22,7 @@ make build
 make upload
 make monitor
 make smoke
+make visual-smoke
 ```
 
 Override defaults with environment variables or `.env`:
@@ -32,3 +34,15 @@ WAVESHARE_VENDOR_DIR=/path/to/ESP32-S3-Touch-AMOLED-1.75C-main make build
 
 `make smoke` builds with a dedicated build directory, uploads, then records a short serial log under `.logs/`.
 On this macOS USB Serial/JTAG port, raw `stty` + `cat` captures data reliably; set `ARDUINO_CLI_MONITOR=1` to force `arduino-cli monitor`.
+
+`make visual-smoke` uploads a static high-contrast OCR screen and then captures one camera frame with `ffmpeg` before checking it with `tesseract`. Defaults:
+
+```bash
+CAMERA_DEVICE=0
+CAMERA_SIZE=1280x720
+CAMERA_CROP="iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2"
+OCR_EXPECTED="CODEX OK"
+OCR_ENGINE=vision
+```
+
+Point the camera at the AMOLED before running the command. If macOS asks for camera permission, allow the terminal/Codex process and rerun.

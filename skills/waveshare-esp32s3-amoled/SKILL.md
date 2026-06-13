@@ -36,6 +36,11 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Use `arduino-cli monitor --config baudrate=115200,dtr=on,rts=off` only as a fallback; it may open successfully but capture no bytes on this USB Serial/JTAG path.
    - Treat repeated sketch serial lines plus visible AMOLED output as the baseline pass condition.
 
+6. For visual display validation:
+   - Upload `sketches/display_ocr_check` when the project has it.
+   - Run `scripts/visual-smoke.sh` or capture one camera frame with `ffmpeg` and OCR it with `tesseract`.
+   - Pass only if OCR sees `CODEX OK`; use the saved raw/processed images to debug focus, glare, rotation, or garbled output.
+
 ## Known 1.75C FQBN
 
 Use this FQBN unless a future Espressif core adds a real 1.75C board profile:
@@ -59,6 +64,13 @@ Example:
 ```
 
 If the project contains `scripts/setup.sh`, `scripts/build.sh`, `scripts/upload.sh`, or `scripts/monitor.sh`, prefer those project scripts because they encode project-local sketch paths.
+
+For visual validation in this repo, prefer:
+
+```bash
+SMOKE_SECONDS=8 ./scripts/smoke.sh
+make visual-smoke
+```
 
 ## References
 
