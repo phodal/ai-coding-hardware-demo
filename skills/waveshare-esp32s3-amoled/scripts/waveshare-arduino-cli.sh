@@ -47,6 +47,25 @@ case "$ACTION" in
       exec "$PROJECT_DIR/scripts/visual-smoke.sh"
     fi
     ;;
+  feature-matrix)
+    if [[ -x "$PROJECT_DIR/scripts/feature-matrix-check.py" ]]; then
+      cd "$PROJECT_DIR"
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec make feature-matrix-check
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        check)
+          exec make feature-matrix-check
+          ;;
+        doc)
+          exec make feature-matrix-doc
+          ;;
+        markdown)
+          exec python3 "$PROJECT_DIR/scripts/feature-matrix-check.py" --markdown
+          ;;
+      esac
+    fi
+    ;;
   camera-aligner)
     if [[ -f "$PROJECT_DIR/Package.swift" ]]; then
       cd "$PROJECT_DIR"
@@ -466,6 +485,10 @@ case "$ACTION" in
     echo "No project visual smoke script found. Use a project that provides scripts/visual-smoke.sh." >&2
     exit 2
     ;;
+  feature-matrix)
+    echo "No project feature matrix checker found. Use a project that provides scripts/feature-matrix-check.py." >&2
+    exit 2
+    ;;
   camera-aligner)
     echo "No SwiftPM CameraAligner found. Use this action from a repo with Package.swift." >&2
     exit 2
@@ -539,7 +562,7 @@ case "$ACTION" in
     exit 2
     ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|power-lifecycle|wifi-connectivity|touch-status|interaction-dashboard|imu-interaction|lvgl-visual-agent|desk-widget|iot-panel|offline-voice|tinyml-imu|esp-claw-agent} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|feature-matrix|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|power-lifecycle|wifi-connectivity|touch-status|interaction-dashboard|imu-interaction|lvgl-visual-agent|desk-widget|iot-panel|offline-voice|tinyml-imu|esp-claw-agent} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac

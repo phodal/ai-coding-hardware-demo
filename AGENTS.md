@@ -5,6 +5,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 ## Hardware Verification Practices
 
 - Keep each hardware lane scriptable from `make`; interactive IDE state is not enough evidence.
+- Keep `config/feature-matrix.tsv` current when adding or changing a feature lane, and run `make feature-matrix-check` before claiming coverage across the 12 requested directions.
 - Prefer a narrow compile/upload/smoke loop before adding abstractions. For this board, clean Arduino CLI builds with dedicated `.arduino-build/<name>` paths avoid cache collisions.
 - Treat serial output and camera OCR as complementary evidence: serial proves firmware control flow, while camera OCR proves the AMOLED actually renders expected text.
 - Keep destructive actions explicit. Firmware replacement commands should require a visible confirmation variable or `--yes`.

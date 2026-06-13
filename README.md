@@ -29,6 +29,7 @@ make smoke
 make visual-smoke
 make camera-aligner
 make camera-diagnose
+make feature-matrix-check
 make official-demos
 make official-build DEMO=01-helloworld
 make official-smoke DEMO=01-helloworld
@@ -71,6 +72,8 @@ Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearl
 - copy the generated `CAMERA_CROP` and `OCR_ROTATE` values for `make visual-smoke`
 
 `make camera-diagnose` writes a bounded diagnostic bundle under `.logs/camera-diagnose-*` with macOS camera inventory, Swift device status, camera-related processes, and optional Swift/ffmpeg video-only capture probes.
+
+`make feature-matrix-check` verifies that each requested feature direction has matching Makefile, script/sketch, documentation, and Skill helper coverage. `make feature-matrix-doc` regenerates `docs/hardware-verification-matrix.md`.
 
 `make official-demos` lists the Waveshare official Arduino examples tracked in `config/official-demos.tsv`.
 Use `make official-build DEMO=<id>` for compile-only validation, and `make official-smoke DEMO=<id>` to upload a vendor demo and verify its expected serial output. Start with `DEMO=01-helloworld`, then move through PMU, IMU, LVGL, and audio demos.
