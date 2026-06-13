@@ -66,11 +66,13 @@ CAMERA_EXPOSURE_POINT=""
 CAMERA_FOCUS_POINT=""
 CAMERA_WARMUP_FRAMES=3
 OCR_PREPROCESS_MODE=gray
+COLOR_SWATCH_CHECK=0
+COLOR_SWATCH_ROI="0.35,0.35,0.40,0.40"
 ```
 
 Point the camera at the AMOLED before running the command. If macOS asks for camera permission, allow the terminal/Codex process and rerun.
 If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make visual-smoke` so the sketch renders OCR text upright for the camera. Use `OCR_ROTATE` only when you cannot change the displayed orientation.
-Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearly instead of hanging when the selected camera device is unavailable or already owned by another app. `CAMERA_CAPTURE_ENGINE=auto` prefers the SwiftPM `CameraSnapshot` tool and falls back to ffmpeg. For bright AMOLED frames, lower `DISPLAY_BRIGHTNESS`, keep `OCR_PREPROCESS_MODE=color`, and set `CAMERA_EXPOSURE_POINT` / `CAMERA_FOCUS_POINT` to a normalized point on the display, for example `0.5,0.65`.
+Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearly instead of hanging when the selected camera device is unavailable or already owned by another app. `CAMERA_CAPTURE_ENGINE=auto` prefers the SwiftPM `CameraSnapshot` tool and falls back to ffmpeg. For bright AMOLED frames, lower `DISPLAY_BRIGHTNESS`, keep `OCR_PREPROCESS_MODE=color`, set `CAMERA_EXPOSURE_POINT` / `CAMERA_FOCUS_POINT` to a normalized point on the display, for example `0.5,0.65`, and enable `COLOR_SWATCH_CHECK=1` to verify red/green/blue/yellow pixels from the calibration swatches.
 
 The OCR script can also reprocess an existing raw frame without touching the camera:
 
@@ -78,7 +80,7 @@ The OCR script can also reprocess an existing raw frame without touching the cam
 CAMERA_RAW_IMAGE=.logs/camera-ocr-YYYYMMDD-HHMMSS.jpg OCR_PREPROCESS_MODE=amoled ./scripts/camera-ocr.sh
 ```
 
-The visual calibration sketch includes large `OK` text plus red/green/blue/yellow swatches. This is the preferred camera setup target before trying vendor demos with white backgrounds or small LVGL fonts.
+The visual calibration sketch includes large `OK` text plus red/green/blue/yellow swatches. This is the preferred camera setup target before trying vendor demos with white backgrounds or small LVGL fonts. To check swatches on an existing image directly, run `make camera-color-check IMAGE=.logs/camera-ocr-YYYYMMDD-HHMMSS.jpg`.
 
 `make camera-aligner` opens a SwiftPM macOS camera tuning tool. Use it to:
 

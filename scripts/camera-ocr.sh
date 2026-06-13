@@ -51,6 +51,8 @@ OCR_SCALE_WIDTH="${OCR_SCALE_WIDTH:-1920}"
 OCR_UNSHARP="${OCR_UNSHARP:-5:5:1.0}"
 OCR_INVERT="${OCR_INVERT:-0}"
 OCR_FILTER_EXTRA="${OCR_FILTER_EXTRA:-}"
+COLOR_SWATCH_CHECK="${COLOR_SWATCH_CHECK:-0}"
+COLOR_SWATCH_SOURCE="${COLOR_SWATCH_SOURCE:-raw}"
 
 mkdir -p "$LOG_DIR"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -249,6 +251,23 @@ if [[ -n "$CAMERA_EXPOSURE_BIAS" ]]; then
 fi
 
 if [[ "$NORMALIZED_TEXT" == *"$NORMALIZED_EXPECTED"* ]]; then
+  if [[ "$COLOR_SWATCH_CHECK" == "1" ]]; then
+    case "$COLOR_SWATCH_SOURCE" in
+      raw)
+        COLOR_SWATCH_IMAGE="$RAW_IMAGE" "$ROOT_DIR/scripts/camera-color-check.sh" "$RAW_IMAGE"
+        ;;
+      processed)
+        COLOR_SWATCH_IMAGE="$PROCESSED_IMAGE" "$ROOT_DIR/scripts/camera-color-check.sh" "$PROCESSED_IMAGE"
+        ;;
+      *)
+        echo "COLOR_SWATCH_SOURCE must be one of: raw, processed" >&2
+        exit 2
+        ;;
+    esac
+  elif [[ "$COLOR_SWATCH_CHECK" != "0" ]]; then
+    echo "COLOR_SWATCH_CHECK must be 0 or 1" >&2
+    exit 2
+  fi
   echo "OCR validation passed."
   exit 0
 fi

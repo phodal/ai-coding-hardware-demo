@@ -8,10 +8,12 @@ let package = Package(
     ],
     products: [
         .executable(name: "CameraAligner", targets: ["CameraAligner"]),
-        .executable(name: "CameraSnapshot", targets: ["CameraSnapshot"])
+        .executable(name: "CameraSnapshot", targets: ["CameraSnapshot"]),
+        .executable(name: "ColorSwatchCheck", targets: ["ColorSwatchCheck"])
     ],
     targets: [
         .executableTarget(name: "CameraAligner"),
-        .executableTarget(name: "CameraSnapshot")
+        .executableTarget(name: "CameraSnapshot"),
+        .executableTarget(name: "ColorSwatchCheck")
     ]
 )
