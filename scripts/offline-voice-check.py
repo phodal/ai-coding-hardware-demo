@@ -22,7 +22,8 @@ READY_RE = re.compile(r"VOICE_(?:READY|PARTIAL) display=(?P<display>[01]) touch=
 STATE_RE = re.compile(
     r"VOICE_STATE .*page=(?P<page>\S+) display=(?P<display>[01]) touch=(?P<touch>[01]) "
     r"wake=(?P<wake>[01]) mode=(?P<mode>\S+) commands=(?P<commands>\d+) "
-    r"recognized=(?P<recognized>\d+) rejected=(?P<rejected>\d+) actions=(?P<actions>\d+) "
+    r"enabled=(?P<enabled>\d+) recognized=(?P<recognized>\d+) "
+    r"rejected=(?P<rejected>\d+) actions=(?P<actions>\d+) "
     r"light=(?P<light>[01]) asleep=(?P<asleep>[01]) last=(?P<last>\S+)"
 )
 PAGE_RE = re.compile(r"VOICE_PAGE page=(?P<page>\S+) source=(?P<source>\S+)")
@@ -151,7 +152,8 @@ def main() -> int:
             serial.wait_for(
                 lambda line: line.startswith("VOICE_MODEL")
                 and "wake_engine=WakeNet" in line
-                and "command_engine=MultiNet" in line,
+                and "command_engine=MultiNet" in line
+                and "commands_runtime=add,delete,modify" in line,
                 5,
                 "VOICE_MODEL",
             )
@@ -166,6 +168,10 @@ def main() -> int:
             ("ADDCMD:FOCUS:focus mode:UI:FOCUS", "VOICE_COMMAND_ADDED", "id=FOCUS"),
             ("MODE:CONTINUOUS", "VOICE_MODE", "mode=CONTINUOUS"),
             ("CMD:FOCUS", "VOICE_ACTION", "action=UI:FOCUS"),
+            ("MODCMD:FOCUS:focus lamp:LIGHT:ON", "VOICE_COMMAND_MODIFIED", "id=FOCUS"),
+            ("CMD:focus lamp", "VOICE_ACTION", "action=LIGHT:ON"),
+            ("DELCMD:FOCUS", "VOICE_COMMAND_DELETED", "id=FOCUS"),
+            ("CMD:FOCUS", "VOICE_REJECT", "reason=unknown_command"),
             ("CMD:SLEEP", "VOICE_ACTION", "action=POWER:SLEEP"),
             ("WAKE:hi esp", "VOICE_WAKE", "engine=WakeNet"),
             ("CMD:LIGHT_OFF", "VOICE_ACTION", "action=LIGHT:OFF"),
@@ -199,12 +205,14 @@ def main() -> int:
 
     if int(latest["commands"]) < 5:
         raise SystemExit(f"Expected at least 5 commands, saw {latest['commands']}")
-    if int(latest["recognized"]) < 5:
-        raise SystemExit(f"Expected at least 5 recognized commands, saw {latest['recognized']}")
-    if int(latest["rejected"]) < 1:
-        raise SystemExit("Expected one rejected command before wake.")
-    if int(latest["actions"]) < 5:
-        raise SystemExit(f"Expected at least 5 actions, saw {latest['actions']}")
+    if int(latest["enabled"]) < 4:
+        raise SystemExit(f"Expected at least 4 enabled commands, saw {latest['enabled']}")
+    if int(latest["recognized"]) < 6:
+        raise SystemExit(f"Expected at least 6 recognized commands, saw {latest['recognized']}")
+    if int(latest["rejected"]) < 2:
+        raise SystemExit("Expected rejections before wake and after delete.")
+    if int(latest["actions"]) < 6:
+        raise SystemExit(f"Expected at least 6 actions, saw {latest['actions']}")
     if int(latest["light"]) != 0:
         raise SystemExit("Expected light to be OFF after LIGHT_OFF.")
     if str(latest["mode"]) != "CONTINUOUS":
@@ -215,7 +223,8 @@ def main() -> int:
     print(
         "offline_voice_summary "
         f"states={len(states)} page_flow={','.join(pages)} commands={latest['commands']} "
-        f"recognized={latest['recognized']} rejected={latest['rejected']} actions={latest['actions']} "
+        f"enabled={latest['enabled']} recognized={latest['recognized']} "
+        f"rejected={latest['rejected']} actions={latest['actions']} "
         f"mode={latest['mode']} light={latest['light']} asleep={latest['asleep']}"
     )
     return 0

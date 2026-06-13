@@ -9,7 +9,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | official-demos | P0 | verified | conditional | 10 item(s) | passed `.logs/hardware-smoke-suite/20260614-050454/summary.json` | suite-passed | No immediate evidence gap. |
 | xiaozhi-ai | P0 | required_external | audio | 11 item(s) | passed `.logs/hardware-smoke-suite/20260614-051043/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | partial | non_audio_control | 15 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
-| offline-voice | P1 | partial | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
+| offline-voice | P1 | verified | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
 | lvgl-visual-agent | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
 | imu-interaction | P1 | verified | none | 9 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
 | power-lifecycle | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
@@ -79,13 +79,13 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 ## offline-voice
 
 - Doc: `docs/p1-offline-voice-control.md`
-- Latest suite summary: `.logs/hardware-smoke-suite/20260614-044244/summary.json`
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-055754/summary.json`
 - Latest suite status: `passed`
 - Verified Locally:
-  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets offline-voice,lvgl-visual-agent,power-lifecycle,esp-claw-agent,tinyml-imu --skip-build --per-target-timeout 240 --max-failures 1"`: uploaded `offline-voice-smoke` to `/dev/cu.usbmodem83101` and passed the offline voice-control state machine.
-  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-044244/summary.json`.
-  - Latest target log: `.logs/hardware-smoke-suite/20260614-044244/offline-voice.log`.
-  - Observed summary: `offline_voice_summary states=3 page_flow=COMMANDS,STATE,LOG,HOME commands=5 recognized=5 rejected=1 actions=5 mode=CONTINUOUS light=0 asleep=0`.
+  - `make offline-voice-build`: passed with `439255 bytes` program storage and `24192 bytes` dynamic memory.
+  - `SKIP_BUILD=1 make offline-voice-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated pre-wake rejection, WakeNet/MultiNet serial simulation, runtime command add/modify/delete, continuous mode, sleep/wake, and light state.
+  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target offline-voice --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-055754/summary.json`.
+  - Observed summary: `offline_voice_summary states=3 page_flow=COMMANDS,STATE,LOG,HOME commands=5 enabled=4 recognized=6 rejected=2 actions=6 mode=CONTINUOUS light=0 asleep=0`.
 
 ## lvgl-visual-agent
 

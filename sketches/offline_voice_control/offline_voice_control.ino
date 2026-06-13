@@ -136,6 +136,16 @@ uint16_t statusColor() {
   return wakeActive || continuousMode ? RGB565_GREEN : RGB565_CYAN;
 }
 
+uint8_t enabledCommandCount() {
+  uint8_t count = 0;
+  for (uint8_t i = 0; i < commandCount && i < MAX_COMMANDS; i++) {
+    if (commands[i].enabled) {
+      count++;
+    }
+  }
+  return count;
+}
+
 void drawPage() {
   if (!displayReady) {
     return;
@@ -237,6 +247,8 @@ void emitState() {
   Serial.print(continuousMode ? "CONTINUOUS" : "SINGLE");
   Serial.print(" commands=");
   Serial.print(commandCount);
+  Serial.print(" enabled=");
+  Serial.print(enabledCommandCount());
   Serial.print(" recognized=");
   Serial.print(recognizedCount);
   Serial.print(" rejected=");
@@ -392,6 +404,60 @@ bool addCommand(const String &payload) {
   return true;
 }
 
+bool modifyCommand(const String &payload) {
+  int first = payload.indexOf(':');
+  int second = payload.indexOf(':', first + 1);
+  if (first <= 0 || second <= first + 1 || second >= static_cast<int>(payload.length()) - 1) {
+    Serial.print("VOICE_BAD_MODCMD value=");
+    Serial.println(payload);
+    Serial.flush();
+    return false;
+  }
+
+  String id = payload.substring(0, first);
+  int index = findCommand(id);
+  if (index < 0) {
+    Serial.print("VOICE_COMMAND_MISSING id=");
+    Serial.println(id);
+    Serial.flush();
+    return false;
+  }
+
+  copyString(commands[index].phrase, sizeof(commands[index].phrase), payload.substring(first + 1, second));
+  copyString(commands[index].action, sizeof(commands[index].action), payload.substring(second + 1));
+  commands[index].enabled = true;
+  Serial.print("VOICE_COMMAND_MODIFIED id=");
+  Serial.print(commands[index].id);
+  Serial.print(" phrase=");
+  Serial.print(commands[index].phrase);
+  Serial.print(" action=");
+  Serial.println(commands[index].action);
+  Serial.flush();
+  drawPage();
+  return true;
+}
+
+bool deleteCommand(const String &idPayload) {
+  String id = idPayload;
+  id.trim();
+  int index = findCommand(id);
+  if (index < 0) {
+    Serial.print("VOICE_COMMAND_MISSING id=");
+    Serial.println(id);
+    Serial.flush();
+    return false;
+  }
+
+  commands[index].enabled = false;
+  Serial.print("VOICE_COMMAND_DELETED id=");
+  Serial.print(commands[index].id);
+  Serial.print(" enabled=");
+  Serial.println(commands[index].enabled ? 1 : 0);
+  Serial.flush();
+  drawPage();
+  return true;
+}
+
 void handleCommandLine(String command) {
   command.trim();
   if (command.length() == 0) {
@@ -454,6 +520,14 @@ void handleCommandLine(String command) {
   }
   if (upper.startsWith("ADDCMD:")) {
     addCommand(command.substring(7));
+    return;
+  }
+  if (upper.startsWith("MODCMD:")) {
+    modifyCommand(command.substring(7));
+    return;
+  }
+  if (upper.startsWith("DELCMD:")) {
+    deleteCommand(command.substring(7));
     return;
   }
   if (upper == "SLEEP") {
