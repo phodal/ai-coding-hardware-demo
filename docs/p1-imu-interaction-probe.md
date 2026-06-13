@@ -60,6 +60,11 @@ The board emits:
 - `SKIP_BUILD=1 make imu-interaction-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated `WRIST_WAKE`, `SHAKE_SWITCH`, `POSE_MENU`, `STEP`, and `MENU_NEXT`; final counters were `steps=1`, `shakes=1`, `wrist_wakes=1`, and `menu_changes=2`.
 - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh imu-interaction /Users/phodal/hardware/arduino check --port /dev/cu.usbmodem83101 --seconds 1`: passed against the flashed sketch.
 - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh imu-interaction /Users/phodal/hardware/arduino check --port /dev/cu.usbmodem83101 --seconds 1`: passed against the flashed sketch.
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets cloud-ai-terminal,imu-interaction,desk-widget --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `imu-interaction-smoke` on `/dev/cu.usbmodem83101`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-045308/imu-interaction.log`.
+- Observed build size: `439115 bytes` program storage and `23120 bytes` dynamic memory.
+- Observed summary: `imu_interaction_summary events=MENU_NEXT,POSE_MENU,SHAKE_SWITCH,SLEEP,STEP,WRIST_WAKE steps=1 shakes=1 wrist_wakes=1 menu_changes=2`.
 
 ## Notes
 

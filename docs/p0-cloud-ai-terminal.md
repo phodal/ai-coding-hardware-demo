@@ -92,6 +92,11 @@ The board emits:
 - `SKIP_BUILD=1 /Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh cloud-ai /Users/phodal/hardware/arduino cache`: passed the same cache gate through the global Skill helper.
 - `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 CAMERA_DEVICE=0 CAMERA_SIZE=1280x720 OCR_ENGINE=vision CLOUD_AI_TIMEOUT=20 make cloud-ai-smoke`: passed serial relay and camera OCR.
 - Latest visual artifact: `.logs/camera-ocr-20260613-225433.jpg`.
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets cloud-ai-terminal,imu-interaction,desk-widget --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `cloud-ai-cache-smoke` on `/dev/cu.usbmodem83101`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-045308/cloud-ai-terminal.log`.
+- Observed build size: `429415 bytes` program storage and `23008 bytes` dynamic memory.
+- Observed relay result: `{"status": "ok", "mode": "mock", "pipeline": true, "cache": true, "response": "AI OK", "tts": "tts frame ready"}`.
 
 ## Remaining Hardware Work
 

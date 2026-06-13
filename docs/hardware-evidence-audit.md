@@ -8,12 +8,12 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | official-demos | P0 | verified | conditional | 5 item(s) | missing | documented-verified | Run through hardware-smoke-suite when this lane is safe to include. |
 | xiaozhi-ai | P0 | required_external | audio | 8 item(s) | missing | external-gated | Needs external firmware/source environment evidence. |
-| cloud-ai-terminal | P0 | partial | non_audio_control | 10 item(s) | missing | documented-partial | Run through hardware-smoke-suite when this lane is safe to include. |
+| cloud-ai-terminal | P0 | partial | non_audio_control | 15 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | offline-voice | P1 | partial | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | lvgl-visual-agent | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
-| imu-interaction | P1 | verified | none | 4 item(s) | missing | documented-verified | Run through hardware-smoke-suite when this lane is safe to include. |
+| imu-interaction | P1 | verified | none | 9 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
 | power-lifecycle | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
-| desk-widget | P1 | partial | none | 5 item(s) | missing | documented-partial | Run through hardware-smoke-suite when this lane is safe to include. |
+| desk-widget | P1 | partial | none | 10 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | iot-panel | P1 | partial | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-043837/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | esp-claw-agent | P2 | partial | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-044424/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | tinyml-imu | P2 | partial | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-044424/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
@@ -47,7 +47,8 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 ## cloud-ai-terminal
 
 - Doc: `docs/p0-cloud-ai-terminal.md`
-- Latest suite summary: missing
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`
+- Latest suite status: `passed`
 - Verified Locally:
   - `make cloud-ai-build`: passed.
   - `make cloud-ai-smoke`: uploaded to `/dev/cu.usbmodem83101`, completed `PING`/`PONG`, `ASK_RX`, and `AI_DISPLAYED:AI OK`.
@@ -59,6 +60,11 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `SKIP_BUILD=1 /Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh cloud-ai /Users/phodal/hardware/arduino cache`: passed the same cache gate through the global Skill helper.
   - `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 CAMERA_DEVICE=0 CAMERA_SIZE=1280x720 OCR_ENGINE=vision CLOUD_AI_TIMEOUT=20 make cloud-ai-smoke`: passed serial relay and camera OCR.
   - Latest visual artifact: `.logs/camera-ocr-20260613-225433.jpg`.
+  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets cloud-ai-terminal,imu-interaction,desk-widget --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `cloud-ai-cache-smoke` on `/dev/cu.usbmodem83101`.
+  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`.
+  - Latest target log: `.logs/hardware-smoke-suite/20260614-045308/cloud-ai-terminal.log`.
+  - Observed build size: `429415 bytes` program storage and `23008 bytes` dynamic memory.
+  - Observed relay result: `{"status": "ok", "mode": "mock", "pipeline": true, "cache": true, "response": "AI OK", "tts": "tts frame ready"}`.
 
 ## offline-voice
 
@@ -85,12 +91,18 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 ## imu-interaction
 
 - Doc: `docs/p1-imu-interaction-probe.md`
-- Latest suite summary: missing
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`
+- Latest suite status: `passed`
 - Verified Locally:
   - `make imu-interaction-build`: passed.
   - `SKIP_BUILD=1 make imu-interaction-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated `WRIST_WAKE`, `SHAKE_SWITCH`, `POSE_MENU`, `STEP`, and `MENU_NEXT`; final counters were `steps=1`, `shakes=1`, `wrist_wakes=1`, and `menu_changes=2`.
   - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh imu-interaction /Users/phodal/hardware/arduino check --port /dev/cu.usbmodem83101 --seconds 1`: passed against the flashed sketch.
   - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh imu-interaction /Users/phodal/hardware/arduino check --port /dev/cu.usbmodem83101 --seconds 1`: passed against the flashed sketch.
+  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets cloud-ai-terminal,imu-interaction,desk-widget --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `imu-interaction-smoke` on `/dev/cu.usbmodem83101`.
+  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`.
+  - Latest target log: `.logs/hardware-smoke-suite/20260614-045308/imu-interaction.log`.
+  - Observed build size: `439115 bytes` program storage and `23120 bytes` dynamic memory.
+  - Observed summary: `imu_interaction_summary events=MENU_NEXT,POSE_MENU,SHAKE_SWITCH,SLEEP,STEP,WRIST_WAKE steps=1 shakes=1 wrist_wakes=1 menu_changes=2`.
 
 ## power-lifecycle
 
@@ -106,13 +118,19 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 ## desk-widget
 
 - Doc: `docs/p1-desk-widget.md`
-- Latest suite summary: missing
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`
+- Latest suite status: `passed`
 - Verified Locally:
   - `make desk-widget-build`: passed.
   - `make desk-widget-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated direct serial commands for CI/GitHub/alert/timer/summary.
   - `SKIP_BUILD=1 make desk-widget-relay-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated mock event relay for CI/GitHub/alert/timer/summary.
   - `SKIP_BUILD=1 skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh desk-widget /Users/phodal/hardware/arduino relay`: passed through the repo Skill helper.
   - `SKIP_BUILD=1 /Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh desk-widget /Users/phodal/hardware/arduino relay`: passed through the global Skill helper.
+  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets cloud-ai-terminal,imu-interaction,desk-widget --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `desk-widget-relay-smoke` on `/dev/cu.usbmodem83101`.
+  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`.
+  - Latest target log: `.logs/hardware-smoke-suite/20260614-045308/desk-widget.log`.
+  - Observed build size: `435187 bytes` program storage and `23240 bytes` dynamic memory.
+  - Observed relay result: `{"status": "ok", "mode": "mock", "ci": {"state": "FAIL", "label": "build red"}, "github": {"count": 7}, "alert_count": 1}`.
 
 ## iot-panel
 

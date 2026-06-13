@@ -56,3 +56,8 @@ This is a control-plane and UI slice. It does not require Wi-Fi credentials yet;
 - `SKIP_BUILD=1 make desk-widget-relay-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated mock event relay for CI/GitHub/alert/timer/summary.
 - `SKIP_BUILD=1 skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh desk-widget /Users/phodal/hardware/arduino relay`: passed through the repo Skill helper.
 - `SKIP_BUILD=1 /Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh desk-widget /Users/phodal/hardware/arduino relay`: passed through the global Skill helper.
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets cloud-ai-terminal,imu-interaction,desk-widget --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `desk-widget-relay-smoke` on `/dev/cu.usbmodem83101`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-045308/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-045308/desk-widget.log`.
+- Observed build size: `435187 bytes` program storage and `23240 bytes` dynamic memory.
+- Observed relay result: `{"status": "ok", "mode": "mock", "ci": {"state": "FAIL", "label": "build red"}, "github": {"count": 7}, "alert_count": 1}`.
