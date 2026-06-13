@@ -66,6 +66,12 @@ case "$ACTION" in
       esac
     fi
     ;;
+  hardware-smoke-suite)
+    if [[ -x "$PROJECT_DIR/scripts/hardware-smoke-suite.py" ]]; then
+      cd "$PROJECT_DIR"
+      exec python3 "$PROJECT_DIR/scripts/hardware-smoke-suite.py" "${EXTRA_ARGS[@]}"
+    fi
+    ;;
   camera-aligner)
     if [[ -f "$PROJECT_DIR/Package.swift" ]]; then
       cd "$PROJECT_DIR"

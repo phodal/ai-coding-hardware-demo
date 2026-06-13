@@ -30,6 +30,8 @@ make visual-smoke
 make camera-aligner
 make camera-diagnose
 make feature-matrix-check
+make hardware-smoke-list
+make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 make official-demos
 make official-build DEMO=01-helloworld
 make official-smoke DEMO=01-helloworld
@@ -74,6 +76,8 @@ Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearl
 `make camera-diagnose` writes a bounded diagnostic bundle under `.logs/camera-diagnose-*` with macOS camera inventory, Swift device status, camera-related processes, and optional Swift/ffmpeg video-only capture probes.
 
 `make feature-matrix-check` verifies that each requested feature direction has matching Makefile, script/sketch, documentation, and Skill helper coverage. `make feature-matrix-doc` regenerates `docs/hardware-verification-matrix.md`.
+
+`make hardware-smoke-list` shows which feature smokes are selected by the default non-audio suite. `make hardware-smoke-suite` runs those selected smokes serially and writes logs under `.logs/hardware-smoke-suite/`; pass `HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"` for a narrow lane. Details are in `docs/hardware-smoke-suite.md`.
 
 `make official-demos` lists the Waveshare official Arduino examples tracked in `config/official-demos.tsv`.
 Use `make official-build DEMO=<id>` for compile-only validation, and `make official-smoke DEMO=<id>` to upload a vendor demo and verify its expected serial output. Start with `DEMO=01-helloworld`, then move through PMU, IMU, LVGL, and audio demos.
@@ -141,6 +145,8 @@ make offline-voice-build
 make offline-voice-smoke
 make lvgl-visual-agent-build
 make lvgl-visual-agent-smoke
+make hardware-smoke-list
+make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 ```
 
 `make cloud-ai-smoke` uploads the self-developed `cloud_ai_terminal` sketch, runs the host serial relay in mock mode, and verifies the board displays an AI response. `make cloud-ai-pipeline-smoke` drives the silent ASR -> LLM -> TTS serial pipeline and verifies `PIPELINE_DONE` without using the microphone or speaker. `make cloud-ai-cache-smoke` additionally validates board-local NVS cache and runtime state commands. These slices validate the display and host/cloud protocol shape; real audio capture and speaker playback are tracked in `docs/p0-cloud-ai-terminal.md`.
