@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 DEMO ?= 01-helloworld
 
-.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay install-hooks board-list clean
+.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay audio-vad-build audio-vad-smoke install-hooks board-list clean
 
 setup:
 	./scripts/setup.sh
@@ -71,6 +71,12 @@ cloud-ai-smoke:
 
 cloud-ai-relay:
 	python3 ./scripts/cloud-ai-relay.py --port $(ARDUINO_PORT)
+
+audio-vad-build:
+	SKETCH=sketches/audio_vad_probe BUILD_PATH=.arduino-build/audio_vad_probe ./scripts/build.sh
+
+audio-vad-smoke:
+	./scripts/audio-vad-smoke.sh
 
 install-hooks:
 	git config core.hooksPath .githooks

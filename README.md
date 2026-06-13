@@ -99,6 +99,10 @@ The versioned `pre-push` hook detects outgoing push refs or commit subjects that
 make cloud-ai-build
 make cloud-ai-smoke
 CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make cloud-ai-smoke
+make audio-vad-build
+make audio-vad-smoke
 ```
 
 `make cloud-ai-smoke` uploads the self-developed `cloud_ai_terminal` sketch, runs the host serial relay in mock mode, and verifies the board displays an AI response. The first slice validates the display and host/cloud protocol shape; audio capture and speaker playback are tracked in `docs/p0-cloud-ai-terminal.md`.
+
+`make audio-vad-smoke` uploads the ES7210 microphone probe, plays a host-side `say` stimulus, and validates serial RMS/peak metrics from the board. This is the microphone capture gate before full ASR streaming; details are in `docs/p0-audio-vad-probe.md`.

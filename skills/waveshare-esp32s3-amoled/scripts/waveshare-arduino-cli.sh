@@ -63,6 +63,25 @@ case "$ACTION" in
       esac
     fi
     ;;
+  audio-vad)
+    if [[ -x "$PROJECT_DIR/scripts/audio-vad-smoke.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/audio-vad-smoke.sh"
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        build)
+          cd "$PROJECT_DIR"
+          exec make audio-vad-build
+          ;;
+        smoke)
+          exec "$PROJECT_DIR/scripts/audio-vad-smoke.sh"
+          ;;
+        check)
+          exec python3 "$PROJECT_DIR/scripts/audio-vad-check.py" "${EXTRA_ARGS[@]:1}"
+          ;;
+      esac
+    fi
+    ;;
 esac
 
 CORE_VERSION="${ARDUINO_CORE_VERSION:-3.3.5}"
@@ -175,8 +194,12 @@ case "$ACTION" in
     echo "No project cloud AI terminal runner found. Use a project that provides scripts/cloud-ai-terminal-smoke.sh." >&2
     exit 2
     ;;
+  audio-vad)
+    echo "No project audio VAD runner found. Use a project that provides scripts/audio-vad-smoke.sh." >&2
+    exit 2
+    ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac

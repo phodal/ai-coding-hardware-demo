@@ -22,7 +22,10 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 ## Cloud AI Terminal Direction
 
 - The first self-developed terminal slice uses serial relay control before direct audio streaming. This validates display rendering and host/cloud protocol shape without blocking on ASR/TTS integration.
-- The next hardware step is to move from mock/HTTP text responses to ES7210 microphone capture and ES8311 playback, reusing official audio demos as known-good references.
+- Move from mock/HTTP text responses to ES7210 microphone capture in small steps: first validate RMS/peak metrics, then require VAD speech, then stream audio for ASR.
+- VAD is stricter than raw microphone capture. Treat RMS/peak threshold increases as the microphone data-flow gate, and use `AUDIO_VAD_REQUIRE_SPEECH=1` only when the host speaker is physically close enough.
+- On the current desk setup, macOS `say` produced a clear ES7210 signal delta but did not trigger ESP-SR VAD; this is acceptable for the microphone data-flow gate but not for a wake-word or speech-command gate.
+- ES8311 playback remains the next output-side validation step, reusing the official audio output demo as the known-good reference.
 
 ## Feature Push README Hook
 
