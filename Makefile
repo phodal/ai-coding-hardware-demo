@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 DEMO ?= 01-helloworld
 
-.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner camera-diagnose official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay audio-vad-build audio-vad-smoke speaker-output-build speaker-output-smoke sensor-status-build sensor-status-smoke touch-status-build touch-status-smoke interaction-dashboard-build interaction-dashboard-smoke desk-widget-build desk-widget-smoke iot-panel-build iot-panel-smoke tinyml-imu-build tinyml-imu-smoke esp-claw-agent-build esp-claw-agent-smoke offline-voice-build offline-voice-smoke install-hooks board-list clean
+.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner camera-diagnose official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay audio-vad-build audio-vad-smoke speaker-output-build speaker-output-smoke sensor-status-build sensor-status-smoke touch-status-build touch-status-smoke interaction-dashboard-build interaction-dashboard-smoke desk-widget-build desk-widget-smoke iot-panel-build iot-panel-smoke tinyml-imu-build tinyml-imu-smoke esp-claw-agent-build esp-claw-agent-smoke offline-voice-build offline-voice-smoke lvgl-visual-agent-build lvgl-visual-agent-smoke install-hooks board-list clean
 
 setup:
 	./scripts/setup.sh
@@ -134,6 +134,12 @@ offline-voice-build:
 
 offline-voice-smoke:
 	./scripts/offline-voice-smoke.sh
+
+lvgl-visual-agent-build:
+	SKETCH=sketches/lvgl_visual_agent BUILD_PATH=.arduino-build/lvgl_visual_agent ./scripts/build.sh
+
+lvgl-visual-agent-smoke:
+	./scripts/lvgl-visual-agent-smoke.sh
 
 install-hooks:
 	git config core.hooksPath .githooks
