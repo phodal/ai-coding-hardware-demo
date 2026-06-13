@@ -68,6 +68,14 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Use `AUDIO_VAD_REQUIRE_SPEECH=1 make audio-vad-smoke` only when the host speaker is close enough for reliable VAD.
    - Use `AUDIO_VAD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make audio-vad-smoke` when camera OCR should verify the screen reaches `OK`.
 
+11. For Skill automation wiring:
+   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile both `cloud_ai_terminal` and `audio_vad_probe`.
+   - `verify`/`doctor` is intentionally compile-only; it does not upload firmware or run camera OCR.
+   - Run explicit hardware smokes when the user wants board validation:
+     `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> smoke`
+     and
+     `AUDIO_VAD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh audio-vad <project-dir> smoke`.
+
 ## Known 1.75C FQBN
 
 Use this FQBN unless a future Espressif core adds a real 1.75C board profile:
@@ -108,6 +116,7 @@ make cloud-ai-build
 make cloud-ai-smoke
 make audio-vad-build
 make audio-vad-smoke
+/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh verify /path/to/project
 ```
 
 ## References

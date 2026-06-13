@@ -7,6 +7,23 @@ PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
 EXTRA_ARGS=("${@:3}")
 
 case "$ACTION" in
+  verify|doctor)
+    if [[ -f "$PROJECT_DIR/Makefile" ]]; then
+      cd "$PROJECT_DIR"
+      arduino-cli version
+      arduino-cli core list
+      arduino-cli board list
+      if [[ -x "$PROJECT_DIR/scripts/official-demo.sh" ]]; then
+        "$PROJECT_DIR/scripts/official-demo.sh" list
+      fi
+      if [[ -x "$PROJECT_DIR/scripts/xiaozhi.sh" && "${VERIFY_XIAOZHI:-0}" == "1" ]]; then
+        "$PROJECT_DIR/scripts/xiaozhi.sh" inspect
+      fi
+      make cloud-ai-build
+      make audio-vad-build
+      exit 0
+    fi
+    ;;
   setup|build|upload|monitor|smoke)
     if [[ -x "$PROJECT_DIR/scripts/$ACTION.sh" ]]; then
       exec "$PROJECT_DIR/scripts/$ACTION.sh"
@@ -143,6 +160,13 @@ upload_sketch() {
 }
 
 case "$ACTION" in
+  verify|doctor)
+    setup_env
+    arduino-cli version
+    arduino-cli core list
+    arduino-cli board list
+    build_sketch
+    ;;
   setup)
     setup_env
     arduino-cli version
@@ -199,7 +223,7 @@ case "$ACTION" in
     exit 2
     ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac
