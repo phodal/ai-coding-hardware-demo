@@ -50,3 +50,8 @@ scripts/official-demo.sh path 01-helloworld
 - `make official-build-all`: passed for all 7 Arduino examples on the current Arduino CLI setup.
 - `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld`: uploaded to `/dev/cu.usbmodem83101` and matched serial text `loop`.
 - Latest smoke log: `.logs/official-01-helloworld-20260613-222514.log`.
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed the default `01-helloworld` official display/serial baseline on `/dev/cu.usbmodem83101`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-050454/summary.json`.
+- Latest suite target log: `.logs/hardware-smoke-suite/20260614-050454/official-demos.log`.
+- Latest suite serial log: `.logs/hardware-smoke-suite/20260614-050454/official-demos/official-01-helloworld-20260614-050707.log`.
+- Latest suite build size: sketch `411067` bytes, globals `22896` bytes.

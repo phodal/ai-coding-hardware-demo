@@ -18,6 +18,7 @@ make hardware-smoke-list
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets power-lifecycle,imu-interaction"
+make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional"
 ```
 
 Audio lanes require explicit opt-in:
@@ -33,5 +34,6 @@ Do not run audio lanes late at night unless the user explicitly asks for them.
 - `make hardware-smoke-list`: selected only `none` and `non_audio_control` lanes by default; skipped `audio`, `conditional`, and external lanes.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"`: printed the default non-audio command plan without running hardware.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build --per-target-timeout 180"`: uploaded to `/dev/cu.usbmodem83101`, ran `iot-panel-relay-smoke`, and wrote `.logs/hardware-smoke-suite/20260614-043837/summary.json` with `passed=1 failed=0`.
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed the default official `01-helloworld` display/serial baseline without running audio demos; summary `.logs/hardware-smoke-suite/20260614-050454/summary.json` has `passed=1 failed=0`.
 - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh hardware-smoke-suite /Users/phodal/hardware/arduino --list`: passed through the repo Skill helper.
 - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh hardware-smoke-suite /Users/phodal/hardware/arduino --list`: passed through the global Skill helper.

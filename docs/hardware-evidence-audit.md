@@ -6,7 +6,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 
 | ID | Priority | Matrix status | Audio mode | Doc evidence | Latest suite | Posture | Next gap |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| official-demos | P0 | verified | conditional | 5 item(s) | missing | documented-verified | Run through hardware-smoke-suite when this lane is safe to include. |
+| official-demos | P0 | verified | conditional | 10 item(s) | passed `.logs/hardware-smoke-suite/20260614-050454/summary.json` | suite-passed | No immediate evidence gap. |
 | xiaozhi-ai | P0 | required_external | audio | 8 item(s) | missing | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | partial | non_audio_control | 15 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | offline-voice | P1 | partial | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
@@ -22,13 +22,19 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 ## official-demos
 
 - Doc: `docs/p0-official-demos.md`
-- Latest suite summary: missing
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-050454/summary.json`
+- Latest suite status: `passed`
 - Verified Locally:
   - `make official-demos`: listed all 7 manifest rows.
   - `make official-build DEMO=01-helloworld`: passed on the current Arduino CLI setup.
   - `make official-build-all`: passed for all 7 Arduino examples on the current Arduino CLI setup.
   - `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld`: uploaded to `/dev/cu.usbmodem83101` and matched serial text `loop`.
   - Latest smoke log: `.logs/official-01-helloworld-20260613-222514.log`.
+  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed the default `01-helloworld` official display/serial baseline on `/dev/cu.usbmodem83101`.
+  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-050454/summary.json`.
+  - Latest suite target log: `.logs/hardware-smoke-suite/20260614-050454/official-demos.log`.
+  - Latest suite serial log: `.logs/hardware-smoke-suite/20260614-050454/official-demos/official-01-helloworld-20260614-050707.log`.
+  - Latest suite build size: sketch `411067` bytes, globals `22896` bytes.
 
 ## xiaozhi-ai
 

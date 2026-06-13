@@ -10,6 +10,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Prefer a narrow compile/upload/smoke loop before adding abstractions. For this board, clean Arduino CLI builds with dedicated `.arduino-build/<name>` paths avoid cache collisions.
 - Serialize hardware uploads for the same USB Serial/JTAG port. Parallel `esptool` runs can fail with an exclusive lock on `/dev/cu.usbmodem83101`.
 - Use `make hardware-smoke-list` and `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target <id>"` for serialized multi-lane evidence. The default suite is non-audio and disables visual OCR unless `--with-visual` is passed.
+- Official demos are `conditional` in the feature matrix. To collect suite evidence late at night, run only the default display/serial baseline with `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional"`; do not broaden that into ES7210/ES8311 audio demo checks.
 - Use `--skip-build` only when that lane's `.arduino-build/<name>` artifacts already exist; otherwise upload can fail because `*.partitions.bin` or related build outputs are missing.
 - Treat serial output and camera OCR as complementary evidence: serial proves firmware control flow, while camera OCR proves the AMOLED actually renders expected text.
 - Keep destructive actions explicit. Firmware replacement commands should require a visible confirmation variable or `--yes`.
