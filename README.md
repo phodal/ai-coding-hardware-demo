@@ -105,6 +105,8 @@ make speaker-output-build
 make speaker-output-smoke
 make sensor-status-build
 make sensor-status-smoke
+make touch-status-build
+make touch-status-smoke
 ```
 
 `make cloud-ai-smoke` uploads the self-developed `cloud_ai_terminal` sketch, runs the host serial relay in mock mode, and verifies the board displays an AI response. The first slice validates the display and host/cloud protocol shape; audio capture and speaker playback are tracked in `docs/p0-cloud-ai-terminal.md`.
@@ -114,3 +116,5 @@ make sensor-status-smoke
 `make speaker-output-smoke` uploads the ES8311 speaker probe, sends `PLAY` over serial, records the board output through a host microphone, and validates the active audio window against baseline energy. Use `SPEAKER_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make speaker-output-smoke` when camera OCR should also verify `SPK OK`; details are in `docs/p0-speaker-output-probe.md`. Avoid running audible audio smokes late at night unless explicitly requested.
 
 `make sensor-status-smoke` uploads the AXP2101 + QMI8658 probe and validates PMU/IMU serial metrics without using any audio device. Use `SENSOR_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make sensor-status-smoke` when camera OCR should also verify `SENS OK`; details are in `docs/p1-sensor-status-probe.md`.
+
+`make touch-status-smoke` uploads the CST9217 touch-controller probe and validates that the controller is online. Use `TOUCH_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make touch-status-smoke` for camera OCR, or `TOUCH_REQUIRE_EVENT=1 make touch-status-smoke` when a human can tap the screen during the smoke window; details are in `docs/p1-touch-status-probe.md`.

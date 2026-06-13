@@ -23,6 +23,7 @@ case "$ACTION" in
       make audio-vad-build
       make speaker-output-build
       make sensor-status-build
+      make touch-status-build
       exit 0
     fi
     ;;
@@ -135,6 +136,25 @@ case "$ACTION" in
           ;;
         check)
           exec python3 "$PROJECT_DIR/scripts/sensor-status-check.py" "${EXTRA_ARGS[@]:1}"
+          ;;
+      esac
+    fi
+    ;;
+  touch-status)
+    if [[ -x "$PROJECT_DIR/scripts/touch-status-smoke.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/touch-status-smoke.sh"
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        build)
+          cd "$PROJECT_DIR"
+          exec make touch-status-build
+          ;;
+        smoke)
+          exec "$PROJECT_DIR/scripts/touch-status-smoke.sh"
+          ;;
+        check)
+          exec python3 "$PROJECT_DIR/scripts/touch-status-check.py" "${EXTRA_ARGS[@]:1}"
           ;;
       esac
     fi
@@ -270,8 +290,12 @@ case "$ACTION" in
     echo "No project sensor status runner found. Use a project that provides scripts/sensor-status-smoke.sh." >&2
     exit 2
     ;;
+  touch-status)
+    echo "No project touch status runner found. Use a project that provides scripts/touch-status-smoke.sh." >&2
+    exit 2
+    ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|touch-status} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac

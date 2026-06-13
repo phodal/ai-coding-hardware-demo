@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 DEMO ?= 01-helloworld
 
-.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay audio-vad-build audio-vad-smoke speaker-output-build speaker-output-smoke sensor-status-build sensor-status-smoke install-hooks board-list clean
+.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay audio-vad-build audio-vad-smoke speaker-output-build speaker-output-smoke sensor-status-build sensor-status-smoke touch-status-build touch-status-smoke install-hooks board-list clean
 
 setup:
 	./scripts/setup.sh
@@ -89,6 +89,12 @@ sensor-status-build:
 
 sensor-status-smoke:
 	./scripts/sensor-status-smoke.sh
+
+touch-status-build:
+	SKETCH=sketches/touch_status_probe BUILD_PATH=.arduino-build/touch_status_probe ./scripts/build.sh
+
+touch-status-smoke:
+	./scripts/touch-status-smoke.sh
 
 install-hooks:
 	git config core.hooksPath .githooks
