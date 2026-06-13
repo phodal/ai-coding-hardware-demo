@@ -1,0 +1,6 @@
+id	status	component	validation	notes
+es7210_capture	implemented	ES7210	compile,artifact,physical-smoke	Captures board microphone frames over I2S for RMS/peak metrics.
+vad	implemented	ESP-SR VAD	compile,artifact,physical-smoke	Uses esp_vad.h and vad_process; physical speech trigger remains placement-dependent.
+aec	planned	ESP-SR AFE AEC	source-integration-required,physical-smoke	Requires reference playback stream and speaker/microphone fixture.
+noise_suppression	planned	ESP-SR AFE NS	source-integration-required,physical-smoke	Requires ESP-SR AFE frame path and repeatable noise stimulus.
+wakenet	planned	ESP-SR WakeNet	source-integration-required,physical-smoke	Offline voice control has serial WakeNet simulation; real audio frames remain gated.

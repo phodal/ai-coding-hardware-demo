@@ -20,7 +20,8 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Stage vendor sketches instead of editing vendor sources when Arduino CLI requires folder and `.ino` names to match.
 - Treat audible audio smokes as disruptive physical tests. Do not run speaker or microphone stimulus tests late at night unless the user explicitly asks for them.
 - Prefer silent PMU/IMU/display validation when working late; serial metrics plus camera OCR can still produce strong evidence without using audio devices.
-- Use `make audio-vad-preflight` as the no-audio gate before scheduling `audio-vad-smoke`; it rebuilds the ES7210 probe and checks artifacts/checker wiring without playing stimulus, uploading firmware, or opening host audio devices.
+- Use `make audio-vad-preflight` as the no-audio gate before scheduling `audio-vad-smoke`; it rebuilds the ES7210 probe and checks artifacts/checker wiring plus `config/audio-afe-profile.tsv` without playing stimulus, uploading firmware, or opening host audio devices.
+- Treat `config/audio-afe-profile.tsv` as the audio-front-end contract: ES7210 capture and ESP-SR VAD are implemented, while AEC, noise suppression, and real WakeNet audio frames remain planned until source integration and physical audio evidence exist.
 
 ## Current Challenges
 
