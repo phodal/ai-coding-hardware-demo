@@ -91,7 +91,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 
 14. For combined non-audio app validation:
    - Run `make interaction-dashboard-build` to compile the combined display, touch-controller, PMU, and IMU dashboard.
-   - Run `make interaction-dashboard-smoke` to upload it and drive page changes over serial without requiring a human tap.
+   - Run `make interaction-dashboard-smoke` to upload it and drive page changes, serial-simulated IMU gesture handling, brightness, standby, and wake transitions without requiring a human tap.
    - Use `INTERACTION_DASHBOARD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make interaction-dashboard-smoke` when camera OCR should verify the final dashboard page reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 

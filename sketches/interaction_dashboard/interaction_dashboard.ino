@@ -28,19 +28,33 @@ enum DashboardPage {
   PAGE_TOUCH,
 };
 
+enum DashboardPowerMode {
+  POWER_ACTIVE = 0,
+  POWER_DIM,
+  POWER_STANDBY,
+};
+
 bool displayReady = false;
 bool pmuReady = false;
 bool imuReady = false;
 bool touchReady = false;
 uint32_t frame = 0;
 uint32_t touchEvents = 0;
+uint32_t gestureEvents = 0;
+uint32_t lastActivityMs = 0;
+uint32_t idleDimMs = 30000;
+uint32_t lastGestureMs = 0;
+uint8_t activeBrightness = 200;
 DashboardPage currentPage = PAGE_HOME;
+DashboardPowerMode powerMode = POWER_ACTIVE;
 String serialBuffer;
 IMUdata acc = {0, 0, 0};
 IMUdata gyr = {0, 0, 0};
+float previousAccMagnitude = 0.0f;
 int16_t touchX[5] = {0};
 int16_t touchY[5] = {0};
 char touchModel[32] = "unknown";
+char lastGesture[16] = "NONE";
 
 const char *pageName(DashboardPage page) {
   switch (page) {
@@ -54,6 +68,18 @@ const char *pageName(DashboardPage page) {
       return "TOUCH";
   }
   return "HOME";
+}
+
+const char *powerModeName(DashboardPowerMode mode) {
+  switch (mode) {
+    case POWER_ACTIVE:
+      return "ACTIVE";
+    case POWER_DIM:
+      return "DIM";
+    case POWER_STANDBY:
+      return "STANDBY";
+  }
+  return "ACTIVE";
 }
 
 bool parsePage(const String &name, DashboardPage &page) {
@@ -111,8 +137,53 @@ uint16_t battMv() {
   return pmuReady ? power.getBattVoltage() : 0;
 }
 
+float maxAbsGyro() {
+  return max(max(fabsf(gyr.x), fabsf(gyr.y)), fabsf(gyr.z));
+}
+
+void applyBrightness() {
+  if (!displayReady) {
+    return;
+  }
+
+  uint8_t brightness = activeBrightness;
+  if (powerMode == POWER_DIM) {
+    brightness = min<uint8_t>(activeBrightness, 28);
+  } else if (powerMode == POWER_STANDBY) {
+    brightness = 0;
+  }
+  gfx->setBrightness(brightness);
+}
+
+void emitPower(const char *source) {
+  Serial.print("DASH_POWER mode=");
+  Serial.print(powerModeName(powerMode));
+  Serial.print(" brightness=");
+  Serial.print(activeBrightness);
+  Serial.print(" idle_ms=");
+  Serial.print(idleDimMs);
+  Serial.print(" source=");
+  Serial.println(source);
+  Serial.flush();
+}
+
+void setPowerMode(DashboardPowerMode mode, const char *source);
+void drawPage();
+
+void markActivity() {
+  lastActivityMs = millis();
+  if (powerMode == POWER_DIM) {
+    setPowerMode(POWER_ACTIVE, "activity");
+  }
+}
+
 void drawPage() {
   if (!displayReady) {
+    return;
+  }
+
+  if (powerMode == POWER_STANDBY) {
+    gfx->fillScreen(RGB565_BLACK);
     return;
   }
 
@@ -123,8 +194,9 @@ void drawPage() {
     case PAGE_HOME:
       centerText("DASH", 44, 6, RGB565_YELLOW);
       centerText((pmuReady && imuReady && touchReady) ? "OK" : "WAIT", 132, 9, RGB565_WHITE);
-      drawMetricLabel("Serial: PAGE:IMU", 300, RGB565_GREEN);
-      drawMetricLabel("Tap left/right", 336, RGB565_GREEN);
+      drawMetricLabel(powerModeName(powerMode), 286, RGB565_GREEN);
+      drawMetricLabel("Serial: PAGE:IMU", 322, RGB565_GREEN);
+      drawMetricLabel("Tap or shake", 358, RGB565_GREEN);
       break;
     case PAGE_IMU:
       centerText("IMU", 48, 6, RGB565_YELLOW);
@@ -136,6 +208,8 @@ void drawPage() {
       gfx->print(gyr.x, 1);
       gfx->print(",");
       gfx->print(gyr.y, 1);
+      drawMetricLabel("GEST ", 368, RGB565_GREEN);
+      gfx->print(lastGesture);
       break;
     case PAGE_PWR:
       centerText("PWR", 48, 6, RGB565_YELLOW);
@@ -149,6 +223,8 @@ void drawPage() {
       drawMetricLabel("BATT ", 368, RGB565_GREEN);
       gfx->print(battMv());
       gfx->print("mV");
+      drawMetricLabel("BRI ", 406, RGB565_GREEN);
+      gfx->print(activeBrightness);
       break;
     case PAGE_TOUCH:
       centerText("TOUCH", 48, 5, RGB565_YELLOW);
@@ -156,8 +232,20 @@ void drawPage() {
       drawMetricLabel(touchModel, 300, RGB565_GREEN);
       drawMetricLabel("events=", 336, RGB565_GREEN);
       gfx->print(touchEvents);
+      drawMetricLabel("gestures=", 374, RGB565_GREEN);
+      gfx->print(gestureEvents);
       break;
   }
+}
+
+void setPowerMode(DashboardPowerMode mode, const char *source) {
+  powerMode = mode;
+  if (mode == POWER_ACTIVE) {
+    lastActivityMs = millis();
+  }
+  applyBrightness();
+  drawPage();
+  emitPower(source);
 }
 
 void emitPage(const char *source) {
@@ -169,9 +257,42 @@ void emitPage(const char *source) {
 }
 
 void setPage(DashboardPage page, const char *source) {
+  markActivity();
   currentPage = page;
   drawPage();
   emitPage(source);
+}
+
+void emitGesture(const char *type, const char *source) {
+  strlcpy(lastGesture, type, sizeof(lastGesture));
+  gestureEvents++;
+  Serial.print("DASH_GESTURE type=");
+  Serial.print(type);
+  Serial.print(" source=");
+  Serial.print(source);
+  Serial.print(" count=");
+  Serial.print(gestureEvents);
+  Serial.print(" amag=");
+  Serial.print(accMagnitude(), 3);
+  Serial.print(" gyro=");
+  Serial.print(maxAbsGyro(), 3);
+  Serial.print(" page=");
+  Serial.println(pageName(currentPage));
+  Serial.flush();
+}
+
+void handleGesture(const char *type, const char *source) {
+  markActivity();
+  emitGesture(type, source);
+  if (strcmp(type, "SHAKE") == 0) {
+    setPage(PAGE_IMU, source);
+  } else if (strcmp(type, "TILT_LEFT") == 0) {
+    setPage(static_cast<DashboardPage>((currentPage + 3) % 4), source);
+  } else if (strcmp(type, "TILT_RIGHT") == 0) {
+    setPage(static_cast<DashboardPage>((currentPage + 1) % 4), source);
+  } else {
+    drawPage();
+  }
 }
 
 void emitStatus() {
@@ -202,7 +323,17 @@ void emitStatus() {
   Serial.print(" gy=");
   Serial.print(gyr.y, 3);
   Serial.print(" gz=");
-  Serial.println(gyr.z, 3);
+  Serial.print(gyr.z, 3);
+  Serial.print(" power=");
+  Serial.print(powerModeName(powerMode));
+  Serial.print(" brightness=");
+  Serial.print(activeBrightness);
+  Serial.print(" gestures=");
+  Serial.print(gestureEvents);
+  Serial.print(" last_gesture=");
+  Serial.print(lastGesture);
+  Serial.print(" idle_ms=");
+  Serial.println(idleDimMs);
   Serial.flush();
 }
 
@@ -220,9 +351,9 @@ void setupDisplay() {
     Serial.flush();
     return;
   }
-  gfx->setBrightness(200);
   gfx->setRotation(DISPLAY_ROTATION);
   displayReady = true;
+  applyBrightness();
   drawPage();
 }
 
@@ -301,6 +432,35 @@ void updateSensors() {
   }
 }
 
+void detectImuGesture() {
+  if (!imuReady || powerMode == POWER_STANDBY) {
+    return;
+  }
+
+  float magnitude = accMagnitude();
+  float delta = fabsf(magnitude - previousAccMagnitude);
+  previousAccMagnitude = magnitude;
+
+  uint32_t now = millis();
+  if (now - lastGestureMs < 1200) {
+    return;
+  }
+
+  if (delta > 0.45f || maxAbsGyro() > 80.0f) {
+    lastGestureMs = now;
+    handleGesture("SHAKE", "imu");
+  }
+}
+
+void enforceIdlePower() {
+  if (powerMode != POWER_ACTIVE || idleDimMs == 0) {
+    return;
+  }
+  if (millis() - lastActivityMs >= idleDimMs) {
+    setPowerMode(POWER_DIM, "idle");
+  }
+}
+
 void handleTouch() {
   if (!touchReady) {
     return;
@@ -311,6 +471,7 @@ void handleTouch() {
     return;
   }
 
+  markActivity();
   touchEvents++;
   DashboardPage nextPage = currentPage;
   if (touchX[0] < (LCD_WIDTH / 2)) {
@@ -338,6 +499,7 @@ void handleCommand(String command) {
     return;
   }
   if (command == "PING") {
+    markActivity();
     Serial.println("PONG");
     Serial.flush();
     return;
@@ -348,6 +510,45 @@ void handleCommand(String command) {
   }
   if (command == "PREV") {
     setPage(static_cast<DashboardPage>((currentPage + 3) % 4), "serial");
+    return;
+  }
+  if (command.startsWith("GESTURE:")) {
+    String gesture = command.substring(8);
+    if (gesture == "SHAKE" || gesture == "TILT_LEFT" || gesture == "TILT_RIGHT") {
+      handleGesture(gesture.c_str(), "serial");
+    } else {
+      Serial.print("DASH_BAD_GESTURE value=");
+      Serial.println(gesture);
+      Serial.flush();
+    }
+    return;
+  }
+  if (command.startsWith("BRIGHT:")) {
+    int requested = command.substring(7).toInt();
+    activeBrightness = static_cast<uint8_t>(constrain(requested, 8, 255));
+    markActivity();
+    applyBrightness();
+    drawPage();
+    emitPower("serial");
+    return;
+  }
+  if (command.startsWith("IDLE:")) {
+    long requestedIdle = command.substring(5).toInt();
+    idleDimMs = static_cast<uint32_t>(requestedIdle < 0 ? 0 : requestedIdle);
+    markActivity();
+    emitPower("serial");
+    return;
+  }
+  if (command == "POWER:STANDBY") {
+    setPowerMode(POWER_STANDBY, "serial");
+    return;
+  }
+  if (command == "POWER:DIM") {
+    setPowerMode(POWER_DIM, "serial");
+    return;
+  }
+  if (command == "POWER:WAKE" || command == "WAKE") {
+    setPowerMode(POWER_ACTIVE, "serial");
     return;
   }
   if (command.startsWith("PAGE:")) {
@@ -405,6 +606,8 @@ void setup() {
   setupPmu();
   setupImu();
   setupTouch();
+  lastActivityMs = millis();
+  previousAccMagnitude = accMagnitude();
 
   drawPage();
   Serial.print((displayReady && pmuReady && imuReady && touchReady) ? "DASH_READY" : "DASH_PARTIAL");
@@ -423,6 +626,8 @@ void setup() {
 void loop() {
   readSerialCommands();
   updateSensors();
+  detectImuGesture();
+  enforceIdlePower();
   handleTouch();
 
   if ((frame % 10) == 0) {
