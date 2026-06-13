@@ -123,6 +123,8 @@ make tinyml-imu-build
 make tinyml-imu-smoke
 make esp-claw-agent-build
 make esp-claw-agent-smoke
+make offline-voice-build
+make offline-voice-smoke
 ```
 
 `make cloud-ai-smoke` uploads the self-developed `cloud_ai_terminal` sketch, runs the host serial relay in mock mode, and verifies the board displays an AI response. The first slice validates the display and host/cloud protocol shape; audio capture and speaker playback are tracked in `docs/p0-cloud-ai-terminal.md`.
@@ -144,3 +146,5 @@ make esp-claw-agent-smoke
 `make tinyml-imu-smoke` uploads the TinyML IMU classifier scaffold, disables live mode, injects deterministic accelerometer/gyroscope feature vectors over serial, and verifies `REST`, `TILT_LEFT`, `TILT_RIGHT`, and `SHAKE` labels. This is the model automation harness before replacing the embedded rule classifier with ESP-DL or a trained model; details are in `docs/p2-tinyml-imu-classifier.md`.
 
 `make esp-claw-agent-smoke` uploads the ESP-Claw/OpenClaw Arduino harness and validates an agent control loop over serial: local rule add, event sensing, rule decision, MCP-style tool call, IM chat input, tagged memory write, and LLM fallback routing. This is a deterministic compatibility slice before replacing it with the official ESP-Claw firmware route; details are in `docs/p2-esp-claw-agent.md`.
+
+`make offline-voice-smoke` uploads the offline voice-control harness and validates the WakeNet/MultiNet-facing state machine without using the microphone: pre-wake rejection, wake event, command recognition, runtime command add, continuous mode, sleep/wake, and local actions. This is the serial control-plane gate before wiring real ESP-SR audio; details are in `docs/p1-offline-voice-control.md`.

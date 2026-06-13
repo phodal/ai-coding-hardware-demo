@@ -107,22 +107,29 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Use `IOT_PANEL_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make iot-panel-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-17. For TinyML / IMU classifier validation:
+17. For offline voice-control state-machine validation:
+   - Run `make offline-voice-build` to compile the WakeNet/MultiNet-facing serial harness.
+   - Run `make offline-voice-smoke` to upload it and validate pre-wake command rejection, wake events, command recognition, runtime command add, continuous mode, sleep/wake state, and local actions without using the microphone.
+   - Use `OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make offline-voice-smoke` when camera OCR should verify the screen reaches `OK`.
+   - Treat this as the deterministic control-plane gate before wiring real ESP-SR audio frames and models.
+   - This path is safe for late-night validation because it does not play audio or use the host microphone.
+
+18. For TinyML / IMU classifier validation:
    - Run `make tinyml-imu-build` to compile the QMI8658 TinyML classifier scaffold.
    - Run `make tinyml-imu-smoke` to upload it, disable live IMU mode, inject deterministic serial feature vectors, and verify `REST`, `TILT_LEFT`, `TILT_RIGHT`, and `SHAKE` labels.
    - Use `TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make tinyml-imu-smoke` when camera OCR should verify the screen reaches `OK`.
    - Treat this as a TinyML automation harness. The current embedded classifier is intentionally simple and should be replaced by ESP-DL or a trained model later without removing the deterministic serial sample gate.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-18. For ESP-Claw / OpenClaw agent harness validation:
+19. For ESP-Claw / OpenClaw agent harness validation:
    - Run `make esp-claw-agent-build` to compile the Arduino compatibility harness for the ESP-Claw/OpenClaw direction.
    - Run `make esp-claw-agent-smoke` to upload it and validate local rule add, event sensing, rule decision, MCP-style tool invocation, IM chat input, tagged memory, and LLM fallback routing over serial.
    - Use `ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make esp-claw-agent-smoke` when camera OCR should verify the screen reaches `OK`.
    - Treat this as a deterministic control-plane harness, not the official ESP-Claw firmware image. It exists so automation can prove the agent loop before IM credentials, Wi-Fi, and full ESP-Claw source builds are introduced.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-19. For Skill automation wiring:
-   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile `cloud_ai_terminal`, `audio_vad_probe`, `speaker_output_probe`, `sensor_status_probe`, `touch_status_probe`, `interaction_dashboard`, `desk_widget`, `iot_control_panel`, `tinyml_imu_classifier`, and `esp_claw_agent`.
+20. For Skill automation wiring:
+   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile `cloud_ai_terminal`, `audio_vad_probe`, `speaker_output_probe`, `sensor_status_probe`, `touch_status_probe`, `interaction_dashboard`, `desk_widget`, `iot_control_panel`, `offline_voice_control`, `tinyml_imu_classifier`, and `esp_claw_agent`.
    - `verify`/`doctor` is intentionally compile-only; it does not upload firmware or run camera OCR.
    - Run explicit hardware smokes when the user wants board validation:
      `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> smoke`
@@ -133,6 +140,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
      `INTERACTION_DASHBOARD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh interaction-dashboard <project-dir> smoke`
      `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh desk-widget <project-dir> smoke`
      `IOT_PANEL_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh iot-panel <project-dir> smoke`
+     `OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh offline-voice <project-dir> smoke`
      `TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh tinyml-imu <project-dir> smoke`
      and
      `ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh esp-claw-agent <project-dir> smoke`.
@@ -190,6 +198,8 @@ make desk-widget-build
 make desk-widget-smoke
 make iot-panel-build
 make iot-panel-smoke
+make offline-voice-build
+make offline-voice-smoke
 make tinyml-imu-build
 make tinyml-imu-smoke
 make esp-claw-agent-build
