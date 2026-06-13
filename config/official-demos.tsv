@@ -1,0 +1,8 @@
+# id	category	title	sketch_rel	expected_serial	notes
+01-helloworld	display	GFX Hello World	01_HelloWorld	loop	Basic CO5300/GFX display smoke.
+02-ascii-table	display	GFX ASCII table	02_GFX_AsciiTable	Arduino_GFX AsciiTable example	Static text/table display smoke.
+03-power-axp2101	power	LVGL AXP2101 ADC data	03_LVGL_AXP2101_ADC_Data	Setup done	PMU, power button, ADC data, Wi-Fi AP/STA setup, LVGL.
+04-imu-qmi8658	imu	LVGL QMI8658 IMU UI	04_LVGL_QMI8658_ui	Read data now	IMU accelerometer/gyro serial data plus LVGL chart.
+05-lvgl-widgets	touch-ui	LVGL widgets	05_LVGL_Widgets	Setup done	LVGL widgets, touch input, QMI8658, display refresh.
+06-es7210-audio-in	audio-in	ES7210 voice activity input	06_ES7210	Speech detected	Dual microphone / ES7210 input path with VAD.
+07-es8311-audio-out	audio-out	ES8311 audio playback	07_ES8311	[echo] Echo start	ES8311 codec and speaker/output path.

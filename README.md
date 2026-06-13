@@ -24,6 +24,9 @@ make monitor
 make smoke
 make visual-smoke
 make camera-aligner
+make official-demos
+make official-build DEMO=01-helloworld
+make official-smoke DEMO=01-helloworld
 ```
 
 Override defaults with environment variables or `.env`:
@@ -58,3 +61,7 @@ If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make 
 - set OCR rotation for boards that appear upside down in the camera
 - see Vision OCR results update live
 - copy the generated `CAMERA_CROP` and `OCR_ROTATE` values for `make visual-smoke`
+
+`make official-demos` lists the Waveshare official Arduino examples tracked in `config/official-demos.tsv`.
+Use `make official-build DEMO=<id>` for compile-only validation, and `make official-smoke DEMO=<id>` to upload a vendor demo and verify its expected serial output. Start with `DEMO=01-helloworld`, then move through PMU, IMU, LVGL, and audio demos.
+See `docs/p0-official-demos.md` for the current P0 bring-up matrix and local verification notes.

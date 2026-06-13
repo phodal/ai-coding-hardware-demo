@@ -43,6 +43,12 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `CAMERA_CROP='...' OCR_ROTATE=... DISPLAY_ROTATION=... make visual-smoke` to capture one camera frame with `ffmpeg` and OCR it with macOS Vision.
    - Pass only if OCR sees `OK`; use the saved raw/processed images to debug focus, glare, rotation, or garbled output.
 
+7. For official demo bring-up:
+   - Run `make official-demos` to list the Waveshare Arduino demo manifest.
+   - Run `make official-build-all` before debugging higher-level AI features; all official Arduino examples should compile first.
+   - Run `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld` to upload the official display baseline and verify runtime serial output.
+   - The project runner stages vendor examples under `.arduino-build/official-sketches/<id>` because several official `.ino` filenames do not match their parent folder names, which `arduino-cli` requires.
+
 ## Known 1.75C FQBN
 
 Use this FQBN unless a future Espressif core adds a real 1.75C board profile:
@@ -73,6 +79,9 @@ For visual validation in this repo, prefer:
 SMOKE_SECONDS=8 ./scripts/smoke.sh
 make camera-aligner
 make visual-smoke
+make official-demos
+make official-build-all
+SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld
 ```
 
 ## References

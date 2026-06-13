@@ -4,6 +4,7 @@ set -euo pipefail
 ACTION="${1:-help}"
 PROJECT_DIR="${2:-$PWD}"
 PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+EXTRA_ARGS=("${@:3}")
 
 case "$ACTION" in
   setup|build|upload|monitor|smoke)
@@ -20,6 +21,19 @@ case "$ACTION" in
     if [[ -f "$PROJECT_DIR/Package.swift" ]]; then
       cd "$PROJECT_DIR"
       exec swift run CameraAligner
+    fi
+    ;;
+  official-demos)
+    if [[ -x "$PROJECT_DIR/scripts/official-demo.sh" ]]; then
+      exec "$PROJECT_DIR/scripts/official-demo.sh" list
+    fi
+    ;;
+  official-demo)
+    if [[ -x "$PROJECT_DIR/scripts/official-demo.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/official-demo.sh" list
+      fi
+      exec "$PROJECT_DIR/scripts/official-demo.sh" "${EXTRA_ARGS[@]}"
     fi
     ;;
 esac
@@ -122,8 +136,12 @@ case "$ACTION" in
     echo "No SwiftPM CameraAligner found. Use this action from a repo with Package.swift." >&2
     exit 2
     ;;
+  official-demos|official-demo)
+    echo "No project official demo runner found. Use a project that provides scripts/official-demo.sh." >&2
+    exit 2
+    ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner} [project-dir]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner|official-demos|official-demo} [project-dir] [official-demo-args...]" >&2
     exit 2
     ;;
 esac
