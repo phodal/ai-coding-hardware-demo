@@ -32,7 +32,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 
 5. Upload and validate:
    - Upload to the detected `/dev/cu.usbmodem*` port.
-   - Open `arduino-cli monitor --config baudrate=115200`.
+   - Open `arduino-cli monitor --config baudrate=115200,dtr=on,rts=off`.
    - Treat repeated sketch serial lines plus visible AMOLED output as the baseline pass condition.
 
 ## Known 1.75C FQBN
@@ -62,4 +62,3 @@ If the project contains `scripts/setup.sh`, `scripts/build.sh`, `scripts/upload.
 ## References
 
 Read `references/board.md` when you need board facts, source links, library names, or troubleshooting notes.
-

@@ -10,6 +10,7 @@ Arduino_CO5300 *gfx = new Arduino_CO5300(
   bus, LCD_RESET, 0, LCD_WIDTH, LCD_HEIGHT, 6, 0, 0, 0);
 
 uint32_t frame = 0;
+bool displayReady = false;
 
 void drawStatusScreen() {
   gfx->fillScreen(RGB565_BLACK);
@@ -33,8 +34,13 @@ void drawStatusScreen() {
 
 void setup() {
   Serial.begin(115200);
-  delay(800);
+  uint32_t serialWaitStart = millis();
+  while (!Serial && (millis() - serialWaitStart < 5000)) {
+    delay(100);
+  }
+
   Serial.println("codex_hello_world boot");
+  Serial.flush();
 
   Wire.begin(IIC_SDA, IIC_SCL);
 
@@ -45,6 +51,9 @@ void setup() {
 
   gfx->setBrightness(160);
   drawStatusScreen();
+  displayReady = true;
+  Serial.println("codex_hello_world display ready");
+  Serial.flush();
 }
 
 void loop() {
@@ -59,22 +68,24 @@ void loop() {
     RGB565_WHITE
   };
 
-  uint16_t color = colors[frame % (sizeof(colors) / sizeof(colors[0]))];
-  int x = 36 + ((frame * 29) % 350);
-  int y = 180 + ((frame * 17) % 220);
+  if (displayReady) {
+    uint16_t color = colors[frame % (sizeof(colors) / sizeof(colors[0]))];
+    int x = 36 + ((frame * 29) % 350);
+    int y = 180 + ((frame * 17) % 220);
 
-  gfx->fillCircle(x, y, 14, color);
-  gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
-  gfx->setTextSize(2);
-  gfx->setCursor(36, 268);
-  gfx->print("frame ");
-  gfx->print(frame);
-  gfx->print("     ");
+    gfx->fillCircle(x, y, 14, color);
+    gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
+    gfx->setTextSize(2);
+    gfx->setCursor(36, 268);
+    gfx->print("frame ");
+    gfx->print(frame);
+    gfx->print("     ");
+  }
 
   Serial.print("codex_hello_world frame=");
   Serial.println(frame);
+  Serial.flush();
 
   frame++;
   delay(500);
 }
-

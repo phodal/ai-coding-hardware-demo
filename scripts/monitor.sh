@@ -16,6 +16,5 @@ fi
 arduino-cli monitor \
   --port "$ARDUINO_PORT" \
   --fqbn "$ARDUINO_FQBN" \
-  --config baudrate="${MONITOR_BAUD:-115200}" \
+  --config baudrate="${MONITOR_BAUD:-115200}",dtr=on,rts=off \
   --timestamp
-

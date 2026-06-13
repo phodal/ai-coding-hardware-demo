@@ -30,4 +30,4 @@ WAVESHARE_VENDOR_DIR=/path/to/ESP32-S3-Touch-AMOLED-1.75C-main make build
 ```
 
 `make smoke` builds with a dedicated build directory, uploads, then records a short serial monitor log under `.logs/`.
-
+The monitor uses `baudrate=115200,dtr=on,rts=off` so the ESP32-S3 sees a CDC connection without RTS holding the reset/boot path in a bad state.

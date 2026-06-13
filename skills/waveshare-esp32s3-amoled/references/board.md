@@ -45,5 +45,5 @@ If a future core adds a 1.75C FQBN, inspect `arduino-cli board details --fqbn <n
 - `esp32:esp32@3.3.10` plus the vendor `Arduino-v3.3.5` GFX library can fail on `spiFrequencyToClockDiv` signature changes. Install `esp32:esp32@3.3.5`.
 - Running multiple `arduino-cli compile` processes at once can corrupt or truncate shared cache artifacts. Use `--jobs 1` and dedicated `--build-path`.
 - Arduino IDE may show nearby Waveshare board profiles like 1.43, 1.64, or 1.8. Do not assume they are correct for 1.75C display/touch behavior.
+- For serial validation, prefer monitor config `baudrate=115200,dtr=on,rts=off`.
 - If upload is unreliable at 921600 baud, retry with `UploadSpeed=460800`.
-
