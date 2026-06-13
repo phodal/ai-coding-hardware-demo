@@ -9,7 +9,7 @@ Summary: `9` of `12` feature directions are currently complete under this strict
 | ID | Priority | Matrix status | Audio mode | Suite | Completion | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
 | official-demos | P0 | verified | conditional | passed `.logs/hardware-smoke-suite/20260614-050454/summary.json` | conditional-physical-evidence-required | Collect the remaining conditional physical evidence, especially official audio demo input/output checks. |
-| xiaozhi-ai | P0 | required_external | audio | passed `.logs/hardware-smoke-suite/20260614-051043/summary.json` | external-required | Run the external firmware/source route, flash only with explicit approval, and capture runtime evidence. |
+| xiaozhi-ai | P0 | required_external | audio | passed `.logs/hardware-smoke-suite/20260614-062838/summary.json` | external-required | Run the external firmware/source route, flash only with explicit approval, and capture runtime evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | complete | No immediate action. |
 | offline-voice | P1 | verified | non_audio_control | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | complete | No immediate action. |
 | lvgl-visual-agent | P1 | verified | none | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | complete | No immediate action. |

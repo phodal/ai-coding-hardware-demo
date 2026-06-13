@@ -7,7 +7,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | ID | Priority | Matrix status | Audio mode | Doc evidence | Latest suite | Posture | Next gap |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | official-demos | P0 | verified | conditional | 10 item(s) | passed `.logs/hardware-smoke-suite/20260614-050454/summary.json` | suite-passed | No immediate evidence gap. |
-| xiaozhi-ai | P0 | required_external | audio | 11 item(s) | passed `.logs/hardware-smoke-suite/20260614-051043/summary.json` | external-gated | Needs external firmware/source environment evidence. |
+| xiaozhi-ai | P0 | required_external | audio | 16 item(s) | passed `.logs/hardware-smoke-suite/20260614-062838/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | suite-passed | No immediate evidence gap. |
 | offline-voice | P1 | verified | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
 | lvgl-visual-agent | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
@@ -39,20 +39,25 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 ## xiaozhi-ai
 
 - Doc: `docs/p0-xiaozhi-ai.md`
-- Latest suite summary: `.logs/hardware-smoke-suite/20260614-051043/summary.json`
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-062838/summary.json`
 - Latest suite status: `passed`
 - Verified Locally:
   - `make xiaozhi-latest` on 2026-06-13 detected release `v2.2.6`.
   - Matched asset: `v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip`.
   - `make xiaozhi-inspect` confirmed the downloaded asset contains `merged-binary.bin` with size `11240285` bytes.
+  - `make xiaozhi-preflight` verifies the current release asset, `merged-binary.bin` SHA-256, esptool path, serial port, source checkout marker, and ESP-IDF availability without flashing firmware or using audio hardware.
+  - Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=missing destructive=0 audio=0`.
+  - Latest `merged-binary.bin` SHA-256: `c08f389e2650b2076d2155fa62c0b34c5f3359e07833a8fca5f0f53c6e8bf7dd`.
   - Standalone `esptool.py` is not installed, but Arduino ESP32 core provides `~/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool`.
   - `make xiaozhi-source-clone` cloned official source to `.vendor/xiaozhi/source` at `v2.2.6-37-g3f9e5fc`.
   - `make xiaozhi-source-check` confirmed the source tree contains `CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C`.
   - `scripts/xiaozhi.sh idf-build` currently fails early because `idf.py` is not available in this shell; source compilation is gated on installing/sourcing ESP-IDF.
   - Flashing was not run during this documentation update.
-  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external --per-target-timeout 180 --max-failures 1"`: ran the non-destructive `xiaozhi-inspect` suite target without flashing firmware or using audio hardware.
-  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-051043/summary.json`.
-  - Latest suite target log: `.logs/hardware-smoke-suite/20260614-051043/xiaozhi-ai.log`.
+  - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external --per-target-timeout 180 --max-failures 1"`: ran the non-destructive `xiaozhi-preflight` suite target without flashing firmware or using audio hardware.
+  - Latest suite summary: `.logs/hardware-smoke-suite/20260614-062838/summary.json`.
+  - Latest suite target log: `.logs/hardware-smoke-suite/20260614-062838/xiaozhi-ai.log`.
+  - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino preflight`: passed through the repo Skill helper.
+  - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino preflight`: passed through the global Skill helper.
 
 ## cloud-ai-terminal
 

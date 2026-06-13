@@ -22,6 +22,7 @@ Usage:
   scripts/xiaozhi.sh latest
   scripts/xiaozhi.sh download
   scripts/xiaozhi.sh inspect
+  scripts/xiaozhi.sh preflight
   scripts/xiaozhi.sh flash --yes
   scripts/xiaozhi.sh erase --yes
   scripts/xiaozhi.sh source-clone
@@ -133,6 +134,58 @@ inspect_firmware() {
     echo "Expected merged-binary.bin inside $zip_path." >&2
     exit 1
   fi
+  python3 - "$zip_path" <<'PY'
+import hashlib
+import pathlib
+import sys
+import zipfile
+
+zip_path = pathlib.Path(sys.argv[1])
+with zipfile.ZipFile(zip_path) as archive:
+    merged = archive.read("merged-binary.bin")
+
+print(
+    "xiaozhi_firmware_summary "
+    f"zip={zip_path} zip_size={zip_path.stat().st_size} "
+    f"merged_size={len(merged)} merged_sha256={hashlib.sha256(merged).hexdigest()}"
+)
+PY
+}
+
+preflight() {
+  local esptool source_status idf_status latest_json
+  latest_json="$(latest_asset_json)"
+  inspect_firmware
+  esptool="$(find_esptool)"
+
+  if [[ -d "$XIAOZHI_SOURCE_DIR/.git" ]]; then
+    source_status="$(git -C "$XIAOZHI_SOURCE_DIR" describe --tags --always 2>/dev/null || git -C "$XIAOZHI_SOURCE_DIR" rev-parse --short HEAD)"
+    if ! rg -q "CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C" "$XIAOZHI_SOURCE_DIR" "$ROOT_DIR/config/xiaozhi-sdkconfig.defaults"; then
+      echo "XiaoZhi source is present but board config marker was not found." >&2
+      exit 1
+    fi
+  else
+    source_status="missing"
+  fi
+
+  if command -v idf.py >/dev/null 2>&1; then
+    idf_status="$(command -v idf.py)"
+  else
+    idf_status="missing"
+  fi
+
+  python3 - "$latest_json" "$XIAOZHI_BOARD_SLUG" "$ARDUINO_PORT" "$esptool" "$source_status" "$idf_status" <<'PY'
+import json
+import sys
+
+latest = json.loads(sys.argv[1])
+print(
+    "xiaozhi_preflight_summary "
+    f"tag={latest['tag']} asset={latest['asset_name']} asset_size={latest['size']} "
+    f"slug={sys.argv[2]} port={sys.argv[3] or 'missing'} esptool={sys.argv[4]} "
+    f"source={sys.argv[5]} idf={sys.argv[6]} destructive=0 audio=0"
+)
+PY
 }
 
 extract_merged_binary() {
@@ -159,6 +212,9 @@ case "$ACTION" in
     ;;
   inspect)
     inspect_firmware
+    ;;
+  preflight)
+    preflight
     ;;
   flash)
     require_yes "${2:-}"

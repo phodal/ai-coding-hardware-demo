@@ -17,7 +17,7 @@ case "$ACTION" in
         "$PROJECT_DIR/scripts/official-demo.sh" list
       fi
       if [[ -x "$PROJECT_DIR/scripts/xiaozhi.sh" && "${VERIFY_XIAOZHI:-0}" == "1" ]]; then
-        "$PROJECT_DIR/scripts/xiaozhi.sh" inspect
+        "$PROJECT_DIR/scripts/xiaozhi.sh" preflight
       fi
       make cloud-ai-build
       make audio-vad-build
