@@ -41,6 +41,8 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - If OCR framing or orientation is uncertain, run `make camera-aligner` first. Copy the generated `CAMERA_CROP='...' OCR_ROTATE=...` environment values.
    - If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make visual-smoke` so the sketch renders upright text for OCR.
    - Run `CAMERA_CROP='...' OCR_ROTATE=... DISPLAY_ROTATION=... make visual-smoke` to capture one camera frame with `ffmpeg` and OCR it with macOS Vision.
+   - For bright AMOLED overexposure or color mismatch, start with the calibration sketch: `DISPLAY_ROTATION=2 DISPLAY_BRIGHTNESS=96 OCR_PREPROCESS_MODE=color CAMERA_EXPOSURE_POINT=0.5,0.65 CAMERA_FOCUS_POINT=0.5,0.65 make visual-smoke`. It renders large `OK` text plus red/green/blue/yellow swatches.
+   - Use `CAMERA_RAW_IMAGE=/path/to/raw.jpg ./scripts/camera-ocr.sh` to retune crop, rotation, or `OCR_PREPROCESS_MODE` without recapturing.
    - Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT`; if it times out before saving a frame, debug macOS camera availability or another app owning the camera before changing board firmware.
    - Run `make camera-diagnose` when capture fails; it records camera inventory, Swift AVFoundation status, related processes, and bounded video-only capture probes under `.logs/`.
    - Pass only if OCR sees `OK`; use the saved raw/processed images to debug focus, glare, rotation, or garbled output.

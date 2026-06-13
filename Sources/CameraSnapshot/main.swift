@@ -1,4 +1,5 @@
 @preconcurrency import AVFoundation
+import CoreGraphics
 import CoreImage
 import Foundation
 import ImageIO
@@ -12,6 +13,9 @@ private struct Options {
     var size = "1280x720"
     var format = "jpeg"
     var warmupFrames = 3
+    var exposureBias: Float?
+    var exposurePoint: CGPoint?
+    var focusPoint: CGPoint?
 }
 
 private enum SnapshotError: Error, CustomStringConvertible {
@@ -23,6 +27,7 @@ private enum SnapshotError: Error, CustomStringConvertible {
     case cannotAddOutput
     case timedOut
     case invalidImage
+    case invalidPoint(String)
     case saveFailed(String)
 
     var description: String {
@@ -43,6 +48,8 @@ private enum SnapshotError: Error, CustomStringConvertible {
             return "Timed out before a camera frame was captured."
         case .invalidImage:
             return "Captured frame could not be converted to an image."
+        case .invalidPoint(let value):
+            return "Point values must be normalized as x,y between 0.0 and 1.0: \(value)"
         case .saveFailed(let path):
             return "Could not save camera frame to \(path)."
         }
@@ -67,6 +74,12 @@ private struct CameraSnapshot {
 
             try requestCameraAccess()
             let device = try selectDevice(options.device, from: devices)
+            if options.exposureBias != nil {
+                fputs(
+                    "CameraSnapshot: --exposure-bias is not supported by macOS AVFoundation; use --exposure-point plus OCR preprocessing controls.\n",
+                    stderr
+                )
+            }
             let capturer = FrameCapturer(device: device, options: options)
             let image = try capturer.capture()
             try save(image: image, to: options.output, format: options.format)
@@ -113,6 +126,20 @@ private struct CameraSnapshot {
                     throw SnapshotError.usage("--warmup-frames requires a non-negative integer.")
                 }
                 options.warmupFrames = value
+            case "--exposure-bias":
+                index += 1
+                guard index < arguments.count, let value = Float(arguments[index]) else {
+                    throw SnapshotError.usage("--exposure-bias requires a numeric EV value, for example -2.0.")
+                }
+                options.exposureBias = value
+            case "--exposure-point":
+                index += 1
+                guard index < arguments.count else { throw SnapshotError.usage("Missing value for --exposure-point.") }
+                options.exposurePoint = try parseNormalizedPoint(arguments[index])
+            case "--focus-point":
+                index += 1
+                guard index < arguments.count else { throw SnapshotError.usage("Missing value for --focus-point.") }
+                options.focusPoint = try parseNormalizedPoint(arguments[index])
             case "--help", "-h":
                 printUsage()
                 exit(0)
@@ -124,6 +151,18 @@ private struct CameraSnapshot {
         return options
     }
 
+    private static func parseNormalizedPoint(_ value: String) throws -> CGPoint {
+        let parts = value.split(separator: ",", omittingEmptySubsequences: false)
+        guard parts.count == 2,
+              let x = Double(parts[0]),
+              let y = Double(parts[1]),
+              (0.0...1.0).contains(x),
+              (0.0...1.0).contains(y) else {
+            throw SnapshotError.invalidPoint(value)
+        }
+        return CGPoint(x: x, y: y)
+    }
+
     private static func printUsage() {
         print("""
         Usage:
@@ -131,6 +170,7 @@ private struct CameraSnapshot {
           CameraSnapshot --device 0 --output /tmp/frame.jpg [--timeout 10] [--size 1280x720]
 
         Device can be a numeric index, uniqueID, or localized name substring.
+        On macOS, prefer --exposure-point 0.5,0.5 for bright OLED/AMOLED targets.
         """)
     }
 
@@ -269,6 +309,8 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
     }
 
     private func configureSession() throws {
+        try configureDevice()
+
         let input = try AVCaptureDeviceInput(device: device)
         let output = AVCaptureVideoDataOutput()
         output.alwaysDiscardsLateVideoFrames = true
@@ -294,6 +336,34 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
         session.addOutput(output)
         session.commitConfiguration()
+    }
+
+    private func configureDevice() throws {
+        guard options.exposureBias != nil || options.exposurePoint != nil || options.focusPoint != nil else {
+            return
+        }
+
+        try device.lockForConfiguration()
+        defer {
+            device.unlockForConfiguration()
+        }
+
+        if let point = options.exposurePoint, device.isExposurePointOfInterestSupported {
+            device.exposurePointOfInterest = point
+            if device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposureMode = .continuousAutoExposure
+            }
+        }
+
+        if let point = options.focusPoint, device.isFocusPointOfInterestSupported {
+            device.focusPointOfInterest = point
+            if device.isFocusModeSupported(.continuousAutoFocus) {
+                device.focusMode = .continuousAutoFocus
+            }
+        }
+
+        // macOS AVFoundation exposes exposure/focus metering points, but not EV bias
+        // or custom exposure duration/ISO for this capture path.
     }
 
     private func preset(for size: String) -> AVCaptureSession.Preset {

@@ -20,6 +20,11 @@ CAMERA_DEVICE="${CAMERA_DEVICE:-0}"
 CAMERA_SIZE="${CAMERA_SIZE:-1280x720}"
 CAMERA_PIXEL_FORMAT="${CAMERA_PIXEL_FORMAT:-uyvy422}"
 CAMERA_CROP="${CAMERA_CROP:-iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2}"
+CAMERA_RAW_IMAGE="${CAMERA_RAW_IMAGE:-}"
+CAMERA_WARMUP_FRAMES="${CAMERA_WARMUP_FRAMES:-3}"
+CAMERA_EXPOSURE_BIAS="${CAMERA_EXPOSURE_BIAS:-}"
+CAMERA_EXPOSURE_POINT="${CAMERA_EXPOSURE_POINT:-}"
+CAMERA_FOCUS_POINT="${CAMERA_FOCUS_POINT:-}"
 OCR_ROTATE="${OCR_ROTATE:-0}"
 OCR_EXPECTED="${OCR_EXPECTED:-OK}"
 OCR_LANG="${OCR_LANG:-eng}"
@@ -27,6 +32,25 @@ OCR_ENGINE="${OCR_ENGINE:-vision}"
 CAMERA_CAPTURE_TIMEOUT="${CAMERA_CAPTURE_TIMEOUT:-15}"
 CAMERA_CAPTURE_ENGINE="${CAMERA_CAPTURE_ENGINE:-auto}"
 CAMERA_SNAPSHOT_FORMAT="${CAMERA_SNAPSHOT_FORMAT:-jpeg}"
+OCR_PREPROCESS_MODE="${OCR_PREPROCESS_MODE:-gray}"
+
+case "$OCR_PREPROCESS_MODE" in
+  amoled)
+    OCR_EQ_CONTRAST="${OCR_EQ_CONTRAST:-2.0}"
+    OCR_EQ_BRIGHTNESS="${OCR_EQ_BRIGHTNESS:--0.30}"
+    OCR_GAMMA="${OCR_GAMMA:-0.75}"
+    ;;
+  *)
+    OCR_EQ_CONTRAST="${OCR_EQ_CONTRAST:-1.6}"
+    OCR_EQ_BRIGHTNESS="${OCR_EQ_BRIGHTNESS:-0.02}"
+    OCR_GAMMA="${OCR_GAMMA:-1.0}"
+    ;;
+esac
+
+OCR_SCALE_WIDTH="${OCR_SCALE_WIDTH:-1920}"
+OCR_UNSHARP="${OCR_UNSHARP:-5:5:1.0}"
+OCR_INVERT="${OCR_INVERT:-0}"
+OCR_FILTER_EXTRA="${OCR_FILTER_EXTRA:-}"
 
 mkdir -p "$LOG_DIR"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -34,17 +58,34 @@ RAW_IMAGE="$LOG_DIR/camera-ocr-$STAMP.jpg"
 PROCESSED_IMAGE="$LOG_DIR/camera-ocr-$STAMP.processed.png"
 OCR_TEXT_FILE="$LOG_DIR/camera-ocr-$STAMP.txt"
 
+if [[ -n "$CAMERA_RAW_IMAGE" ]]; then
+  RAW_IMAGE="$CAMERA_RAW_IMAGE"
+fi
+
 capture_with_swift() {
   if ! command -v swift >/dev/null 2>&1; then
     return 127
   fi
   echo "Capturing camera device $CAMERA_DEVICE via CameraSnapshot at $CAMERA_SIZE -> $RAW_IMAGE"
-  swift run --package-path "$ROOT_DIR" CameraSnapshot \
+  local args=(
+    swift run --package-path "$ROOT_DIR" CameraSnapshot
     --device "$CAMERA_DEVICE" \
     --output "$RAW_IMAGE" \
     --timeout "$CAMERA_CAPTURE_TIMEOUT" \
     --size "$CAMERA_SIZE" \
-    --format "$CAMERA_SNAPSHOT_FORMAT"
+    --format "$CAMERA_SNAPSHOT_FORMAT" \
+    --warmup-frames "$CAMERA_WARMUP_FRAMES"
+  )
+  if [[ -n "$CAMERA_EXPOSURE_BIAS" ]]; then
+    args+=(--exposure-bias "$CAMERA_EXPOSURE_BIAS")
+  fi
+  if [[ -n "$CAMERA_EXPOSURE_POINT" ]]; then
+    args+=(--exposure-point "$CAMERA_EXPOSURE_POINT")
+  fi
+  if [[ -n "$CAMERA_FOCUS_POINT" ]]; then
+    args+=(--focus-point "$CAMERA_FOCUS_POINT")
+  fi
+  "${args[@]}"
 }
 
 capture_with_ffmpeg() {
@@ -61,33 +102,37 @@ capture_with_ffmpeg() {
     -y "$RAW_IMAGE"
 }
 
-case "$CAMERA_CAPTURE_ENGINE" in
-  auto)
-    if ! capture_with_swift; then
-      echo "Swift camera capture failed; falling back to ffmpeg." >&2
-      if ! capture_with_ffmpeg; then
-        echo "Camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
+if [[ -n "$CAMERA_RAW_IMAGE" ]]; then
+  echo "Using existing camera image -> $RAW_IMAGE"
+else
+  case "$CAMERA_CAPTURE_ENGINE" in
+    auto)
+      if ! capture_with_swift; then
+        echo "Swift camera capture failed; falling back to ffmpeg." >&2
+        if ! capture_with_ffmpeg; then
+          echo "Camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
+          exit 124
+        fi
+      fi
+      ;;
+    swift)
+      if ! capture_with_swift; then
+        echo "Swift camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
         exit 124
       fi
-    fi
-    ;;
-  swift)
-    if ! capture_with_swift; then
-      echo "Swift camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
-      exit 124
-    fi
-    ;;
-  ffmpeg)
-    if ! capture_with_ffmpeg; then
-      echo "ffmpeg camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
-      exit 124
-    fi
-    ;;
-  *)
-    echo "CAMERA_CAPTURE_ENGINE must be one of: auto, swift, ffmpeg" >&2
-    exit 2
-    ;;
-esac
+      ;;
+    ffmpeg)
+      if ! capture_with_ffmpeg; then
+        echo "ffmpeg camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
+        exit 124
+      fi
+      ;;
+    *)
+      echo "CAMERA_CAPTURE_ENGINE must be one of: auto, swift, ffmpeg" >&2
+      exit 2
+      ;;
+  esac
+fi
 
 if [[ ! -s "$RAW_IMAGE" ]]; then
   echo "Camera capture did not produce an image: $RAW_IMAGE" >&2
@@ -113,11 +158,56 @@ case "$OCR_ROTATE" in
     ;;
 esac
 
+build_ocr_filter() {
+  local filter="crop=$CAMERA_CROP${ROTATE_FILTER}"
+
+  if [[ "$OCR_SCALE_WIDTH" != "0" ]]; then
+    filter+=",scale=$OCR_SCALE_WIDTH:-1"
+  fi
+
+  case "$OCR_PREPROCESS_MODE" in
+    none)
+      ;;
+    color)
+      filter+=",eq=contrast=$OCR_EQ_CONTRAST:brightness=$OCR_EQ_BRIGHTNESS:gamma=$OCR_GAMMA"
+      ;;
+    gray)
+      filter+=",format=gray,eq=contrast=$OCR_EQ_CONTRAST:brightness=$OCR_EQ_BRIGHTNESS:gamma=$OCR_GAMMA"
+      ;;
+    amoled)
+      filter+=",eq=contrast=$OCR_EQ_CONTRAST:brightness=$OCR_EQ_BRIGHTNESS:gamma=$OCR_GAMMA"
+      ;;
+    *)
+      echo "OCR_PREPROCESS_MODE must be one of: none, color, gray, amoled" >&2
+      exit 2
+      ;;
+  esac
+
+  if [[ "$OCR_INVERT" == "1" ]]; then
+    filter+=",negate"
+  elif [[ "$OCR_INVERT" != "0" ]]; then
+    echo "OCR_INVERT must be 0 or 1" >&2
+    exit 2
+  fi
+
+  if [[ -n "$OCR_UNSHARP" && "$OCR_UNSHARP" != "0" ]]; then
+    filter+=",unsharp=$OCR_UNSHARP"
+  fi
+
+  if [[ -n "$OCR_FILTER_EXTRA" ]]; then
+    filter+=",$OCR_FILTER_EXTRA"
+  fi
+
+  printf '%s' "$filter"
+}
+
+OCR_FILTER="$(build_ocr_filter)"
+
 ffmpeg \
   -hide_banner \
   -loglevel error \
   -i "$RAW_IMAGE" \
-  -vf "crop=$CAMERA_CROP${ROTATE_FILTER},scale=1920:-1,format=gray,eq=contrast=1.6:brightness=0.02,unsharp=5:5:1.0" \
+  -vf "$OCR_FILTER" \
   -y "$PROCESSED_IMAGE"
 
 if [[ "$OCR_ENGINE" == "vision" ]]; then
@@ -152,6 +242,11 @@ echo "  crop:      $CAMERA_CROP"
 echo "  rotate:    $OCR_ROTATE"
 echo "  engine:    $OCR_ENGINE"
 echo "  capture:   $CAMERA_CAPTURE_ENGINE"
+echo "  mode:      $OCR_PREPROCESS_MODE"
+echo "  filter:    $OCR_FILTER"
+if [[ -n "$CAMERA_EXPOSURE_BIAS" ]]; then
+  echo "  exposure:  $CAMERA_EXPOSURE_BIAS"
+fi
 
 if [[ "$NORMALIZED_TEXT" == *"$NORMALIZED_EXPECTED"* ]]; then
   echo "OCR validation passed."

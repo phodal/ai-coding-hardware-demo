@@ -58,14 +58,27 @@ CAMERA_SIZE=1280x720
 CAMERA_CROP="iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2"
 OCR_ROTATE=0
 DISPLAY_ROTATION=0
+DISPLAY_BRIGHTNESS=128
 OCR_EXPECTED="OK"
 OCR_ENGINE=vision
 CAMERA_CAPTURE_TIMEOUT=15
+CAMERA_EXPOSURE_POINT=""
+CAMERA_FOCUS_POINT=""
+CAMERA_WARMUP_FRAMES=3
+OCR_PREPROCESS_MODE=gray
 ```
 
 Point the camera at the AMOLED before running the command. If macOS asks for camera permission, allow the terminal/Codex process and rerun.
 If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make visual-smoke` so the sketch renders OCR text upright for the camera. Use `OCR_ROTATE` only when you cannot change the displayed orientation.
-Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearly instead of hanging when the selected camera device is unavailable or already owned by another app. `CAMERA_CAPTURE_ENGINE=auto` prefers the SwiftPM `CameraSnapshot` tool and falls back to ffmpeg.
+Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearly instead of hanging when the selected camera device is unavailable or already owned by another app. `CAMERA_CAPTURE_ENGINE=auto` prefers the SwiftPM `CameraSnapshot` tool and falls back to ffmpeg. For bright AMOLED frames, lower `DISPLAY_BRIGHTNESS`, keep `OCR_PREPROCESS_MODE=color`, and set `CAMERA_EXPOSURE_POINT` / `CAMERA_FOCUS_POINT` to a normalized point on the display, for example `0.5,0.65`.
+
+The OCR script can also reprocess an existing raw frame without touching the camera:
+
+```bash
+CAMERA_RAW_IMAGE=.logs/camera-ocr-YYYYMMDD-HHMMSS.jpg OCR_PREPROCESS_MODE=amoled ./scripts/camera-ocr.sh
+```
+
+The visual calibration sketch includes large `OK` text plus red/green/blue/yellow swatches. This is the preferred camera setup target before trying vendor demos with white backgrounds or small LVGL fonts.
 
 `make camera-aligner` opens a SwiftPM macOS camera tuning tool. Use it to:
 

@@ -13,6 +13,10 @@ Arduino_CO5300 *gfx = new Arduino_CO5300(
 #define DISPLAY_ROTATION 0
 #endif
 
+#ifndef DISPLAY_BRIGHTNESS
+#define DISPLAY_BRIGHTNESS 128
+#endif
+
 uint32_t frame = 0;
 bool displayReady = false;
 
@@ -28,14 +32,28 @@ void centerText(const char *text, int16_t y, uint8_t size, uint16_t color) {
   gfx->print(text);
 }
 
+void drawSwatch(int16_t x, int16_t y, uint16_t color, const char *label, uint16_t labelColor) {
+  gfx->fillRect(x, y, 84, 58, color);
+  gfx->drawRect(x, y, 84, 58, RGB565_WHITE);
+  gfx->setTextSize(3);
+  gfx->setTextColor(labelColor, color);
+  gfx->setCursor(x + 31, y + 17);
+  gfx->print(label);
+}
+
 void drawOcrScreen() {
   gfx->fillScreen(RGB565_BLACK);
   gfx->drawRect(8, 8, LCD_WIDTH - 16, LCD_HEIGHT - 16, RGB565_WHITE);
   gfx->drawRect(14, 14, LCD_WIDTH - 28, LCD_HEIGHT - 28, RGB565_BLUE);
 
-  centerText("OK", 112, 10, RGB565_WHITE);
-  centerText("2026", 246, 6, RGB565_YELLOW);
-  centerText("ESP32 S3 AMOLED", 362, 2, RGB565_CYAN);
+  centerText("OK", 70, 10, RGB565_WHITE);
+  centerText("2026", 196, 6, RGB565_YELLOW);
+  centerText("ESP32 S3", 264, 3, RGB565_CYAN);
+
+  drawSwatch(44, 334, RGB565_RED, "R", RGB565_WHITE);
+  drawSwatch(142, 334, RGB565_GREEN, "G", RGB565_BLACK);
+  drawSwatch(240, 334, RGB565_BLUE, "B", RGB565_WHITE);
+  drawSwatch(338, 334, RGB565_YELLOW, "Y", RGB565_BLACK);
 }
 
 void setup() {
@@ -56,12 +74,13 @@ void setup() {
     return;
   }
 
-  gfx->setBrightness(220);
+  gfx->setBrightness(DISPLAY_BRIGHTNESS);
   gfx->setRotation(DISPLAY_ROTATION);
   drawOcrScreen();
   displayReady = true;
 
-  Serial.println("display_ocr_check text=OK 2026");
+  Serial.print("display_ocr_check text=OK 2026 brightness=");
+  Serial.println(DISPLAY_BRIGHTNESS);
   Serial.flush();
 }
 
