@@ -17,7 +17,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | iot-panel | P1 | partial | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-043837/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | esp-claw-agent | P2 | partial | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-044424/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
 | tinyml-imu | P2 | partial | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-044424/summary.json` | suite-passed | Decide what remains before promoting matrix status to verified. |
-| audio-front-end | P2 | required_quiet_window | audio | 5 item(s) | missing | quiet-window-gated | Needs an explicit quiet-window audio run. |
+| audio-front-end | P2 | required_quiet_window | audio | 10 item(s) | missing | quiet-window-gated | Needs an explicit quiet-window audio run. |
 
 ## official-demos
 
@@ -184,6 +184,11 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 - Latest suite summary: missing
 - Verified Locally:
   - `make audio-vad-build`: passed.
+  - `make audio-vad-preflight`: rebuilt the ES7210 probe and passed without uploading, playing stimulus, or opening audio devices.
+  - Preflight build size: sketch `439475` bytes, globals `23024` bytes.
+  - Preflight artifact check: `audio_vad_probe.ino.bin`, `.bootloader.bin`, `.partitions.bin`, and `.elf` were present under `.arduino-build/audio_vad_probe`.
+  - Preflight summary: `audio_devices_used=0 stimulus_played=0 uploaded=0`, port `/dev/cu.usbmodem83101`.
+  - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh audio-vad /Users/phodal/hardware/arduino preflight`: passed the same no-audio preflight through the repo Skill helper.
   - `AUDIO_VAD_ACTIVE_SECONDS=8 AUDIO_VAD_BASELINE_SECONDS=2 make audio-vad-smoke`: uploaded to `/dev/cu.usbmodem83101` and passed.
   - Observed summary: `baseline_max_rms=0`, `baseline_max_peak=3`, `active_max_rms=14`, `active_max_peak=40`, `rms_delta=14`, `peak_delta=37`.
   - VAD did not fire with the current host-speaker placement, so `AUDIO_VAD_REQUIRE_SPEECH=1` remains a stricter manual/fixture-dependent gate.

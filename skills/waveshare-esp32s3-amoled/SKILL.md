@@ -78,6 +78,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 
 11. For microphone/audio-front-end validation:
    - Run `make audio-vad-build` to compile the ES7210 microphone probe.
+   - Run `make audio-vad-preflight` when audio should stay quiet; it rebuilds and checks artifacts, serial port, ES7210 source markers, and checker options without uploading, playing stimulus, or opening audio devices.
    - Run `make audio-vad-smoke` to upload it, play a host-side `say` stimulus, and validate RMS/peak serial metrics.
    - Use `AUDIO_VAD_REQUIRE_SPEECH=1 make audio-vad-smoke` only when the host speaker is close enough for reliable VAD.
    - Use `AUDIO_VAD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make audio-vad-smoke` when camera OCR should verify the screen reaches `OK`.
@@ -243,6 +244,7 @@ make cloud-ai-smoke
 make cloud-ai-pipeline-smoke
 make cloud-ai-cache-smoke
 make audio-vad-build
+make audio-vad-preflight
 make audio-vad-smoke
 make speaker-output-build
 make speaker-output-smoke

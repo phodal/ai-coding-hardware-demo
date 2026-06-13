@@ -155,6 +155,10 @@ case "$ACTION" in
           cd "$PROJECT_DIR"
           exec make audio-vad-build
           ;;
+        preflight)
+          cd "$PROJECT_DIR"
+          exec make audio-vad-preflight
+          ;;
         smoke)
           exec "$PROJECT_DIR/scripts/audio-vad-smoke.sh"
           ;;
