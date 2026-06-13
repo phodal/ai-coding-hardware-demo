@@ -9,6 +9,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Treat serial output and camera OCR as complementary evidence: serial proves firmware control flow, while camera OCR proves the AMOLED actually renders expected text.
 - Keep destructive actions explicit. Firmware replacement commands should require a visible confirmation variable or `--yes`.
 - Stage vendor sketches instead of editing vendor sources when Arduino CLI requires folder and `.ino` names to match.
+- Treat audible audio smokes as disruptive physical tests. Do not run speaker or microphone stimulus tests late at night unless the user explicitly asks for them.
 
 ## Current Challenges
 
@@ -17,6 +18,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Camera OCR is sensitive to orientation, focus, glare, and pixel font shape. Use `make camera-aligner` and keep validation text large and simple.
 - Vision OCR can misread `AI OK` as `HI OK`; use serial to verify the full payload and OCR a stable subset such as `OK`.
 - `pyserial` is not installed in the current Python, so host relay tools should use stdlib `termios` or document their dependency explicitly.
+- Python `audioop` is not available in the current Python, so WAV analysis should use explicit PCM byte parsing or a documented dependency.
 - ESP-IDF is not currently sourced in this shell, so XiaoZhi source builds can only be checked up to board configuration until `idf.py` is available.
 
 ## Cloud AI Terminal Direction
@@ -25,7 +27,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Move from mock/HTTP text responses to ES7210 microphone capture in small steps: first validate RMS/peak metrics, then require VAD speech, then stream audio for ASR.
 - VAD is stricter than raw microphone capture. Treat RMS/peak threshold increases as the microphone data-flow gate, and use `AUDIO_VAD_REQUIRE_SPEECH=1` only when the host speaker is physically close enough.
 - On the current desk setup, macOS `say` produced a clear ES7210 signal delta but did not trigger ESP-SR VAD; this is acceptable for the microphone data-flow gate but not for a wake-word or speech-command gate.
-- ES8311 playback remains the next output-side validation step, reusing the official audio output demo as the known-good reference.
+- ES8311 playback now has a board-generated tone probe and a host microphone gate. Treat the current gate as physical output evidence, not as proof of TTS quality or frequency accuracy.
 
 ## Feature Push README Hook
 
