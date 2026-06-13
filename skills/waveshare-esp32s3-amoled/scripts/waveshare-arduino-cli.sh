@@ -44,6 +44,25 @@ case "$ACTION" in
       exec "$PROJECT_DIR/scripts/xiaozhi.sh" "${EXTRA_ARGS[@]}"
     fi
     ;;
+  cloud-ai)
+    if [[ -x "$PROJECT_DIR/scripts/cloud-ai-terminal-smoke.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/cloud-ai-terminal-smoke.sh"
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        build)
+          cd "$PROJECT_DIR"
+          exec make cloud-ai-build
+          ;;
+        smoke)
+          exec "$PROJECT_DIR/scripts/cloud-ai-terminal-smoke.sh"
+          ;;
+        relay)
+          exec python3 "$PROJECT_DIR/scripts/cloud-ai-relay.py" "${EXTRA_ARGS[@]:1}"
+          ;;
+      esac
+    fi
+    ;;
 esac
 
 CORE_VERSION="${ARDUINO_CORE_VERSION:-3.3.5}"
@@ -152,8 +171,12 @@ case "$ACTION" in
     echo "No project XiaoZhi runner found. Use a project that provides scripts/xiaozhi.sh." >&2
     exit 2
     ;;
+  cloud-ai)
+    echo "No project cloud AI terminal runner found. Use a project that provides scripts/cloud-ai-terminal-smoke.sh." >&2
+    exit 2
+    ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac

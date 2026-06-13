@@ -56,6 +56,12 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - For source builds, run `make xiaozhi-source-clone` then `make xiaozhi-source-check`; the local defaults select `CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C=y`.
    - If `idf.py` is missing, stop at source-check and tell the user to install/source ESP-IDF before `scripts/xiaozhi.sh idf-build`.
 
+9. For the self-developed cloud AI terminal:
+   - Run `make cloud-ai-build` to compile the board-side display/serial terminal.
+   - Run `make cloud-ai-smoke` to upload it and verify the host serial relay reaches `AI_DISPLAYED`.
+   - Run `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make cloud-ai-smoke` when the camera is positioned for OCR; pass only if the screen shows `AI OK`.
+   - Treat this as the control-plane slice; ES7210 microphone input and ES8311 speaker output still need dedicated audio stream validation.
+
 ## Known 1.75C FQBN
 
 Use this FQBN unless a future Espressif core adds a real 1.75C board profile:
@@ -92,6 +98,8 @@ SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld
 make xiaozhi-latest
 make xiaozhi-inspect
 make xiaozhi-source-check
+make cloud-ai-build
+make cloud-ai-smoke
 ```
 
 ## References

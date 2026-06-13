@@ -84,3 +84,21 @@ make xiaozhi-source-check
 `make xiaozhi-latest`, `make xiaozhi-download`, and `make xiaozhi-inspect` automate the prebuilt XiaoZhi AI firmware route for `waveshare-esp32-s3-touch-amoled-1.75c`. `CONFIRM=--yes make xiaozhi-flash` writes the downloaded merged binary to the board and is intentionally explicit because it replaces the Arduino sketch currently on the device.
 
 The source route uses `scripts/xiaozhi.sh idf-build`, `scripts/xiaozhi.sh idf-flash`, and `scripts/xiaozhi.sh idf-monitor` from an ESP-IDF shell where `idf.py` is available. See `docs/p0-xiaozhi-ai.md` for the current XiaoZhi acceptance notes.
+
+## Git Hooks
+
+```bash
+make install-hooks
+```
+
+The versioned `pre-push` hook detects outgoing push refs or commit subjects that include `feat`. When it finds one, it updates the generated Feature Push Notes block in this README and stops the push so the README change can be reviewed and committed before pushing again.
+
+## Cloud AI Terminal Commands
+
+```bash
+make cloud-ai-build
+make cloud-ai-smoke
+CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make cloud-ai-smoke
+```
+
+`make cloud-ai-smoke` uploads the self-developed `cloud_ai_terminal` sketch, runs the host serial relay in mock mode, and verifies the board displays an AI response. The first slice validates the display and host/cloud protocol shape; audio capture and speaker playback are tracked in `docs/p0-cloud-ai-terminal.md`.

@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 DEMO ?= 01-helloworld
 
-.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check board-list clean
+.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-aligner official-demos official-build official-upload official-smoke official-build-all xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-relay install-hooks board-list clean
 
 setup:
 	./scripts/setup.sh
@@ -59,6 +59,22 @@ xiaozhi-source-clone:
 
 xiaozhi-source-check:
 	./scripts/xiaozhi.sh source-check
+
+cloud-ai-build:
+	SKETCH=sketches/cloud_ai_terminal BUILD_PATH=.arduino-build/cloud_ai_terminal ./scripts/build.sh
+
+cloud-ai-upload:
+	SKETCH=sketches/cloud_ai_terminal BUILD_PATH=.arduino-build/cloud_ai_terminal ./scripts/upload.sh
+
+cloud-ai-smoke:
+	./scripts/cloud-ai-terminal-smoke.sh
+
+cloud-ai-relay:
+	python3 ./scripts/cloud-ai-relay.py --port $(ARDUINO_PORT)
+
+install-hooks:
+	git config core.hooksPath .githooks
+	chmod +x .githooks/pre-push scripts/update-readme-for-feat-push.sh
 
 board-list:
 	arduino-cli board list
