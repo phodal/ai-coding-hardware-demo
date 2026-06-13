@@ -6,7 +6,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 
 | ID | Priority | Matrix status | Audio mode | Doc evidence | Latest suite | Posture | Next gap |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| official-demos | P0 | verified | conditional | 11 item(s) | passed `.logs/hardware-smoke-suite/20260614-050454/summary.json` | suite-passed | No immediate evidence gap. |
+| official-demos | P0 | verified | conditional | 13 item(s) | passed `.logs/hardware-smoke-suite/20260614-050454/summary.json` | suite-passed | No immediate evidence gap. |
 | xiaozhi-ai | P0 | required_external | audio | 16 item(s) | passed `.logs/hardware-smoke-suite/20260614-062838/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | suite-passed | No immediate evidence gap. |
 | offline-voice | P1 | verified | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
@@ -29,6 +29,8 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `make official-build DEMO=01-helloworld`: passed on the current Arduino CLI setup.
   - `make official-build-all`: passed for all 7 Arduino examples on the current Arduino CLI setup.
   - `make official-audio-preflight`: passed for `06-es7210-audio-in` and `07-es8311-audio-out`, with `official_audio_preflight_summary demos=2 failed=0 destructive=0 audio=0`.
+  - `make official-coverage`: passed read-only audit with `official_coverage_summary demos=7 built=7 physical_smoke=1 missing_physical=6 audio_demos=2 audio_quiet_ready=2 destructive=0 audio=0`.
+  - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh official-demo /Users/phodal/hardware/arduino coverage`: passed the same read-only audit through the global Skill helper.
   - `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld`: uploaded to `/dev/cu.usbmodem83101` and matched serial text `loop`.
   - Latest smoke log: `.logs/official-01-helloworld-20260613-222514.log`.
   - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed the default `01-helloworld` official display/serial baseline on `/dev/cu.usbmodem83101`.

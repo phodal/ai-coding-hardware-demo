@@ -49,6 +49,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make official-demos` to list the Waveshare Arduino demo manifest.
    - Run `make official-build-all` before debugging higher-level AI features; all official Arduino examples should compile first.
    - Run `make official-audio-preflight` when audio should stay quiet; it compiles only the official ES7210/ES8311 demos and checks source/serial markers without uploading or using audio devices.
+   - Run `make official-coverage` for a read-only audit of build artifacts, source presence, quiet audio marker readiness, and existing physical smoke logs across every official demo.
    - Run `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld` to upload the official display baseline and verify runtime serial output.
    - The project runner stages vendor examples under `.arduino-build/official-sketches/<id>` because several official `.ino` filenames do not match their parent folder names, which `arduino-cli` requires.
 
@@ -244,6 +245,7 @@ make visual-smoke
 make official-demos
 make official-build-all
 make official-audio-preflight
+make official-coverage
 SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld
 make xiaozhi-latest
 make xiaozhi-inspect

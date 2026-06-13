@@ -19,6 +19,7 @@ Usage:
   scripts/official-demo.sh smoke <demo-id>
   scripts/official-demo.sh build-all
   scripts/official-demo.sh audio-preflight
+  scripts/official-demo.sh coverage
 EOF
 }
 
@@ -36,6 +37,10 @@ demo_ids() {
 
 audio_demo_ids() {
   awk -F '\t' '$0 !~ /^#/ && NF >= 5 && $2 ~ /^audio/ { print $1 }' "$MANIFEST"
+}
+
+demo_rows() {
+  awk -F '\t' '$0 !~ /^#/ && NF >= 5 { print }' "$MANIFEST"
 }
 
 configure_demo() {
@@ -139,6 +144,80 @@ audio_preflight() {
   exit "$failed"
 }
 
+latest_matching_smoke_log() {
+  local id="$1" expected="$2" log
+  [[ "$expected" != "-" ]] || return 1
+  [[ -d "$ROOT_DIR/.logs" ]] || return 1
+  while IFS= read -r log; do
+    if rg -F "$expected" "$log" >/dev/null; then
+      printf '%s\n' "$log"
+      return 0
+    fi
+  done < <(find "$ROOT_DIR/.logs" -type f -name "official-$id-*.log" 2>/dev/null | sort -r)
+  return 1
+}
+
+coverage_audit() {
+  local total=0 built=0 physical=0 audio=0 audio_quiet_ready=0 missing_physical=0
+  local row id category title sketch_rel expected notes build_bin build_status build_bytes
+  local source_dir source_status audio_quiet_status smoke_log smoke_status completion
+
+  while IFS= read -r row; do
+    IFS=$'\t' read -r id category title sketch_rel expected notes <<<"$row"
+    total=$((total + 1))
+    build_bin="$ROOT_DIR/.arduino-build/official-$id/$id.ino.bin"
+    if [[ -f "$build_bin" ]]; then
+      build_status="passed"
+      build_bytes="$(stat -f %z "$build_bin")"
+      built=$((built + 1))
+    else
+      build_status="missing"
+      build_bytes=0
+    fi
+
+    source_dir="$WAVESHARE_ARDUINO_DIR/examples/$sketch_rel"
+    source_status="present"
+    [[ -d "$source_dir" ]] || source_status="missing"
+
+    audio_quiet_status="not_required"
+    if [[ "$category" == audio-* ]]; then
+      audio=$((audio + 1))
+      if [[ "$source_status" == "present" ]] && ( check_audio_markers "$id" "$category" "$expected" "$source_dir" ); then
+        audio_quiet_status="marker_ready"
+        audio_quiet_ready=$((audio_quiet_ready + 1))
+      else
+        audio_quiet_status="missing_markers"
+      fi
+    fi
+
+    if smoke_log="$(latest_matching_smoke_log "$id" "$expected")"; then
+      smoke_status="passed"
+      physical=$((physical + 1))
+    else
+      smoke_status="missing"
+      smoke_log="-"
+      missing_physical=$((missing_physical + 1))
+    fi
+
+    completion="physical-required"
+    if [[ "$smoke_status" == "passed" && "$category" != audio-* ]]; then
+      completion="non-audio-physical-passed"
+    elif [[ "$smoke_status" == "passed" ]]; then
+      completion="audio-physical-passed"
+    elif [[ "$category" == audio-* && "$audio_quiet_status" == "marker_ready" && "$build_status" == "passed" ]]; then
+      completion="quiet-preflight-only"
+    elif [[ "$build_status" == "passed" ]]; then
+      completion="build-only"
+    fi
+
+    printf 'official_coverage id=%s category=%s build=%s build_bytes=%s source=%s audio_quiet=%s physical_smoke=%s log=%s completion=%s destructive=0 audio=0\n' \
+      "$id" "$category" "$build_status" "$build_bytes" "$source_status" "$audio_quiet_status" "$smoke_status" "$smoke_log" "$completion"
+  done < <(demo_rows)
+
+  printf 'official_coverage_summary demos=%s built=%s physical_smoke=%s missing_physical=%s audio_demos=%s audio_quiet_ready=%s destructive=0 audio=0\n' \
+    "$total" "$built" "$physical" "$missing_physical" "$audio" "$audio_quiet_ready"
+}
+
 capture_serial() {
   local log_file expected
   expected="$1"
@@ -213,6 +292,9 @@ case "$ACTION" in
     ;;
   audio-preflight)
     audio_preflight
+    ;;
+  coverage)
+    coverage_audit
     ;;
   *)
     usage
