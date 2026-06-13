@@ -18,6 +18,7 @@ Usage:
   scripts/official-demo.sh upload <demo-id>
   scripts/official-demo.sh smoke <demo-id>
   scripts/official-demo.sh build-all
+  scripts/official-demo.sh audio-preflight
 EOF
 }
 
@@ -31,6 +32,10 @@ read_demo() {
 
 demo_ids() {
   awk -F '\t' '$0 !~ /^#/ && NF >= 5 { print $1 }' "$MANIFEST"
+}
+
+audio_demo_ids() {
+  awk -F '\t' '$0 !~ /^#/ && NF >= 5 && $2 ~ /^audio/ { print $1 }' "$MANIFEST"
 }
 
 configure_demo() {
@@ -85,6 +90,53 @@ list_demos() {
       printf "%-20s %-10s %-30s %s\n", $1, $2, $3, $4
     }
   ' "$MANIFEST"
+}
+
+check_audio_markers() {
+  local id="$1" category="$2" expected="$3" source_dir="$4"
+  local marker_pattern
+  case "$category" in
+    audio-in)
+      marker_pattern='ES7210|Speech detected|VAD|I2S'
+      ;;
+    audio-out)
+      marker_pattern='ES8311|Echo start|I2S|codec'
+      ;;
+    *)
+      echo "Unsupported audio category for $id: $category" >&2
+      exit 1
+      ;;
+  esac
+
+  if [[ "$expected" == "-" ]]; then
+    echo "Audio demo $id is missing an expected serial marker." >&2
+    exit 1
+  fi
+  if ! rg -n "$marker_pattern" "$source_dir" >/dev/null; then
+    echo "Audio demo $id is missing expected source markers: $marker_pattern" >&2
+    exit 1
+  fi
+}
+
+audio_preflight() {
+  local failed=0 count=0 row id category title sketch_rel expected notes
+  while IFS= read -r id; do
+    row="$(read_demo "$id")"
+    IFS=$'\t' read -r id category title sketch_rel expected notes <<<"$row"
+    configure_demo "$id"
+    check_audio_markers "$id" "$category" "$expected" "$OFFICIAL_DEMO_SOURCE_SKETCH"
+    echo "==> Audio preflight build: $id ($title)"
+    if "$ROOT_DIR/scripts/build.sh"; then
+      echo "official_audio_preflight id=$id category=$category expected=${expected// /_} status=passed destructive=0 audio=0"
+    else
+      failed=1
+      echo "official_audio_preflight id=$id category=$category expected=${expected// /_} status=failed destructive=0 audio=0"
+    fi
+    count=$((count + 1))
+  done < <(audio_demo_ids)
+
+  echo "official_audio_preflight_summary demos=$count failed=$failed destructive=0 audio=0"
+  exit "$failed"
 }
 
 capture_serial() {
@@ -158,6 +210,9 @@ case "$ACTION" in
       fi
     done < <(demo_ids)
     exit "$failed"
+    ;;
+  audio-preflight)
+    audio_preflight
     ;;
   *)
     usage
