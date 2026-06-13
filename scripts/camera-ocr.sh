@@ -20,7 +20,8 @@ CAMERA_DEVICE="${CAMERA_DEVICE:-0}"
 CAMERA_SIZE="${CAMERA_SIZE:-1280x720}"
 CAMERA_PIXEL_FORMAT="${CAMERA_PIXEL_FORMAT:-uyvy422}"
 CAMERA_CROP="${CAMERA_CROP:-iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2}"
-OCR_EXPECTED="${OCR_EXPECTED:-CODEX OK}"
+OCR_ROTATE="${OCR_ROTATE:-0}"
+OCR_EXPECTED="${OCR_EXPECTED:-OK}"
 OCR_LANG="${OCR_LANG:-eng}"
 OCR_ENGINE="${OCR_ENGINE:-vision}"
 
@@ -43,11 +44,30 @@ ffmpeg \
   -frames:v 1 \
   -y "$RAW_IMAGE"
 
+case "$OCR_ROTATE" in
+  0)
+    ROTATE_FILTER=""
+    ;;
+  90)
+    ROTATE_FILTER=",transpose=1"
+    ;;
+  180)
+    ROTATE_FILTER=",hflip,vflip"
+    ;;
+  270)
+    ROTATE_FILTER=",transpose=2"
+    ;;
+  *)
+    echo "OCR_ROTATE must be one of: 0, 90, 180, 270" >&2
+    exit 2
+    ;;
+esac
+
 ffmpeg \
   -hide_banner \
   -loglevel error \
   -i "$RAW_IMAGE" \
-  -vf "crop=$CAMERA_CROP,scale=1920:-1,format=gray,eq=contrast=1.6:brightness=0.02,unsharp=5:5:1.0" \
+  -vf "crop=$CAMERA_CROP${ROTATE_FILTER},scale=1920:-1,format=gray,eq=contrast=1.6:brightness=0.02,unsharp=5:5:1.0" \
   -y "$PROCESSED_IMAGE"
 
 if [[ "$OCR_ENGINE" == "vision" ]]; then
@@ -55,7 +75,10 @@ if [[ "$OCR_ENGINE" == "vision" ]]; then
     echo "swift is required for OCR_ENGINE=vision." >&2
     exit 1
   fi
-  swift "$ROOT_DIR/scripts/vision-ocr.swift" "$RAW_IMAGE" >"$OCR_TEXT_FILE" 2>"$LOG_DIR/camera-ocr-$STAMP.vision.log"
+  {
+    swift "$ROOT_DIR/scripts/vision-ocr.swift" "$PROCESSED_IMAGE"
+    swift "$ROOT_DIR/scripts/vision-ocr.swift" "$RAW_IMAGE"
+  } >"$OCR_TEXT_FILE" 2>"$LOG_DIR/camera-ocr-$STAMP.vision.log"
 else
   if [[ "$TESSERACT_AVAILABLE" != "1" ]]; then
     echo "tesseract is required for OCR_ENGINE=tesseract." >&2
@@ -76,6 +99,7 @@ echo "  raw:       $RAW_IMAGE"
 echo "  processed: $PROCESSED_IMAGE"
 echo "  text:      $OCR_TEXT_FILE"
 echo "  crop:      $CAMERA_CROP"
+echo "  rotate:    $OCR_ROTATE"
 echo "  engine:    $OCR_ENGINE"
 
 if [[ "$NORMALIZED_TEXT" == *"$NORMALIZED_EXPECTED"* ]]; then

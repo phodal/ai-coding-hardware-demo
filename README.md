@@ -36,21 +36,25 @@ WAVESHARE_VENDOR_DIR=/path/to/ESP32-S3-Touch-AMOLED-1.75C-main make build
 `make smoke` builds with a dedicated build directory, uploads, then records a short serial log under `.logs/`.
 On this macOS USB Serial/JTAG port, raw `stty` + `cat` captures data reliably; set `ARDUINO_CLI_MONITOR=1` to force `arduino-cli monitor`.
 
-`make visual-smoke` uploads a static high-contrast OCR screen and then captures one camera frame with `ffmpeg` before checking it with `tesseract`. Defaults:
+`make visual-smoke` uploads a static high-contrast OCR screen and then captures one camera frame with `ffmpeg` before checking it with macOS Vision OCR. Defaults:
 
 ```bash
 CAMERA_DEVICE=0
 CAMERA_SIZE=1280x720
 CAMERA_CROP="iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2"
-OCR_EXPECTED="CODEX OK"
+OCR_ROTATE=0
+DISPLAY_ROTATION=0
+OCR_EXPECTED="OK"
 OCR_ENGINE=vision
 ```
 
 Point the camera at the AMOLED before running the command. If macOS asks for camera permission, allow the terminal/Codex process and rerun.
+If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make visual-smoke` so the sketch renders OCR text upright for the camera. Use `OCR_ROTATE` only when you cannot change the displayed orientation.
 
 `make camera-aligner` opens a SwiftPM macOS camera tuning tool. Use it to:
 
 - preview the selected camera live
 - adjust the OCR crop rectangle with sliders
+- set OCR rotation for boards that appear upside down in the camera
 - see Vision OCR results update live
-- copy the generated `CAMERA_CROP` value for `make visual-smoke`
+- copy the generated `CAMERA_CROP` and `OCR_ROTATE` values for `make visual-smoke`

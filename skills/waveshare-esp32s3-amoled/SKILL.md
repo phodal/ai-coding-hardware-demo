@@ -38,8 +38,10 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 
 6. For visual display validation:
    - Upload `sketches/display_ocr_check` when the project has it.
-   - Run `scripts/visual-smoke.sh` or capture one camera frame with `ffmpeg` and OCR it with `tesseract`.
-   - Pass only if OCR sees `CODEX OK`; use the saved raw/processed images to debug focus, glare, rotation, or garbled output.
+   - If OCR framing or orientation is uncertain, run `make camera-aligner` first. Copy the generated `CAMERA_CROP='...' OCR_ROTATE=...` environment values.
+   - If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make visual-smoke` so the sketch renders upright text for OCR.
+   - Run `CAMERA_CROP='...' OCR_ROTATE=... DISPLAY_ROTATION=... make visual-smoke` to capture one camera frame with `ffmpeg` and OCR it with macOS Vision.
+   - Pass only if OCR sees `OK`; use the saved raw/processed images to debug focus, glare, rotation, or garbled output.
 
 ## Known 1.75C FQBN
 
@@ -69,6 +71,7 @@ For visual validation in this repo, prefer:
 
 ```bash
 SMOKE_SECONDS=8 ./scripts/smoke.sh
+make camera-aligner
 make visual-smoke
 ```
 

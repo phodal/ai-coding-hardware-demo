@@ -10,11 +10,17 @@ require_vendor_libraries
 
 mkdir -p "$BUILD_PATH"
 
-arduino-cli compile \
-  --clean \
-  --jobs 1 \
-  --fqbn "$ARDUINO_FQBN" \
-  --libraries "$WAVESHARE_LIBRARIES" \
-  --build-path "$BUILD_PATH" \
-  "$SKETCH"
+COMPILE_ARGS=(
+  compile
+  --clean
+  --jobs 1
+  --fqbn "$ARDUINO_FQBN"
+  --libraries "$WAVESHARE_LIBRARIES"
+  --build-path "$BUILD_PATH"
+)
 
+if [[ -n "${ARDUINO_BUILD_PROPERTY:-}" ]]; then
+  COMPILE_ARGS+=(--build-property "$ARDUINO_BUILD_PROPERTY")
+fi
+
+arduino-cli "${COMPILE_ARGS[@]}" "$SKETCH"

@@ -7,12 +7,17 @@ import SwiftUI
 struct CameraAlignerApp: App {
     @StateObject private var camera = CameraService()
 
+    init() {
+        NSApplication.shared.setActivationPolicy(.regular)
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(camera)
                 .frame(minWidth: 1120, minHeight: 760)
                 .onAppear {
+                    NSApplication.shared.activate(ignoringOtherApps: true)
                     camera.start()
                 }
                 .onDisappear {
@@ -87,7 +92,7 @@ private struct ControlPanel: View {
                         }
                         Button("Copy CAMERA_CROP") {
                             NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(camera.ffmpegCropExpression, forType: .string)
+                            NSPasteboard.general.setString(camera.exportEnvironment, forType: .string)
                         }
                     }
                 }
@@ -96,9 +101,17 @@ private struct ControlPanel: View {
 
             GroupBox("OCR") {
                 VStack(alignment: .leading, spacing: 8) {
+                    Picker("Rotate", selection: $camera.rotationDegrees) {
+                        Text("0").tag(0)
+                        Text("90").tag(90)
+                        Text("180").tag(180)
+                        Text("270").tag(270)
+                    }
+                    .pickerStyle(.segmented)
+
                     HStack {
                         Text("Expected")
-                        TextField("CODEX OK", text: $camera.expectedText)
+                        TextField("OK", text: $camera.expectedText)
                             .textFieldStyle(.roundedBorder)
                     }
 
@@ -122,10 +135,10 @@ private struct ControlPanel: View {
                     Text("CAMERA_CROP")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(camera.ffmpegCropExpression)
+                    Text(camera.exportEnvironment)
                         .font(.system(.caption, design: .monospaced))
                         .textSelection(.enabled)
-                    Text("Use it with: CAMERA_CROP='\(camera.ffmpegCropExpression)' make visual-smoke")
+                    Text("Use it with: \(camera.exportEnvironment) make visual-smoke")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -229,7 +242,8 @@ private final class CameraService: NSObject, ObservableObject, AVCaptureVideoDat
     @Published var cropW = 0.38 { didSet { clampCrop() } }
     @Published var cropH = 0.42 { didSet { clampCrop() } }
 
-    @Published var expectedText = "CODEX OK"
+    @Published var rotationDegrees = 0
+    @Published var expectedText = "OK"
     @Published private(set) var ocrText = ""
     @Published private(set) var ocrPassed = false
 
@@ -249,6 +263,10 @@ private final class CameraService: NSObject, ObservableObject, AVCaptureVideoDat
         let w = String(format: "iw*%.3f", cropW)
         let h = String(format: "ih*%.3f", cropH)
         return "\(w):\(h):\(x):\(y)"
+    }
+
+    var exportEnvironment: String {
+        "CAMERA_CROP='\(ffmpegCropExpression)' OCR_ROTATE=\(rotationDegrees)"
     }
 
     func start() {
@@ -303,11 +321,12 @@ private final class CameraService: NSObject, ObservableObject, AVCaptureVideoDat
 
         let image = CIImage(cvPixelBuffer: pixelBuffer)
         guard let cgImage = ciContext.createCGImage(image, from: image.extent),
-              let cropped = crop(image: cgImage) else {
+              let cropped = crop(image: cgImage),
+              let oriented = rotate(image: cropped, degrees: rotationDegrees) else {
             return
         }
 
-        recognizeText(in: cropped)
+        recognizeText(in: oriented)
     }
 
     private func configureSession() {
@@ -358,6 +377,22 @@ private final class CameraService: NSObject, ObservableObject, AVCaptureVideoDat
         ).integral
 
         return image.cropping(to: rect)
+    }
+
+    private func rotate(image: CGImage, degrees: Int) -> CGImage? {
+        guard degrees != 0 else {
+            return image
+        }
+
+        let ciImage = CIImage(cgImage: image)
+        let radians = CGFloat(Double(degrees) * Double.pi / 180.0)
+        let rotated = ciImage.transformed(by: CGAffineTransform(rotationAngle: radians))
+        let translated = rotated.transformed(by: CGAffineTransform(
+            translationX: -rotated.extent.origin.x,
+            y: -rotated.extent.origin.y
+        ))
+
+        return ciContext.createCGImage(translated, from: translated.extent)
     }
 
     private func recognizeText(in image: CGImage) {

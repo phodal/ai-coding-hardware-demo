@@ -9,6 +9,10 @@ Arduino_DataBus *bus = new Arduino_ESP32QSPI(
 Arduino_CO5300 *gfx = new Arduino_CO5300(
   bus, LCD_RESET, 0, LCD_WIDTH, LCD_HEIGHT, 6, 0, 0, 0);
 
+#ifndef DISPLAY_ROTATION
+#define DISPLAY_ROTATION 0
+#endif
+
 uint32_t frame = 0;
 bool displayReady = false;
 
@@ -29,9 +33,9 @@ void drawOcrScreen() {
   gfx->drawRect(8, 8, LCD_WIDTH - 16, LCD_HEIGHT - 16, RGB565_WHITE);
   gfx->drawRect(14, 14, LCD_WIDTH - 28, LCD_HEIGHT - 28, RGB565_BLUE);
 
-  centerText("CODEX", 112, 6, RGB565_WHITE);
-  centerText("OK", 210, 8, RGB565_YELLOW);
-  centerText("ESP32 S3 AMOLED", 336, 2, RGB565_CYAN);
+  centerText("OK", 112, 10, RGB565_WHITE);
+  centerText("2026", 246, 6, RGB565_YELLOW);
+  centerText("ESP32 S3 AMOLED", 362, 2, RGB565_CYAN);
 }
 
 void setup() {
@@ -53,10 +57,11 @@ void setup() {
   }
 
   gfx->setBrightness(220);
+  gfx->setRotation(DISPLAY_ROTATION);
   drawOcrScreen();
   displayReady = true;
 
-  Serial.println("display_ocr_check text=CODEX OK");
+  Serial.println("display_ocr_check text=OK 2026");
   Serial.flush();
 }
 

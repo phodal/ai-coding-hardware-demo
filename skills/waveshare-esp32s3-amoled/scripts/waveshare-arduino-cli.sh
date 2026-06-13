@@ -11,6 +11,17 @@ case "$ACTION" in
       exec "$PROJECT_DIR/scripts/$ACTION.sh"
     fi
     ;;
+  visual-smoke)
+    if [[ -x "$PROJECT_DIR/scripts/visual-smoke.sh" ]]; then
+      exec "$PROJECT_DIR/scripts/visual-smoke.sh"
+    fi
+    ;;
+  camera-aligner)
+    if [[ -f "$PROJECT_DIR/Package.swift" ]]; then
+      cd "$PROJECT_DIR"
+      exec swift run CameraAligner
+    fi
+    ;;
 esac
 
 CORE_VERSION="${ARDUINO_CORE_VERSION:-3.3.5}"
@@ -103,8 +114,16 @@ case "$ACTION" in
     stty -f "$PORT" "${MONITOR_BAUD:-115200}" cs8 -cstopb -parenb -ixon -ixoff -echo
     exec cat "$PORT"
     ;;
+  visual-smoke)
+    echo "No project visual smoke script found. Use a project that provides scripts/visual-smoke.sh." >&2
+    exit 2
+    ;;
+  camera-aligner)
+    echo "No SwiftPM CameraAligner found. Use this action from a repo with Package.swift." >&2
+    exit 2
+    ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke} [project-dir]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|visual-smoke|camera-aligner} [project-dir]" >&2
     exit 2
     ;;
 esac
