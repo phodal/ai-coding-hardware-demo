@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT_DIR/scripts/arduino-env.sh"
 
 if ! command -v ffmpeg >/dev/null 2>&1; then
-  echo "ffmpeg is required for camera capture." >&2
+  echo "ffmpeg is required for image processing." >&2
   exit 1
 fi
 
@@ -25,6 +25,8 @@ OCR_EXPECTED="${OCR_EXPECTED:-OK}"
 OCR_LANG="${OCR_LANG:-eng}"
 OCR_ENGINE="${OCR_ENGINE:-vision}"
 CAMERA_CAPTURE_TIMEOUT="${CAMERA_CAPTURE_TIMEOUT:-15}"
+CAMERA_CAPTURE_ENGINE="${CAMERA_CAPTURE_ENGINE:-auto}"
+CAMERA_SNAPSHOT_FORMAT="${CAMERA_SNAPSHOT_FORMAT:-jpeg}"
 
 mkdir -p "$LOG_DIR"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -32,21 +34,60 @@ RAW_IMAGE="$LOG_DIR/camera-ocr-$STAMP.jpg"
 PROCESSED_IMAGE="$LOG_DIR/camera-ocr-$STAMP.processed.png"
 OCR_TEXT_FILE="$LOG_DIR/camera-ocr-$STAMP.txt"
 
-echo "Capturing camera device $CAMERA_DEVICE at $CAMERA_SIZE ($CAMERA_PIXEL_FORMAT) -> $RAW_IMAGE"
+capture_with_swift() {
+  if ! command -v swift >/dev/null 2>&1; then
+    return 127
+  fi
+  echo "Capturing camera device $CAMERA_DEVICE via CameraSnapshot at $CAMERA_SIZE -> $RAW_IMAGE"
+  swift run --package-path "$ROOT_DIR" CameraSnapshot \
+    --device "$CAMERA_DEVICE" \
+    --output "$RAW_IMAGE" \
+    --timeout "$CAMERA_CAPTURE_TIMEOUT" \
+    --size "$CAMERA_SIZE" \
+    --format "$CAMERA_SNAPSHOT_FORMAT"
+}
 
-if ! perl -e 'alarm shift; exec @ARGV' "$CAMERA_CAPTURE_TIMEOUT" ffmpeg \
-  -hide_banner \
-  -loglevel error \
-  -f avfoundation \
-  -framerate 30 \
-  -pixel_format "$CAMERA_PIXEL_FORMAT" \
-  -video_size "$CAMERA_SIZE" \
-  -i "$CAMERA_DEVICE:none" \
-  -frames:v 1 \
-  -y "$RAW_IMAGE"; then
-  echo "Camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
-  exit 124
-fi
+capture_with_ffmpeg() {
+  echo "Capturing camera device $CAMERA_DEVICE via ffmpeg at $CAMERA_SIZE ($CAMERA_PIXEL_FORMAT) -> $RAW_IMAGE"
+  perl -e 'alarm shift; exec @ARGV' "$CAMERA_CAPTURE_TIMEOUT" ffmpeg \
+    -hide_banner \
+    -loglevel error \
+    -f avfoundation \
+    -framerate 30 \
+    -pixel_format "$CAMERA_PIXEL_FORMAT" \
+    -video_size "$CAMERA_SIZE" \
+    -i "$CAMERA_DEVICE:none" \
+    -frames:v 1 \
+    -y "$RAW_IMAGE"
+}
+
+case "$CAMERA_CAPTURE_ENGINE" in
+  auto)
+    if ! capture_with_swift; then
+      echo "Swift camera capture failed; falling back to ffmpeg." >&2
+      if ! capture_with_ffmpeg; then
+        echo "Camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
+        exit 124
+      fi
+    fi
+    ;;
+  swift)
+    if ! capture_with_swift; then
+      echo "Swift camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
+      exit 124
+    fi
+    ;;
+  ffmpeg)
+    if ! capture_with_ffmpeg; then
+      echo "ffmpeg camera capture failed or timed out after ${CAMERA_CAPTURE_TIMEOUT}s." >&2
+      exit 124
+    fi
+    ;;
+  *)
+    echo "CAMERA_CAPTURE_ENGINE must be one of: auto, swift, ffmpeg" >&2
+    exit 2
+    ;;
+esac
 
 if [[ ! -s "$RAW_IMAGE" ]]; then
   echo "Camera capture did not produce an image: $RAW_IMAGE" >&2
@@ -110,6 +151,7 @@ echo "  text:      $OCR_TEXT_FILE"
 echo "  crop:      $CAMERA_CROP"
 echo "  rotate:    $OCR_ROTATE"
 echo "  engine:    $OCR_ENGINE"
+echo "  capture:   $CAMERA_CAPTURE_ENGINE"
 
 if [[ "$NORMALIZED_TEXT" == *"$NORMALIZED_EXPECTED"* ]]; then
   echo "OCR validation passed."

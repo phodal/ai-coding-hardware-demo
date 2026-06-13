@@ -19,6 +19,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Camera OCR is sensitive to orientation, focus, glare, and pixel font shape. Use `make camera-aligner` and keep validation text large and simple.
 - Vision OCR can misread `AI OK` as `HI OK`; use serial to verify the full payload and OCR a stable subset such as `OK`.
 - Camera capture has a `CAMERA_CAPTURE_TIMEOUT` guard. If ffmpeg times out before saving a frame, treat it as host camera availability/ownership first, not as board display failure.
+- Use `make camera-diagnose` when OCR capture fails. It records system camera inventory, Swift AVFoundation device status, related camera processes, and video-only capture probes without touching audio input.
 - `pyserial` is not installed in the current Python, so host relay tools should use stdlib `termios` or document their dependency explicitly.
 - Python `audioop` is not available in the current Python, so WAV analysis should use explicit PCM byte parsing or a documented dependency.
 - ESP-IDF is not currently sourced in this shell, so XiaoZhi source builds can only be checked up to board configuration until `idf.py` is available.

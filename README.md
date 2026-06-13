@@ -28,6 +28,7 @@ make monitor
 make smoke
 make visual-smoke
 make camera-aligner
+make camera-diagnose
 make official-demos
 make official-build DEMO=01-helloworld
 make official-smoke DEMO=01-helloworld
@@ -46,6 +47,7 @@ On this macOS USB Serial/JTAG port, raw `stty` + `cat` captures data reliably; s
 `make visual-smoke` uploads a static high-contrast OCR screen and then captures one camera frame with `ffmpeg` before checking it with macOS Vision OCR. Defaults:
 
 ```bash
+CAMERA_CAPTURE_ENGINE=auto
 CAMERA_DEVICE=0
 CAMERA_SIZE=1280x720
 CAMERA_CROP="iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2"
@@ -58,7 +60,7 @@ CAMERA_CAPTURE_TIMEOUT=15
 
 Point the camera at the AMOLED before running the command. If macOS asks for camera permission, allow the terminal/Codex process and rerun.
 If the board appears upside down in the camera, prefer `DISPLAY_ROTATION=2 make visual-smoke` so the sketch renders OCR text upright for the camera. Use `OCR_ROTATE` only when you cannot change the displayed orientation.
-Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearly instead of hanging when the selected camera device is unavailable or already owned by another app.
+Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearly instead of hanging when the selected camera device is unavailable or already owned by another app. `CAMERA_CAPTURE_ENGINE=auto` prefers the SwiftPM `CameraSnapshot` tool and falls back to ffmpeg.
 
 `make camera-aligner` opens a SwiftPM macOS camera tuning tool. Use it to:
 
@@ -67,6 +69,8 @@ Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearl
 - set OCR rotation for boards that appear upside down in the camera
 - see Vision OCR results update live
 - copy the generated `CAMERA_CROP` and `OCR_ROTATE` values for `make visual-smoke`
+
+`make camera-diagnose` writes a bounded diagnostic bundle under `.logs/camera-diagnose-*` with macOS camera inventory, Swift device status, camera-related processes, and optional Swift/ffmpeg video-only capture probes.
 
 `make official-demos` lists the Waveshare official Arduino examples tracked in `config/official-demos.tsv`.
 Use `make official-build DEMO=<id>` for compile-only validation, and `make official-smoke DEMO=<id>` to upload a vendor demo and verify its expected serial output. Start with `DEMO=01-helloworld`, then move through PMU, IMU, LVGL, and audio demos.
