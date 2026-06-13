@@ -25,6 +25,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - ESP-IDF is not currently sourced in this shell, so XiaoZhi source builds can only be checked up to board configuration until `idf.py` is available.
 - PMU validation should not require a nonzero battery voltage because the battery connector may be unused; gate on system voltage and use battery voltage as supporting evidence.
 - Power lifecycle validation should not require a connected battery by default. `power-lifecycle-smoke` uses serial-preserving DIM/STANDBY/ACTIVE states, so it proves firmware power-control behavior without claiming true ESP32 deep sleep or measured current draw.
+- Wi-Fi validation should be scan-only by default. Do not hard-code or commit SSIDs/passwords; use `WIFI_TEST_SSID` and `WIFI_TEST_PASSWORD` only for supervised local join checks.
 - Touch validation has two levels: default `touch-status-smoke` proves the CST9217 controller is online, while `TOUCH_REQUIRE_EVENT=1` requires a supervised human tap.
 
 ## Cloud AI Terminal Direction
@@ -44,6 +45,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - The LVGL visual-agent harness is the preferred P1 touch UI / visual-agent slice. It uses real LVGL widgets and a serial protocol for chat bubbles, cards, settings, and agent thoughts, so UI behavior can be tested without network or audio dependencies.
 - The desk widget is the first P1 desktop-widget slice. It is intentionally serial-driven before direct Wi-Fi integrations, so CI/GitHub/calendar/LLM relays can be validated without credentials or audio devices.
 - The IoT control panel is the first P1 Home Assistant/MQTT/HTTP slice. Keep it serial-driven until the UI/state model is stable, then bridge real network events through the same protocol before moving logic fully onto Wi-Fi firmware.
+- The Wi-Fi connectivity probe is the network hardware gate for Cloud AI, desktop widget, and IoT work. Prefer it before debugging HTTP/MQTT application logic, and avoid logging nearby SSID names unless the user explicitly needs that evidence.
 - The offline voice-control harness is a P1 non-audio gate for WakeNet/MultiNet behavior. Preserve the serial `WAKE:` and `CMD:` simulation path when adding real ESP-SR audio so late-night validation can still prove the command state machine without microphone or speaker use.
 - The TinyML IMU classifier is a P2 model-automation scaffold. Keep deterministic serial `SAMPLE:` vectors as the Skill-facing acceptance path even after replacing the embedded rule classifier with ESP-DL or a trained model.
 - The ESP-Claw/OpenClaw agent harness is a P2 compatibility scaffold, not the official ESP-Claw firmware. Preserve the serial `RULE:ADD` plus `EVENT` gate so Skill automation can prove sense/reason/decide/act behavior without IM credentials, Wi-Fi, camera, or audio.

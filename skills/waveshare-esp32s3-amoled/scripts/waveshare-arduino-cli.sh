@@ -24,6 +24,7 @@ case "$ACTION" in
       make speaker-output-build
       make sensor-status-build
       make power-lifecycle-build
+      make wifi-connectivity-build
       make touch-status-build
       make interaction-dashboard-build
       make lvgl-visual-agent-build
@@ -167,6 +168,25 @@ case "$ACTION" in
           ;;
         check)
           exec python3 "$PROJECT_DIR/scripts/power-lifecycle-check.py" "${EXTRA_ARGS[@]:1}"
+          ;;
+      esac
+    fi
+    ;;
+  wifi-connectivity)
+    if [[ -x "$PROJECT_DIR/scripts/wifi-connectivity-smoke.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/wifi-connectivity-smoke.sh"
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        build)
+          cd "$PROJECT_DIR"
+          exec make wifi-connectivity-build
+          ;;
+        smoke)
+          exec "$PROJECT_DIR/scripts/wifi-connectivity-smoke.sh"
+          ;;
+        check)
+          exec python3 "$PROJECT_DIR/scripts/wifi-connectivity-check.py" "${EXTRA_ARGS[@]:1}"
           ;;
       esac
     fi
@@ -458,6 +478,10 @@ case "$ACTION" in
     echo "No project power lifecycle runner found. Use a project that provides scripts/power-lifecycle-smoke.sh." >&2
     exit 2
     ;;
+  wifi-connectivity)
+    echo "No project Wi-Fi connectivity runner found. Use a project that provides scripts/wifi-connectivity-smoke.sh." >&2
+    exit 2
+    ;;
   touch-status)
     echo "No project touch status runner found. Use a project that provides scripts/touch-status-smoke.sh." >&2
     exit 2
@@ -491,7 +515,7 @@ case "$ACTION" in
     exit 2
     ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|power-lifecycle|touch-status|interaction-dashboard|lvgl-visual-agent|desk-widget|iot-panel|offline-voice|tinyml-imu|esp-claw-agent} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|power-lifecycle|wifi-connectivity|touch-status|interaction-dashboard|lvgl-visual-agent|desk-widget|iot-panel|offline-voice|tinyml-imu|esp-claw-agent} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac
