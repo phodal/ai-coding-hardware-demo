@@ -111,6 +111,8 @@ make speaker-output-build
 make speaker-output-smoke
 make sensor-status-build
 make sensor-status-smoke
+make power-lifecycle-build
+make power-lifecycle-smoke
 make touch-status-build
 make touch-status-smoke
 make interaction-dashboard-build
@@ -136,6 +138,8 @@ make lvgl-visual-agent-smoke
 `make speaker-output-smoke` uploads the ES8311 speaker probe, sends `PLAY` over serial, records the board output through a host microphone, and validates the active audio window against baseline energy. Use `SPEAKER_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make speaker-output-smoke` when camera OCR should also verify `SPK OK`; details are in `docs/p0-speaker-output-probe.md`. Avoid running audible audio smokes late at night unless explicitly requested.
 
 `make sensor-status-smoke` uploads the AXP2101 + QMI8658 probe and validates PMU/IMU serial metrics without using any audio device. Use `SENSOR_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make sensor-status-smoke` when camera OCR should also verify `SENS OK`; details are in `docs/p1-sensor-status-probe.md`.
+
+`make power-lifecycle-smoke` uploads the AXP2101 power lifecycle probe and validates DIM, STANDBY, ACTIVE, brightness, capacity, load profile, wake, and runtime-estimate serial behavior without using audio devices. The default smoke does not require a connected battery because the battery connector may be unused; set `POWER_REQUIRE_BATTERY=1` only when a battery is connected. The automated standby keeps USB serial alive instead of entering true deep sleep; details are in `docs/p1-power-lifecycle-probe.md`.
 
 `make touch-status-smoke` uploads the CST9217 touch-controller probe and validates that the controller is online. Use `TOUCH_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make touch-status-smoke` for camera OCR, or `TOUCH_REQUIRE_EVENT=1 make touch-status-smoke` when a human can tap the screen during the smoke window; details are in `docs/p1-touch-status-probe.md`.
 

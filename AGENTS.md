@@ -24,6 +24,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Python `audioop` is not available in the current Python, so WAV analysis should use explicit PCM byte parsing or a documented dependency.
 - ESP-IDF is not currently sourced in this shell, so XiaoZhi source builds can only be checked up to board configuration until `idf.py` is available.
 - PMU validation should not require a nonzero battery voltage because the battery connector may be unused; gate on system voltage and use battery voltage as supporting evidence.
+- Power lifecycle validation should not require a connected battery by default. `power-lifecycle-smoke` uses serial-preserving DIM/STANDBY/ACTIVE states, so it proves firmware power-control behavior without claiming true ESP32 deep sleep or measured current draw.
 - Touch validation has two levels: default `touch-status-smoke` proves the CST9217 controller is online, while `TOUCH_REQUIRE_EVENT=1` requires a supervised human tap.
 
 ## Cloud AI Terminal Direction
@@ -34,6 +35,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - On the current desk setup, macOS `say` produced a clear ES7210 signal delta but did not trigger ESP-SR VAD; this is acceptable for the microphone data-flow gate but not for a wake-word or speech-command gate.
 - ES8311 playback now has a board-generated tone probe and a host microphone gate. Treat the current gate as physical output evidence, not as proof of TTS quality or frequency accuracy.
 - AXP2101 + QMI8658 now have a silent sensor-status probe. A stationary board should report accelerometer magnitude near 1 g; use the wider default range only as a smoke gate.
+- The power lifecycle probe is the preferred P1 battery/low-power control gate. Keep its default path silent and serial-driven; only enable `POWER_REQUIRE_BATTERY=1` when a battery is physically connected.
 - CST9217 touch now has a silent controller-online probe. Do not claim end-to-end touch UX without either the official LVGL widgets pass or a `TOUCH_REQUIRE_EVENT=1` manual tap pass.
 - The LVGL visual-agent harness is the repo-owned proof for LVGL UI beyond vendor examples. Prefer it when validating chat/card/settings UI behavior; keep the official `05-lvgl-widgets` demo as the vendor baseline.
 - The interaction dashboard is the preferred combined non-audio app smoke. It verifies display, touch-controller presence, PMU, and IMU through serial page switching plus optional OCR, without requiring a human tap or using any audio device.
