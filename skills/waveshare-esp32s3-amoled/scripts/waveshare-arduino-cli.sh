@@ -66,6 +66,25 @@ case "$ACTION" in
       esac
     fi
     ;;
+  hardware-evidence)
+    if [[ -x "$PROJECT_DIR/scripts/hardware-evidence-audit.py" ]]; then
+      cd "$PROJECT_DIR"
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec make hardware-evidence-audit
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        audit)
+          exec make hardware-evidence-audit
+          ;;
+        doc)
+          exec make hardware-evidence-doc
+          ;;
+        markdown)
+          exec python3 "$PROJECT_DIR/scripts/hardware-evidence-audit.py" --markdown
+          ;;
+      esac
+    fi
+    ;;
   hardware-smoke-suite)
     if [[ -x "$PROJECT_DIR/scripts/hardware-smoke-suite.py" ]]; then
       cd "$PROJECT_DIR"

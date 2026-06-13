@@ -45,3 +45,11 @@ The smoke script uploads the sketch, waits for `TINYML_READY`, disables live mod
 - The current classifier is intentionally simple and embedded: acceleration orientation rules plus gyroscope and acceleration magnitude gates.
 - Keep the serial sample path when replacing the classifier. It gives the Skill a deterministic way to validate model behavior without camera positioning or physical movement.
 - This path is safe for late-night validation because it does not play audio or use the host microphone.
+
+## Verified Locally
+
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets esp-claw-agent,tinyml-imu --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `tinyml-imu-smoke` on `/dev/cu.usbmodem83101`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-044424/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-044424/tinyml-imu.log`.
+- Observed build size: `438763 bytes` program storage and `23048 bytes` dynamic memory.
+- Observed summary: `tinyml_imu_summary classifications=4 labels=REST,TILT_LEFT,TILT_RIGHT,SHAKE min_confidence=0.823`.

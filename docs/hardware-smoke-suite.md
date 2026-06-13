@@ -9,6 +9,7 @@ It exists to keep board validation deterministic:
 - It defaults to non-audio lanes only: `audio_mode=none` and `audio_mode=non_audio_control`.
 - It skips `audio`, `conditional`, and `required_external` lanes unless explicitly allowed.
 - It forces `*_VISUAL_SMOKE=0` by default so a suite run does not depend on camera framing. Use `--with-visual` only when the camera is positioned.
+- Use `--skip-build` only when the relevant `.arduino-build/<name>` artifacts already exist. If upload reports a missing `*.partitions.bin`, rerun that target without `--skip-build`.
 
 ## Commands
 

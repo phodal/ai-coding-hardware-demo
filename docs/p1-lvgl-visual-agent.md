@@ -47,3 +47,10 @@ The smoke script uploads the sketch, waits for `VIS_READY`, validates LVGL capab
 
 - This is the preferred repo-owned LVGL app surface. The official `05-lvgl-widgets` demo remains the vendor baseline, while this sketch validates an agent-specific workflow under automation.
 - This path is safe for late-night validation because it does not play audio or use the host microphone.
+
+## Verified Locally
+
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets offline-voice,lvgl-visual-agent,power-lifecycle,esp-claw-agent,tinyml-imu --skip-build --per-target-timeout 240 --max-failures 1"`: uploaded `lvgl-visual-agent-smoke` to `/dev/cu.usbmodem83101` and passed the LVGL agent UI flow.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-044244/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-044244/lvgl-visual-agent.log`.
+- Observed summary: `lvgl_visual_agent_summary states=18 page_flow=CHAT,CARDS,SETTINGS,CHAT chat=1 cards=2 settings=2 agent=1 commands=13`.

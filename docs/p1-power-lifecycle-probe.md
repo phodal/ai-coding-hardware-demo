@@ -54,3 +54,10 @@ The host checker drives:
 ## Notes
 
 The automated `STANDBY` mode dims the display to zero while keeping USB serial alive. It is not a true ESP32 deep-sleep proof. A future true low-power pass should use reset/wake evidence and a separate current measurement path because deep sleep can intentionally disconnect the serial session.
+
+## Verified Locally
+
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets offline-voice,lvgl-visual-agent,power-lifecycle,esp-claw-agent,tinyml-imu --skip-build --per-target-timeout 240 --max-failures 1"`: uploaded `power-lifecycle-smoke` to `/dev/cu.usbmodem83101` and passed the AXP2101 lifecycle gate.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-044244/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-044244/power-lifecycle.log`.
+- Observed summary: `power_lifecycle_summary modes=ACTIVE,DIM,STANDBY system_mv=4306 vbus_mv=5166 batt_mv=4078 battery_connected=1 estimate_min=166 mode_changes=3 wake_count=1`.

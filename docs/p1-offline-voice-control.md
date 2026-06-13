@@ -54,3 +54,10 @@ The smoke script uploads the harness, sends `WAKE:` and `CMD:` events, validates
 
 - This is not yet a real ESP-SR audio pipeline. It is the deterministic control-plane gate that should remain after ES7210 microphone frames and ESP-SR models are wired in.
 - Do not run microphone stimulus or speaker tests late at night. This harness is safe because it uses serial-only WakeNet/MultiNet simulation.
+
+## Verified Locally
+
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets offline-voice,lvgl-visual-agent,power-lifecycle,esp-claw-agent,tinyml-imu --skip-build --per-target-timeout 240 --max-failures 1"`: uploaded `offline-voice-smoke` to `/dev/cu.usbmodem83101` and passed the offline voice-control state machine.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-044244/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-044244/offline-voice.log`.
+- Observed summary: `offline_voice_summary states=3 page_flow=COMMANDS,STATE,LOG,HOME commands=5 recognized=5 rejected=1 actions=5 mode=CONTINUOUS light=0 asleep=0`.

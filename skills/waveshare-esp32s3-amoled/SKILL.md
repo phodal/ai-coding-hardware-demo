@@ -54,6 +54,8 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 8. For feature coverage auditing:
    - Run `make feature-matrix-check` to verify all 12 requested feature directions have matching Makefile targets, scripts/sketches, docs, and Skill helper wiring.
    - Run `make feature-matrix-doc` after changing `config/feature-matrix.tsv` to regenerate `docs/hardware-verification-matrix.md`.
+   - Run `make hardware-evidence-audit` to identify lanes with missing `Verified Locally` sections or missing smoke-suite evidence.
+   - Run `make hardware-evidence-doc` to regenerate `docs/hardware-evidence-audit.md`.
    - Run `make hardware-smoke-list` to inspect the default serialized non-audio smoke selection.
    - Run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target <id>"` for a narrow serialized hardware lane; the default suite skips audio, conditional, and external lanes.
    - Treat matrix status values as coverage metadata, not proof that a partial or external feature is complete.
@@ -224,6 +226,8 @@ make camera-aligner
 make camera-diagnose
 make feature-matrix-check
 make feature-matrix-doc
+make hardware-evidence-audit
+make hardware-evidence-doc
 make hardware-smoke-list
 make hardware-smoke-suite
 make visual-smoke

@@ -54,3 +54,11 @@ The smoke script uploads the harness, adds a deterministic rule, emits events, c
 - This is a control-plane harness, not the final ESP-Claw firmware image.
 - Keep the deterministic serial rule/event path even after adding real ESP-Claw source builds. It gives the Skill a stable hardware smoke independent of IM credentials, cloud LLM keys, Wi-Fi, and camera positioning.
 - This path is safe for late-night validation because it does not play audio or use the host microphone.
+
+## Verified Locally
+
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets esp-claw-agent,tinyml-imu --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed `esp-claw-agent-smoke` on `/dev/cu.usbmodem83101`.
+- Latest suite summary: `.logs/hardware-smoke-suite/20260614-044424/summary.json`.
+- Latest target log: `.logs/hardware-smoke-suite/20260614-044424/esp-claw-agent.log`.
+- Observed build size: `437991 bytes` program storage and `23872 bytes` dynamic memory.
+- Observed summary: `esp_claw_agent_summary states=3 page_flow=RULES,MCP,MEMORY,HOME rules=4 events=3 actions=4 mcp=1 chats=1 memory=1 latest_action=LLM:REQUEST`.

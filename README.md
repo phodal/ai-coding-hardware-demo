@@ -30,6 +30,8 @@ make visual-smoke
 make camera-aligner
 make camera-diagnose
 make feature-matrix-check
+make hardware-evidence-audit
+make hardware-evidence-doc
 make hardware-smoke-list
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 make official-demos
@@ -76,6 +78,8 @@ Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT` so automation fails clearl
 `make camera-diagnose` writes a bounded diagnostic bundle under `.logs/camera-diagnose-*` with macOS camera inventory, Swift device status, camera-related processes, and optional Swift/ffmpeg video-only capture probes.
 
 `make feature-matrix-check` verifies that each requested feature direction has matching Makefile, script/sketch, documentation, and Skill helper coverage. `make feature-matrix-doc` regenerates `docs/hardware-verification-matrix.md`.
+
+`make hardware-evidence-audit` reports which feature lanes have documented verification evidence and latest smoke-suite evidence. `make hardware-evidence-doc` regenerates `docs/hardware-evidence-audit.md`.
 
 `make hardware-smoke-list` shows which feature smokes are selected by the default non-audio suite. `make hardware-smoke-suite` runs those selected smokes serially and writes logs under `.logs/hardware-smoke-suite/`; pass `HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"` for a narrow lane. Details are in `docs/hardware-smoke-suite.md`.
 
@@ -145,6 +149,8 @@ make offline-voice-build
 make offline-voice-smoke
 make lvgl-visual-agent-build
 make lvgl-visual-agent-smoke
+make hardware-evidence-audit
+make hardware-evidence-doc
 make hardware-smoke-list
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 ```
