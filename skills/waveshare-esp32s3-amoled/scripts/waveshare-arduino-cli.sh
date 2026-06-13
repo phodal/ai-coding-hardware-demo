@@ -25,6 +25,7 @@ case "$ACTION" in
       make sensor-status-build
       make touch-status-build
       make interaction-dashboard-build
+      make desk-widget-build
       exit 0
     fi
     ;;
@@ -179,6 +180,25 @@ case "$ACTION" in
       esac
     fi
     ;;
+  desk-widget)
+    if [[ -x "$PROJECT_DIR/scripts/desk-widget-smoke.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/desk-widget-smoke.sh"
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        build)
+          cd "$PROJECT_DIR"
+          exec make desk-widget-build
+          ;;
+        smoke)
+          exec "$PROJECT_DIR/scripts/desk-widget-smoke.sh"
+          ;;
+        check)
+          exec python3 "$PROJECT_DIR/scripts/desk-widget-check.py" "${EXTRA_ARGS[@]:1}"
+          ;;
+      esac
+    fi
+    ;;
 esac
 
 CORE_VERSION="${ARDUINO_CORE_VERSION:-3.3.5}"
@@ -318,8 +338,12 @@ case "$ACTION" in
     echo "No project interaction dashboard runner found. Use a project that provides scripts/interaction-dashboard-smoke.sh." >&2
     exit 2
     ;;
+  desk-widget)
+    echo "No project desk widget runner found. Use a project that provides scripts/desk-widget-smoke.sh." >&2
+    exit 2
+    ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|touch-status|interaction-dashboard} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|camera-aligner|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|touch-status|interaction-dashboard|desk-widget} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac

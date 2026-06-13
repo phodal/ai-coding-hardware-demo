@@ -95,8 +95,14 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Use `INTERACTION_DASHBOARD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make interaction-dashboard-smoke` when camera OCR should verify the final dashboard page reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-15. For Skill automation wiring:
-   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile `cloud_ai_terminal`, `audio_vad_probe`, `speaker_output_probe`, `sensor_status_probe`, `touch_status_probe`, and `interaction_dashboard`.
+15. For desktop AI widget validation:
+   - Run `make desk-widget-build` to compile the serial-driven desktop widget.
+   - Run `make desk-widget-smoke` to upload it and validate CI/GitHub/alert/timer/AI-summary pages without network credentials.
+   - Use `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make desk-widget-smoke` when camera OCR should verify the screen reaches `OK`.
+   - This path is safe for late-night validation because it does not play audio or use the host microphone.
+
+16. For Skill automation wiring:
+   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile `cloud_ai_terminal`, `audio_vad_probe`, `speaker_output_probe`, `sensor_status_probe`, `touch_status_probe`, `interaction_dashboard`, and `desk_widget`.
    - `verify`/`doctor` is intentionally compile-only; it does not upload firmware or run camera OCR.
    - Run explicit hardware smokes when the user wants board validation:
      `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> smoke`
@@ -104,8 +110,9 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
      `SPEAKER_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh speaker-output <project-dir> smoke`
      `SENSOR_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh sensor-status <project-dir> smoke`
      `TOUCH_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh touch-status <project-dir> smoke`
+     `INTERACTION_DASHBOARD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh interaction-dashboard <project-dir> smoke`
      and
-     `INTERACTION_DASHBOARD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh interaction-dashboard <project-dir> smoke`.
+     `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh desk-widget <project-dir> smoke`.
 
 ## Known 1.75C FQBN
 
@@ -156,6 +163,8 @@ make touch-status-build
 make touch-status-smoke
 make interaction-dashboard-build
 make interaction-dashboard-smoke
+make desk-widget-build
+make desk-widget-smoke
 /Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh verify /path/to/project
 ```
 

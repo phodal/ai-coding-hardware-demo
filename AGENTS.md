@@ -37,6 +37,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - CST9217 touch now has a silent controller-online probe. Do not claim end-to-end touch UX without either the official LVGL widgets pass or a `TOUCH_REQUIRE_EVENT=1` manual tap pass.
 - The interaction dashboard is the preferred combined non-audio app smoke. It verifies display, touch-controller presence, PMU, and IMU through serial page switching plus optional OCR, without requiring a human tap or using any audio device.
 - The interaction dashboard also has first-pass P1 behavior for IMU gestures and power management. Default automation uses serial-simulated gestures and power commands for determinism; real physical shake evidence should be reported separately as `DASH_GESTURE source=imu`.
+- The desk widget is the first P1 desktop-widget slice. It is intentionally serial-driven before direct Wi-Fi integrations, so CI/GitHub/calendar/LLM relays can be validated without credentials or audio devices.
 
 ## Feature Push README Hook
 
