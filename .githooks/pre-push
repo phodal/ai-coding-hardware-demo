@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+PUSH_SPEC_FILE="$(mktemp)"
+trap 'rm -f "$PUSH_SPEC_FILE"' EXIT
+
+cat >"$PUSH_SPEC_FILE"
+
+"$ROOT_DIR/scripts/update-readme-for-feat-push.sh" "$PUSH_SPEC_FILE"
