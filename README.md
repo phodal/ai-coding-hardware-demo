@@ -128,9 +128,11 @@ The source route uses `make xiaozhi-idf-env`, `make xiaozhi-idf-build`, `scripts
 
 ```bash
 make install-hooks
+make hook-smoke
 ```
 
 The versioned `pre-push` hook detects outgoing push refs or commit subjects that include `feat`. When it finds one, it updates the generated Feature Push Notes block in this README and stops the push so the README change can be reviewed and committed before pushing again.
+`make hook-smoke` validates that behavior in a temporary git worktree without modifying the current checkout.
 
 ## Cloud AI Terminal Commands
 

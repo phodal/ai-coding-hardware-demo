@@ -74,6 +74,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 ## Feature Push README Hook
 
 - This repo uses `.githooks/pre-push`; install it with `make install-hooks` or `git config core.hooksPath .githooks`.
+- Run `make hook-smoke` after changing `.githooks/pre-push`, `scripts/update-readme-for-feat-push.sh`, or the generated README marker block. It validates both the no-op and feat-triggered paths in a temporary worktree.
 - When an outgoing push ref or commit subject includes `feat`, the hook must update the generated `README.md` section between `<!-- feat-push-readme:start -->` and `<!-- feat-push-readme:end -->`.
 - Because a pre-push hook cannot add a newly modified `README.md` to the already prepared push, the hook intentionally stops that push after updating the file. Commit the README change, then push again.
 - AI agents changing feature behavior should keep `README.md` current before committing, and should not remove the generated marker block unless they also replace the hook behavior.
