@@ -16,6 +16,7 @@ private struct Options {
     var exposureBias: Float?
     var exposurePoint: CGPoint?
     var focusPoint: CGPoint?
+    var verbose = false
 }
 
 private enum SnapshotError: Error, CustomStringConvertible {
@@ -25,7 +26,7 @@ private enum SnapshotError: Error, CustomStringConvertible {
     case deviceNotFound(String)
     case cannotAddInput
     case cannotAddOutput
-    case timedOut
+    case timedOut(String)
     case invalidImage
     case invalidPoint(String)
     case saveFailed(String)
@@ -44,8 +45,8 @@ private enum SnapshotError: Error, CustomStringConvertible {
             return "Could not add the selected camera as an AVCapture input."
         case .cannotAddOutput:
             return "Could not add video frame output to the capture session."
-        case .timedOut:
-            return "Timed out before a camera frame was captured."
+        case .timedOut(let diagnostics):
+            return "Timed out before a camera frame was captured. \(diagnostics)"
         case .invalidImage:
             return "Captured frame could not be converted to an image."
         case .invalidPoint(let value):
@@ -140,6 +141,8 @@ private struct CameraSnapshot {
                 index += 1
                 guard index < arguments.count else { throw SnapshotError.usage("Missing value for --focus-point.") }
                 options.focusPoint = try parseNormalizedPoint(arguments[index])
+            case "--verbose":
+                options.verbose = true
             case "--help", "-h":
                 printUsage()
                 exit(0)
@@ -167,7 +170,7 @@ private struct CameraSnapshot {
         print("""
         Usage:
           CameraSnapshot --list
-          CameraSnapshot --device 0 --output /tmp/frame.jpg [--timeout 10] [--size 1280x720]
+          CameraSnapshot --device 0 --output /tmp/frame.jpg [--timeout 10] [--size 1280x720] [--verbose]
 
         Device can be a numeric index, uniqueID, or localized name substring.
         On macOS, prefer --exposure-point 0.5,0.5 for bright OLED/AMOLED targets.
@@ -271,6 +274,9 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
     private let semaphore = DispatchSemaphore(value: 0)
     private let ciContext = CIContext()
     private var frameCount = 0
+    private var dropCount = 0
+    private var lastDropReason = "none"
+    private var activePreset: AVCaptureSession.Preset?
     private var capturedImage: CGImage?
     private var captureError: Error?
 
@@ -282,7 +288,9 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
     func capture() throws -> CGImage {
         try configureSession()
+        log("starting_session device=\(deviceSummary())")
         session.startRunning()
+        log("session_started running=\(session.isRunning)")
         defer {
             session.stopRunning()
         }
@@ -297,7 +305,7 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
         }
         guard signaled else {
-            throw SnapshotError.timedOut
+            throw SnapshotError.timedOut(captureSummary())
         }
         if let captureError {
             throw captureError
@@ -320,7 +328,13 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
         output.setSampleBufferDelegate(self, queue: queue)
 
         session.beginConfiguration()
-        session.sessionPreset = preset(for: options.size)
+        let requestedPreset = preset(for: options.size)
+        activePreset = requestedPreset
+        if session.canSetSessionPreset(requestedPreset) {
+            session.sessionPreset = requestedPreset
+        } else {
+            log("session_preset_unsupported requested=\(requestedPreset.rawValue) size=\(options.size)")
+        }
         session.inputs.forEach { session.removeInput($0) }
         session.outputs.forEach { session.removeOutput($0) }
 
@@ -336,6 +350,13 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
         session.addOutput(output)
         session.commitConfiguration()
+        log(
+            "session_configured preset=\(session.sessionPreset.rawValue)"
+                + " requested_size=\(options.size)"
+                + " inputs=\(session.inputs.count)"
+                + " outputs=\(session.outputs.count)"
+                + " active_format=\(activeFormatSummary())"
+        )
     }
 
     private func configureDevice() throws {
@@ -383,6 +404,9 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
         frameCount += 1
+        if frameCount == 1 {
+            log("first_frame_received warmup_frames=\(options.warmupFrames)")
+        }
         guard frameCount > options.warmupFrames else {
             return
         }
@@ -406,5 +430,53 @@ private final class FrameCapturer: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         capturedImage = cgImage
         semaphore.signal()
+    }
+
+    func captureOutput(_ output: AVCaptureOutput,
+                       didDrop sampleBuffer: CMSampleBuffer,
+                       from connection: AVCaptureConnection) {
+        dropCount += 1
+        if let attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as? [[CFString: Any]],
+           let reason = attachments.first?[kCMSampleBufferAttachmentKey_DroppedFrameReason] {
+            lastDropReason = "\(reason)"
+        }
+        if dropCount == 1 {
+            log("first_frame_dropped reason=\(lastDropReason)")
+        }
+    }
+
+    private func captureSummary() -> String {
+        "diagnostics{running=\(session.isRunning)"
+            + " frames=\(frameCount)"
+            + " drops=\(dropCount)"
+            + " last_drop=\(lastDropReason)"
+            + " preset=\(session.sessionPreset.rawValue)"
+            + " active_preset=\(activePreset?.rawValue ?? "none")"
+            + " device=\(deviceSummary())"
+            + " active_format=\(activeFormatSummary())}"
+    }
+
+    private func deviceSummary() -> String {
+        "\(device.localizedName.replacingOccurrences(of: " ", with: "_"))"
+            + ",connected=\(device.isConnected ? 1 : 0)"
+            + ",suspended=\(device.isSuspended ? 1 : 0)"
+            + ",in_use=\(device.isInUseByAnotherApplication ? 1 : 0)"
+    }
+
+    private func activeFormatSummary() -> String {
+        let dimensions = CMVideoFormatDescriptionGetDimensions(device.activeFormat.formatDescription)
+        let frameRates = device.activeFormat.videoSupportedFrameRateRanges
+            .map { range in
+                "\(Int(range.minFrameRate))-\(Int(range.maxFrameRate))fps"
+            }
+            .joined(separator: "|")
+        return "\(dimensions.width)x\(dimensions.height)@\(frameRates)"
+    }
+
+    private func log(_ message: String) {
+        guard options.verbose else {
+            return
+        }
+        fputs("CameraSnapshotDiagnostics: \(message)\n", stderr)
     }
 }

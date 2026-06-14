@@ -92,7 +92,7 @@ The visual calibration sketch includes large `OK` text plus red/green/blue/yello
 - see Vision OCR results update live
 - copy the generated `CAMERA_CROP` and `OCR_ROTATE` values for `make visual-smoke`
 
-`make camera-diagnose` writes a bounded diagnostic bundle under `.logs/camera-diagnose-*` with macOS camera inventory, Swift device status, camera-related processes, and optional Swift/ffmpeg video-only capture probes.
+`make camera-diagnose` writes a bounded diagnostic bundle under `.logs/camera-diagnose-*` with macOS camera inventory, Swift device status, camera-related processes, and optional Swift/ffmpeg video-only capture probes. Use `CAMERA_DIAGNOSE_FFMPEG=0 make camera-diagnose` to avoid ffmpeg device enumeration. If Swift diagnostics show `running=true frames=0 drops=0`, the camera session started but macOS/USB delivered no video buffers; fix the host camera path before rerunning board visual smokes.
 
 `make feature-matrix-check` verifies that each requested feature direction has matching Makefile, script/sketch, documentation, and Skill helper coverage. `make feature-matrix-doc` regenerates `docs/hardware-verification-matrix.md`.
 
