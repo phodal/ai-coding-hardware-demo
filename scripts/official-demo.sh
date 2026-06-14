@@ -19,6 +19,8 @@ Usage:
   scripts/official-demo.sh smoke <demo-id>
   scripts/official-demo.sh build-all
   scripts/official-demo.sh audio-preflight
+  scripts/official-demo.sh audio-physical-plan
+  scripts/official-demo.sh audio-physical-smoke
   scripts/official-demo.sh coverage
 EOF
 }
@@ -188,6 +190,89 @@ audio_preflight() {
   exit "$failed"
 }
 
+audio_physical_plan() {
+  local count=0 row id category title sketch_rel expected notes command
+  while IFS= read -r id; do
+    row="$(read_demo "$id")"
+    IFS=$'\t' read -r id category title sketch_rel expected notes <<<"$row"
+    case "$category" in
+      audio-in)
+        command="ALLOW_AUDIO=1 make official-audio-physical-smoke"
+        ;;
+      audio-out)
+        command="ALLOW_AUDIO=1 OFFICIAL_AUDIO_OUTPUT_CONFIRM=heard make official-audio-physical-smoke"
+        ;;
+      *)
+        command="-"
+        ;;
+    esac
+    printf 'official_audio_physical_plan id=%s category=%s title=%q expected=%q command=%q requires_allowed_audio=1 destructive=requires_upload audio=physical\n' \
+      "$id" "$category" "$title" "$expected" "$command"
+    count=$((count + 1))
+  done < <(audio_demo_ids)
+
+  printf 'official_audio_physical_plan_summary demos=%s destructive=requires_upload audio=physical gated_by=ALLOW_AUDIO\n' "$count"
+}
+
+capture_serial_with_stimulus() {
+  local expected="$1" capture_pid
+  capture_serial "$expected" &
+  capture_pid=$!
+  sleep "${OFFICIAL_AUDIO_STIMULUS_DELAY:-2}"
+  echo "> stimulus: ${OFFICIAL_AUDIO_STIMULUS_COMMAND:-say 'hello xiao zhi official audio input test'}"
+  eval "${OFFICIAL_AUDIO_STIMULUS_COMMAND:-say 'hello xiao zhi official audio input test'}"
+  wait "$capture_pid"
+}
+
+audio_physical_smoke() {
+  if [[ "${ALLOW_AUDIO:-0}" != "1" ]]; then
+    echo "official_audio_physical_smoke status=refused reason=allow_audio_required hint='set ALLOW_AUDIO=1 during an allowed audio window' destructive=0 audio=0" >&2
+    return 2
+  fi
+
+  local failed=0 count=0 row id category title sketch_rel expected notes
+  while IFS= read -r id; do
+    row="$(read_demo "$id")"
+    IFS=$'\t' read -r id category title sketch_rel expected notes <<<"$row"
+    configure_demo "$id"
+    check_audio_markers "$id" "$category" "$expected" "$OFFICIAL_DEMO_SOURCE_SKETCH"
+    echo "==> Official audio physical smoke: $id ($title)"
+    "$ROOT_DIR/scripts/upload.sh"
+    sleep "${OFFICIAL_SMOKE_SETTLE_SECONDS:-0}"
+    case "$category" in
+      audio-in)
+        if capture_serial_with_stimulus "$expected"; then
+          echo "official_audio_physical_smoke id=$id category=$category status=passed destructive=1 audio=physical"
+        else
+          failed=1
+          echo "official_audio_physical_smoke id=$id category=$category status=failed destructive=1 audio=physical"
+        fi
+        ;;
+      audio-out)
+        if capture_serial "$expected"; then
+          if [[ "${OFFICIAL_AUDIO_OUTPUT_CONFIRM:-}" == "heard" ]]; then
+            echo "official_audio_physical_smoke id=$id category=$category status=passed audible_confirmed=1 destructive=1 audio=physical"
+          else
+            failed=1
+            echo "official_audio_physical_smoke id=$id category=$category status=failed audible_confirmed=0 reason=manual_audible_confirmation_required destructive=1 audio=physical"
+          fi
+        else
+          failed=1
+          echo "official_audio_physical_smoke id=$id category=$category status=failed reason=serial_marker_missing destructive=1 audio=physical"
+        fi
+        ;;
+      *)
+        failed=1
+        echo "official_audio_physical_smoke id=$id category=$category status=failed reason=unsupported_category destructive=0 audio=0"
+        ;;
+    esac
+    count=$((count + 1))
+  done < <(audio_demo_ids)
+
+  echo "official_audio_physical_smoke_summary demos=$count failed=$failed destructive=1 audio=physical"
+  return "$failed"
+}
+
 latest_matching_smoke_log() {
   local id="$1" expected="$2" log
   [[ "$expected" != "-" ]] || return 1
@@ -351,6 +436,12 @@ case "$ACTION" in
     ;;
   audio-preflight)
     audio_preflight
+    ;;
+  audio-physical-plan)
+    audio_physical_plan
+    ;;
+  audio-physical-smoke)
+    audio_physical_smoke
     ;;
   coverage)
     coverage_audit

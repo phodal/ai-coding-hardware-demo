@@ -15,6 +15,9 @@ make official-build DEMO=01-helloworld
 make official-smoke DEMO=01-helloworld
 make official-build-all
 make official-audio-preflight
+make official-audio-physical-plan
+ALLOW_AUDIO=1 make official-audio-physical-smoke
+ALLOW_AUDIO=1 OFFICIAL_AUDIO_OUTPUT_CONFIRM=heard make official-audio-physical-smoke
 make official-coverage
 ```
 
@@ -41,6 +44,8 @@ scripts/official-demo.sh path 01-helloworld
 - `make official-build DEMO=<id>` is non-destructive and compiles only.
 - `make official-build-all` compiles every manifest row serially and returns a non-zero exit code if any demo fails.
 - `make official-audio-preflight` compiles only the official ES7210/ES8311 audio demos and checks source/serial markers without uploading firmware or using audio devices.
+- `make official-audio-physical-plan` is safe at night. It prints the gated physical-audio plan for the official ES7210/ES8311 demos without uploading or using audio devices.
+- `make official-audio-physical-smoke` is intentionally refused unless `ALLOW_AUDIO=1` is set. The ES7210 input path plays the configured host stimulus while serial capture is open; the ES8311 output path also requires `OFFICIAL_AUDIO_OUTPUT_CONFIRM=heard` after a supervised audible check.
 - `make official-coverage` is read-only. It reports build artifacts, source presence, audio quiet-marker readiness, and existing physical smoke logs for every official demo without uploading or using audio devices.
 - `make official-smoke DEMO=<id>` uploads to the connected board and captures serial output under `.logs/`.
 - Official smoke capture uses `scripts/serial-capture.py` by default so the log is open before pulsing RTS reset; this is required for demos that print expected serial text only during `setup()`.
@@ -55,6 +60,8 @@ scripts/official-demo.sh path 01-helloworld
 - `make official-build DEMO=01-helloworld`: passed on the current Arduino CLI setup.
 - `make official-build-all`: passed for all 7 Arduino examples on the current Arduino CLI setup.
 - `make official-audio-preflight`: passed for `06-es7210-audio-in` and `07-es8311-audio-out`, with `official_audio_preflight_summary demos=2 failed=0 destructive=0 audio=0`.
+- `make official-audio-physical-plan`: passed without uploading or using audio devices and reported both official audio demos as gated by `ALLOW_AUDIO`.
+- `make official-audio-physical-smoke` without `ALLOW_AUDIO=1`: refused with `official_audio_physical_smoke status=refused ... destructive=0 audio=0`.
 - `make official-coverage`: passed read-only audit with `official_coverage_summary demos=7 built=7 physical_smoke=5 missing_physical=2 audio_demos=2 audio_quiet_ready=2 destructive=0 audio=0`.
 - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh official-demo /Users/phodal/hardware/arduino coverage`: passed the same read-only audit through the global Skill helper.
 - `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld`: uploaded to `/dev/cu.usbmodem83101` and matched serial text `loop`.
