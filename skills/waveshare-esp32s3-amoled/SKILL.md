@@ -45,7 +45,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Use `make camera-color-check IMAGE=/path/to/raw.jpg` to check red/green/blue/yellow swatches on an existing camera image without OCR. Tune with `COLOR_SWATCH_MIN_X_GAP`, `COLOR_SWATCH_MAX_Y_SPREAD`, or `COLOR_SWATCH_GEOMETRY=0` only when the camera angle demands it.
    - Use `CAMERA_RAW_IMAGE=/path/to/raw.jpg ./scripts/camera-ocr.sh` to retune crop, rotation, or `OCR_PREPROCESS_MODE` without recapturing.
    - Camera capture is bounded by `CAMERA_CAPTURE_TIMEOUT`; if it times out before saving a frame, debug macOS camera availability or another app owning the camera before changing board firmware.
-   - Run `make camera-diagnose` when capture fails; it records camera inventory, Swift AVFoundation status, related processes, and bounded video-only capture probes under `.logs/`. Use `CAMERA_DIAGNOSE_FFMPEG=0` when you want to avoid ffmpeg device enumeration. If Swift diagnostics report `running=true frames=0 drops=0`, the capture session started but macOS/USB delivered no video buffers, so fix the host camera pipeline before rerunning board smokes.
+   - Run `make camera-ready` before expensive visual smokes when camera availability is uncertain; it uses Swift capture only and fails unless a frame is saved. Run `make camera-diagnose` when capture fails; it records camera inventory, Swift AVFoundation status, related processes, and bounded video-only capture probes under `.logs/`. Use `CAMERA_DIAGNOSE_FFMPEG=0` when you want to avoid ffmpeg device enumeration. If Swift diagnostics report `running=true frames=0 drops=0`, the capture session started but macOS/USB delivered no video buffers, so fix the host camera pipeline before rerunning board smokes.
    - Pass only if OCR sees `OK`; use the saved raw/processed images to debug focus, glare, rotation, or garbled output.
 
 7. For official demo bring-up:
@@ -250,6 +250,7 @@ For visual validation in this repo, prefer:
 SMOKE_SECONDS=8 ./scripts/smoke.sh
 make camera-aligner
 make camera-diagnose
+make camera-ready
 make feature-matrix-check
 make feature-matrix-doc
 make hardware-evidence-audit

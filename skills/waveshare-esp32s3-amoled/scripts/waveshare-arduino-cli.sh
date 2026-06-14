@@ -47,6 +47,12 @@ case "$ACTION" in
       exec "$PROJECT_DIR/scripts/visual-smoke.sh"
     fi
     ;;
+  camera-ready|camera-diagnose)
+    if [[ -f "$PROJECT_DIR/Makefile" ]]; then
+      cd "$PROJECT_DIR"
+      exec make "$ACTION"
+    fi
+    ;;
   feature-matrix)
     if [[ -x "$PROJECT_DIR/scripts/feature-matrix-check.py" ]]; then
       cd "$PROJECT_DIR"
