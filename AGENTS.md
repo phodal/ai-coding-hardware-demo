@@ -43,6 +43,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - PMU validation should not require a nonzero battery voltage because the battery connector may be unused; gate on system voltage and use battery voltage as supporting evidence.
 - Power lifecycle validation should not require a connected battery by default. `power-lifecycle-smoke` uses serial-preserving DIM/STANDBY/ACTIVE states, so it proves firmware power-control behavior without claiming true ESP32 deep sleep or measured current draw.
 - Wi-Fi validation should be scan-only by default. Do not hard-code or commit SSIDs/passwords; use `WIFI_TEST_SSID` and `WIFI_TEST_PASSWORD` only for supervised local join checks.
+- Store supervised Wi-Fi join credentials only in ignored `.env` files. The Wi-Fi checker redacts the host-side `JOIN` command, but serial output remains the authoritative proof for `connected=1` and IP assignment; camera OCR should validate the stable `OK` subset because the pixel font can misread `JOIN`.
 - Touch validation has two levels: default `touch-status-smoke` proves the CST9217 controller is online, while `TOUCH_REQUIRE_EVENT=1` requires a supervised human tap.
 
 ## Cloud AI Terminal Direction
