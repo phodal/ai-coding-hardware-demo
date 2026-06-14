@@ -19,9 +19,16 @@ fi
 ROI="${COLOR_SWATCH_ROI:-0.35,0.35,0.40,0.40}"
 MIN_PIXELS="${COLOR_SWATCH_MIN_PIXELS:-25}"
 STEP="${COLOR_SWATCH_STEP:-2}"
+MIN_X_GAP="${COLOR_SWATCH_MIN_X_GAP:-20}"
+MAX_Y_SPREAD="${COLOR_SWATCH_MAX_Y_SPREAD:-45}"
+GEOMETRY_ARGS=(--min-x-gap "$MIN_X_GAP" --max-y-spread "$MAX_Y_SPREAD")
+if [[ "${COLOR_SWATCH_GEOMETRY:-1}" == "0" ]]; then
+  GEOMETRY_ARGS=(--skip-geometry)
+fi
 
 swift run --package-path "$ROOT_DIR" ColorSwatchCheck \
   --image "$IMAGE" \
   --roi "$ROI" \
   --min-pixels "$MIN_PIXELS" \
-  --step "$STEP"
+  --step "$STEP" \
+  "${GEOMETRY_ARGS[@]}"

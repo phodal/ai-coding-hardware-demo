@@ -7,6 +7,9 @@ private struct Options {
     var roi = NormalizedRect(x: 0.35, y: 0.35, width: 0.40, height: 0.40)
     var minPixels = 25
     var step = 2
+    var requireGeometry = true
+    var minXGap = 20.0
+    var maxYSpread = 45.0
 }
 
 private struct NormalizedRect {
@@ -28,6 +31,12 @@ private struct SwatchStats {
     var redTotal = 0
     var greenTotal = 0
     var blueTotal = 0
+    var xTotal = 0
+    var yTotal = 0
+    var minX = Int.max
+    var minY = Int.max
+    var maxX = Int.min
+    var maxY = Int.min
 
     var average: (red: Int, green: Int, blue: Int) {
         guard pixels > 0 else {
@@ -36,12 +45,40 @@ private struct SwatchStats {
         return (redTotal / pixels, greenTotal / pixels, blueTotal / pixels)
     }
 
-    mutating func add(red: UInt8, green: UInt8, blue: UInt8) {
+    var center: (x: Double, y: Double)? {
+        guard pixels > 0 else {
+            return nil
+        }
+        return (Double(xTotal) / Double(pixels), Double(yTotal) / Double(pixels))
+    }
+
+    var bounds: (minX: Int, minY: Int, maxX: Int, maxY: Int)? {
+        guard pixels > 0 else {
+            return nil
+        }
+        return (minX, minY, maxX, maxY)
+    }
+
+    mutating func add(red: UInt8, green: UInt8, blue: UInt8, x: Int, y: Int) {
         pixels += 1
         redTotal += Int(red)
         greenTotal += Int(green)
         blueTotal += Int(blue)
+        xTotal += x
+        yTotal += y
+        minX = Swift.min(minX, x)
+        minY = Swift.min(minY, y)
+        maxX = Swift.max(maxX, x)
+        maxY = Swift.max(maxY, y)
     }
+}
+
+private struct Sample {
+    let x: Int
+    let y: Int
+    let red: UInt8
+    let green: UInt8
+    let blue: UInt8
 }
 
 private enum ColorSwatchError: Error, CustomStringConvertible {
@@ -77,30 +114,40 @@ private struct ColorSwatchCheck {
             let failures = Swatch.allCases.filter { swatch in
                 (stats[swatch]?.pixels ?? 0) < options.minPixels
             }
+            let geometryFailures = options.requireGeometry && failures.isEmpty
+                ? validateGeometry(stats: stats, options: options)
+                : []
 
             print("color_swatch_check image=\(options.imagePath)")
             print(
                 "color_swatch_roi x=\(options.roi.x) y=\(options.roi.y)"
                     + " width=\(options.roi.width) height=\(options.roi.height)"
                     + " min_pixels=\(options.minPixels) step=\(options.step)"
+                    + " geometry=\(options.requireGeometry ? 1 : 0)"
             )
             for swatch in Swatch.allCases {
                 let swatchStats = stats[swatch] ?? SwatchStats()
                 let avg = swatchStats.average
+                let center = swatchStats.center
+                let bounds = swatchStats.bounds
                 print(
                     "color_swatch name=\(swatch.rawValue)"
                         + " pixels=\(swatchStats.pixels)"
                         + " avg_r=\(avg.red) avg_g=\(avg.green) avg_b=\(avg.blue)"
+                        + " center_x=\(format(center?.x)) center_y=\(format(center?.y))"
+                        + " bounds=\(format(bounds))"
                 )
             }
 
-            if failures.isEmpty {
+            if failures.isEmpty && geometryFailures.isEmpty {
                 print("color_swatch_summary status=passed")
                 exit(0)
             }
 
+            let missing = failures.map(\.rawValue).joined(separator: ",")
+            let geometry = geometryFailures.joined(separator: ",")
             fputs(
-                "color_swatch_summary status=failed missing=\(failures.map(\.rawValue).joined(separator: ","))\n",
+                "color_swatch_summary status=failed missing=\(missing) geometry=\(geometry)\n",
                 stderr
             )
             exit(1)
@@ -136,6 +183,20 @@ private struct ColorSwatchCheck {
                     throw ColorSwatchError.usage("--step requires a positive integer.")
                 }
                 options.step = value
+            case "--min-x-gap":
+                index += 1
+                guard index < arguments.count, let value = Double(arguments[index]), value >= 0 else {
+                    throw ColorSwatchError.usage("--min-x-gap requires a non-negative number.")
+                }
+                options.minXGap = value
+            case "--max-y-spread":
+                index += 1
+                guard index < arguments.count, let value = Double(arguments[index]), value >= 0 else {
+                    throw ColorSwatchError.usage("--max-y-spread requires a non-negative number.")
+                }
+                options.maxYSpread = value
+            case "--skip-geometry":
+                options.requireGeometry = false
             case "--help", "-h":
                 printUsage()
                 exit(0)
@@ -171,7 +232,8 @@ private struct ColorSwatchCheck {
           ColorSwatchCheck --image /path/to/frame.jpg [--roi 0.35,0.35,0.40,0.40]
 
         The checker scans the center display ROI for red, green, blue, and yellow
-        dominant pixels from the display_ocr_check calibration swatches.
+        dominant pixels from the display_ocr_check calibration swatches, then
+        checks that their centroids are left-to-right and row-aligned.
         """)
     }
 
@@ -210,7 +272,7 @@ private struct ColorSwatchCheck {
         let x1 = min(width, Int(((options.roi.x + options.roi.width) * Double(width)).rounded(.up)))
         let y1 = min(height, Int(((options.roi.y + options.roi.height) * Double(height)).rounded(.up)))
 
-        var stats = Dictionary(uniqueKeysWithValues: Swatch.allCases.map { ($0, SwatchStats()) })
+        var samples = Dictionary(uniqueKeysWithValues: Swatch.allCases.map { ($0, [Sample]()) })
 
         for y in stride(from: y0, to: y1, by: options.step) {
             for x in stride(from: x0, to: x1, by: options.step) {
@@ -219,12 +281,109 @@ private struct ColorSwatchCheck {
                 let green = pixels[offset + 1]
                 let blue = pixels[offset + 2]
                 if let swatch = classify(red: red, green: green, blue: blue) {
-                    stats[swatch]?.add(red: red, green: green, blue: blue)
+                    samples[swatch]?.append(Sample(x: x, y: y, red: red, green: green, blue: blue))
                 }
             }
         }
 
-        return stats
+        return Dictionary(
+            uniqueKeysWithValues: Swatch.allCases.map { swatch in
+                (swatch, largestConnectedStats(samples: samples[swatch] ?? [], step: options.step))
+            }
+        )
+    }
+
+    private static func largestConnectedStats(samples: [Sample], step: Int) -> SwatchStats {
+        guard !samples.isEmpty else {
+            return SwatchStats()
+        }
+
+        let keyedSamples = Dictionary(uniqueKeysWithValues: samples.map { (pointKey(x: $0.x, y: $0.y), $0) })
+        var visited = Set<Int64>()
+        var best = SwatchStats()
+        let neighborStride = step
+        let neighborOffsets = [
+            (-neighborStride, -neighborStride), (0, -neighborStride), (neighborStride, -neighborStride),
+            (-neighborStride, 0), (neighborStride, 0),
+            (-neighborStride, neighborStride), (0, neighborStride), (neighborStride, neighborStride),
+        ]
+
+        for sample in samples {
+            let startKey = pointKey(x: sample.x, y: sample.y)
+            if visited.contains(startKey) {
+                continue
+            }
+
+            var component = SwatchStats()
+            var stack = [sample]
+            visited.insert(startKey)
+
+            while let current = stack.popLast() {
+                component.add(red: current.red, green: current.green, blue: current.blue, x: current.x, y: current.y)
+                for offset in neighborOffsets {
+                    let nx = current.x + offset.0
+                    let ny = current.y + offset.1
+                    let key = pointKey(x: nx, y: ny)
+                    if visited.contains(key) {
+                        continue
+                    }
+                    guard let neighbor = keyedSamples[key] else {
+                        continue
+                    }
+                    visited.insert(key)
+                    stack.append(neighbor)
+                }
+            }
+
+            if component.pixels > best.pixels {
+                best = component
+            }
+        }
+
+        return best
+    }
+
+    private static func pointKey(x: Int, y: Int) -> Int64 {
+        (Int64(y) << 32) | Int64(UInt32(bitPattern: Int32(x)))
+    }
+
+    private static func validateGeometry(stats: [Swatch: SwatchStats], options: Options) -> [String] {
+        let centers = Swatch.allCases.compactMap { swatch -> (swatch: Swatch, x: Double, y: Double)? in
+            guard let center = stats[swatch]?.center else {
+                return nil
+            }
+            return (swatch, center.x, center.y)
+        }
+        guard centers.count == Swatch.allCases.count else {
+            return ["centers-missing"]
+        }
+
+        var failures: [String] = []
+        for pair in zip(centers, centers.dropFirst()) {
+            if pair.1.x - pair.0.x < options.minXGap {
+                failures.append("\(pair.0.swatch.rawValue)-before-\(pair.1.swatch.rawValue)")
+            }
+        }
+
+        let yValues = centers.map(\.y)
+        if let minY = yValues.min(), let maxY = yValues.max(), maxY - minY > options.maxYSpread {
+            failures.append("row-spread-\(format(maxY - minY))")
+        }
+        return failures
+    }
+
+    private static func format(_ value: Double?) -> String {
+        guard let value else {
+            return "na"
+        }
+        return String(format: "%.1f", value)
+    }
+
+    private static func format(_ bounds: (minX: Int, minY: Int, maxX: Int, maxY: Int)?) -> String {
+        guard let bounds else {
+            return "na"
+        }
+        return "\(bounds.minX),\(bounds.minY),\(bounds.maxX),\(bounds.maxY)"
     }
 
     private static func classify(red: UInt8, green: UInt8, blue: UInt8) -> Swatch? {
