@@ -1,0 +1,23 @@
+Capturing camera device 0 via CameraSnapshot at 1280x720 -> /Users/phodal/hardware/arduino/docs/evidence/ok-qoder-20260614-120532/camera-ocr-20260614-120846.jpg
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'CameraSnapshot' complete! (0.08s)
+camera_snapshot output=/Users/phodal/hardware/arduino/docs/evidence/ok-qoder-20260614-120532/camera-ocr-20260614-120846.jpg device=罗技高清网络摄像机 C930c size=1920x1080
+OCR expected: OK
+OCR text:
+Qoders
+УP9E-99 (E
+Qoder
+OK
+Artifacts:
+  raw:       /Users/phodal/hardware/arduino/docs/evidence/ok-qoder-20260614-120532/camera-ocr-20260614-120846.jpg
+  processed: /Users/phodal/hardware/arduino/docs/evidence/ok-qoder-20260614-120532/camera-ocr-20260614-120846.processed.png
+  text:      /Users/phodal/hardware/arduino/docs/evidence/ok-qoder-20260614-120532/camera-ocr-20260614-120846.txt
+  crop:      iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2
+  rotate:    180
+  engine:    vision
+  capture:   auto
+  mode:      gray
+  filter:    crop=iw*0.55:ih*0.65:(iw-ow)/2:(ih-oh)/2,hflip,vflip,scale=1920:-1,format=gray,eq=contrast=1.6:brightness=0.02:gamma=1.0,unsharp=5:5:1.0
+OCR validation passed.

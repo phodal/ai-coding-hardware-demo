@@ -1,0 +1,24 @@
+{
+  "id": "ok-qoder-20260614-120532",
+  "timestamp": "20260614-120532",
+  "sketch": "sketches/codex_hello_world",
+  "display_text": "OK Qoder",
+  "expected_ocr": "OK",
+  "display_rotation": 0,
+  "ocr_rotation": 180,
+  "build": "passed",
+  "smoke": "passed",
+  "serial": "passed",
+  "camera_ocr": "passed",
+  "destructive": 0,
+  "audio": 0,
+  "artifacts": {
+    "build_log": "build.log",
+    "smoke_log": "smoke.log",
+    "serial_log": "logs/smoke-20260614-120837.log",
+    "camera_ocr_log": "camera-ocr.log",
+    "raw_image": "camera-ocr-20260614-120846.jpg",
+    "processed_image": "camera-ocr-20260614-120846.processed.png",
+    "ocr_text": "camera-ocr-20260614-120846.txt"
+  }
+}

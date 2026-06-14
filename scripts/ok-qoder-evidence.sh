@@ -7,8 +7,11 @@ EVIDENCE_DIR="${EVIDENCE_DIR:-$ROOT_DIR/docs/evidence/ok-qoder-$STAMP}"
 LOG_DIR="$EVIDENCE_DIR/logs"
 SMOKE_SECONDS="${SMOKE_SECONDS:-8}"
 CAMERA_CAPTURE_TIMEOUT="${CAMERA_CAPTURE_TIMEOUT:-8}"
-OCR_EXPECTED="${OCR_EXPECTED:-Qoder}"
+DISPLAY_TEXT="${DISPLAY_TEXT:-OK Qoder}"
+OCR_EXPECTED="${OCR_EXPECTED:-OK}"
 ALLOW_PARTIAL="${ALLOW_PARTIAL:-0}"
+DISPLAY_ROTATION="${DISPLAY_ROTATION:-0}"
+OCR_ROTATE="${OCR_ROTATE:-180}"
 
 mkdir -p "$LOG_DIR"
 
@@ -19,9 +22,9 @@ run_logged() {
   "$@" 2>&1 | tee "$EVIDENCE_DIR/$name.log"
 }
 
-run_logged build make -C "$ROOT_DIR" build
+run_logged build env DISPLAY_ROTATION="$DISPLAY_ROTATION" ARDUINO_BUILD_PROPERTY="compiler.cpp.extra_flags=-DDISPLAY_ROTATION=$DISPLAY_ROTATION" make -C "$ROOT_DIR" build
 
-if run_logged smoke env LOG_DIR="$LOG_DIR" SMOKE_SECONDS="$SMOKE_SECONDS" make -C "$ROOT_DIR" smoke; then
+if run_logged smoke env LOG_DIR="$LOG_DIR" SMOKE_SECONDS="$SMOKE_SECONDS" DISPLAY_ROTATION="$DISPLAY_ROTATION" ARDUINO_BUILD_PROPERTY="compiler.cpp.extra_flags=-DDISPLAY_ROTATION=$DISPLAY_ROTATION" make -C "$ROOT_DIR" smoke; then
   smoke_status=passed
 else
   smoke_status=failed
@@ -40,6 +43,7 @@ env \
   LOG_DIR="$EVIDENCE_DIR" \
   CAMERA_CAPTURE_TIMEOUT="$CAMERA_CAPTURE_TIMEOUT" \
   OCR_EXPECTED="$OCR_EXPECTED" \
+  OCR_ROTATE="$OCR_ROTATE" \
   OCR_ENGINE="${OCR_ENGINE:-vision}" \
   "$ROOT_DIR/scripts/camera-ocr.sh" >"$EVIDENCE_DIR/camera-ocr.log" 2>&1
 camera_rc=$?
@@ -65,6 +69,8 @@ summary_json="$EVIDENCE_DIR/summary.json"
   echo "- Upload and serial smoke: $smoke_status"
   echo "- Serial frame evidence: $serial_status"
   echo "- Camera OCR: $camera_status"
+  echo "- Display rotation: $DISPLAY_ROTATION"
+  echo "- OCR rotation: $OCR_ROTATE"
   echo "- Destructive: 0"
   echo "- Audio: 0"
   echo
@@ -106,7 +112,10 @@ summary_json="$EVIDENCE_DIR/summary.json"
   echo "  \"id\": \"ok-qoder-$STAMP\","
   echo "  \"timestamp\": \"$STAMP\","
   echo "  \"sketch\": \"sketches/codex_hello_world\","
+  echo "  \"display_text\": \"$DISPLAY_TEXT\","
   echo "  \"expected_ocr\": \"$OCR_EXPECTED\","
+  echo "  \"display_rotation\": $DISPLAY_ROTATION,"
+  echo "  \"ocr_rotation\": $OCR_ROTATE,"
   echo "  \"build\": \"passed\","
   echo "  \"smoke\": \"$smoke_status\","
   echo "  \"serial\": \"$serial_status\","

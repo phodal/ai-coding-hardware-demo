@@ -3,6 +3,10 @@
 #include <Wire.h>
 #include "pin_config.h"
 
+#ifndef DISPLAY_ROTATION
+#define DISPLAY_ROTATION 0
+#endif
+
 Arduino_DataBus *bus = new Arduino_ESP32QSPI(
   LCD_CS, LCD_SCLK, LCD_SDIO0, LCD_SDIO1, LCD_SDIO2, LCD_SDIO3);
 
@@ -14,22 +18,27 @@ bool displayReady = false;
 
 void drawStatusScreen() {
   gfx->fillScreen(RGB565_BLACK);
+  gfx->drawRoundRect(18, 18, 430, 430, 24, RGB565_BLUE);
+
   gfx->setTextColor(RGB565_CYAN);
-  gfx->setTextSize(2);
-  gfx->setCursor(24, 40);
-  gfx->println("OK Qoder");
+  gfx->setTextSize(6);
+  gfx->setCursor(36, 96);
+  gfx->println("Qoder");
 
   gfx->setTextColor(RGB565_GREEN);
-  gfx->setTextSize(2);
-  gfx->setCursor(24, 82);
-  gfx->println("ESP32-S3 AMOLED");
+  gfx->setTextSize(5);
+  gfx->setCursor(152, 220);
+  gfx->println("OK");
 
   gfx->setTextColor(RGB565_YELLOW);
-  gfx->setTextSize(1);
-  gfx->setCursor(24, 128);
-  gfx->println("Build/upload automation OK");
+  gfx->setTextSize(2);
+  gfx->setCursor(78, 316);
+  gfx->println("ESP32-S3 AMOLED");
 
-  gfx->drawRoundRect(20, 155, 426, 92, 12, RGB565_BLUE);
+  gfx->setTextColor(RGB565_WHITE);
+  gfx->setTextSize(1);
+  gfx->setCursor(112, 360);
+  gfx->println("Build/upload automation");
 }
 
 void setup() {
@@ -49,6 +58,7 @@ void setup() {
     return;
   }
 
+  gfx->setRotation(DISPLAY_ROTATION);
   gfx->setBrightness(160);
   drawStatusScreen();
   displayReady = true;
@@ -57,26 +67,10 @@ void setup() {
 }
 
 void loop() {
-  const uint16_t colors[] = {
-    RGB565_RED,
-    RGB565_ORANGE,
-    RGB565_YELLOW,
-    RGB565_GREEN,
-    RGB565_CYAN,
-    RGB565_BLUE,
-    RGB565_MAGENTA,
-    RGB565_WHITE
-  };
-
   if (displayReady) {
-    uint16_t color = colors[frame % (sizeof(colors) / sizeof(colors[0]))];
-    int x = 36 + ((frame * 29) % 350);
-    int y = 180 + ((frame * 17) % 220);
-
-    gfx->fillCircle(x, y, 14, color);
     gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
     gfx->setTextSize(2);
-    gfx->setCursor(36, 268);
+    gfx->setCursor(156, 396);
     gfx->print("frame ");
     gfx->print(frame);
     gfx->print("     ");
