@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import csv
+import json
 import pathlib
 import re
 import sys
@@ -9,6 +10,7 @@ from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MATRIX_PATH = ROOT / "config" / "feature-matrix.tsv"
+SMOKE_SUITE_LOG_ROOT = ROOT / ".logs" / "hardware-smoke-suite"
 CAMERA_PATH_RE = re.compile(r"(?:/Users/[^`\\s)]*/hardware/arduino/)?\.logs/camera-ocr-[0-9-]+\.(?:jpg|jpeg|png|txt)")
 VISUAL_TERMS = (
     "VISUAL_SMOKE",
@@ -76,6 +78,35 @@ def artifact_paths(text: str) -> list[str]:
     return paths
 
 
+def latest_camera_ready_preflight() -> dict[str, Any] | None:
+    candidates: list[tuple[float, pathlib.Path, dict[str, Any]]] = []
+    for summary_path in SMOKE_SUITE_LOG_ROOT.glob("*/summary.json"):
+        try:
+            payload = json.loads(summary_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for result in payload.get("results", []):
+            if result.get("id") != "camera-ready":
+                continue
+            try:
+                mtime = summary_path.stat().st_mtime
+            except OSError:
+                mtime = 0.0
+            candidates.append((mtime, summary_path, result))
+            break
+    if not candidates:
+        return None
+
+    _, summary_path, result = max(candidates, key=lambda item: item[0])
+    return {
+        "summary": rel(summary_path),
+        "log": rel(result.get("log", "")),
+        "status": result.get("status", "unknown"),
+        "returncode": result.get("returncode", "unknown"),
+        "seconds": result.get("seconds", "unknown"),
+    }
+
+
 def visual_status(row: dict[str, str], doc_text: str, verified_text: str) -> tuple[str, str]:
     verified_artifacts = artifact_paths(verified_text)
     if verified_artifacts:
@@ -125,6 +156,7 @@ def audit_rows(rows: list[dict[str, str]]) -> list[dict[str, Any]]:
 
 def render_markdown(records: list[dict[str, Any]]) -> str:
     camera_verified = sum(1 for item in records if item["visual_status"].startswith("camera-verified"))
+    camera_preflight = latest_camera_ready_preflight()
     lines = [
         "# Visual Evidence Audit",
         "",
@@ -137,6 +169,16 @@ def render_markdown(records: list[dict[str, Any]]) -> str:
         "| ID | Priority | Matrix status | Audio mode | Visual status | Artifacts | Next visual gap |",
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
+    if camera_preflight:
+        lines[7:7] = [
+            "Latest camera-ready preflight:",
+            "",
+            f"- Status: `{camera_preflight['status']}`",
+            f"- Summary: `{camera_preflight['summary']}`",
+            f"- Log: `{camera_preflight['log']}`",
+            f"- Return code: `{camera_preflight['returncode']}`",
+            "",
+        ]
     details: list[str] = []
     for item in records:
         artifact_text = ", ".join(f"`{path}`" for path in item["artifacts"]) if item["artifacts"] else "none"
@@ -170,9 +212,17 @@ def main() -> int:
     args = parser.parse_args()
 
     records = audit_rows(load_matrix(pathlib.Path(args.matrix)))
+    camera_preflight = latest_camera_ready_preflight()
     if args.markdown:
         print(render_markdown(records), end="")
         return 0
+
+    if camera_preflight:
+        print(
+            "visual_evidence_camera_preflight "
+            f"status={camera_preflight['status']} returncode={camera_preflight['returncode']} "
+            f"summary={camera_preflight['summary']} log={camera_preflight['log']}"
+        )
 
     camera_verified = 0
     for item in records:

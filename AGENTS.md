@@ -7,7 +7,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - Keep each hardware lane scriptable from `make`; interactive IDE state is not enough evidence.
 - Keep `config/feature-matrix.tsv` current when adding or changing a feature lane, and run `make feature-matrix-check` before claiming coverage across the 12 requested directions.
 - Use `make hardware-evidence-audit` before claiming completion across lanes; it exposes missing `Verified Locally` sections and missing smoke-suite evidence.
-- Use `make visual-evidence-audit` before claiming camera/OCR coverage across lanes. It checks whether each feature doc records real `camera-ocr` artifacts in `## Verified Locally`, rather than only documenting an optional `*_VISUAL_SMOKE` path.
+- Use `make visual-evidence-audit` before claiming camera/OCR coverage across lanes. It checks whether each feature doc records real `camera-ocr` artifacts in `## Verified Locally`, rather than only documenting an optional `*_VISUAL_SMOKE` path, and it reports the latest `camera-ready` preflight status when visual suite runs are blocked by the host camera.
 - Use `make goal-completion-audit` before claiming the full objective is done. It is stricter than evidence presence and keeps partial, external, conditional, and quiet-window lanes from being over-reported as complete.
 - Prefer a narrow compile/upload/smoke loop before adding abstractions. For this board, clean Arduino CLI builds with dedicated `.arduino-build/<name>` paths avoid cache collisions.
 - Serialize hardware uploads for the same USB Serial/JTAG port. Parallel `esptool` runs can fail with an exclusive lock on `/dev/cu.usbmodem83101`.

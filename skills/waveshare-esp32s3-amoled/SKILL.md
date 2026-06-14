@@ -63,7 +63,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make feature-matrix-doc` after changing `config/feature-matrix.tsv` to regenerate `docs/hardware-verification-matrix.md`.
    - Run `make hardware-evidence-audit` to identify lanes with missing `Verified Locally` sections or missing smoke-suite evidence.
    - Run `make hardware-evidence-doc` to regenerate `docs/hardware-evidence-audit.md`.
-   - Run `make visual-evidence-audit` to identify lanes that lack recorded camera/OCR artifacts in their local evidence sections.
+   - Run `make visual-evidence-audit` to identify lanes that lack recorded camera/OCR artifacts in their local evidence sections; it also reports the latest `camera-ready` preflight status when visual suite runs are blocked by the host camera.
    - Run `make visual-evidence-doc` to regenerate `docs/visual-evidence-audit.md`.
    - Run `make goal-completion-audit` for the stricter requirement-level completion gate; use `python3 scripts/goal-completion-audit.py --strict` only when a non-zero result should fail CI or handoff.
    - Run `make goal-completion-doc` to regenerate `docs/goal-completion-audit.md`.
