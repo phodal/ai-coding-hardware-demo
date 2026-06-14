@@ -148,7 +148,7 @@ find_esptool() {
   exit 1
 }
 
-latest_asset_json() {
+latest_asset_json_live() {
   require_python
   python3 - "$XIAOZHI_RELEASE_REPO" "$XIAOZHI_BOARD_SLUG" <<'PY'
 import json
@@ -169,6 +169,7 @@ for asset in release.get("assets", []):
             "asset_name": asset.get("name"),
             "download_url": asset.get("browser_download_url"),
             "size": asset.get("size"),
+            "source": "live",
         }, ensure_ascii=True))
         break
 else:
@@ -177,8 +178,61 @@ else:
 PY
 }
 
+cached_asset_json() {
+  require_python
+  python3 - "$XIAOZHI_FIRMWARE_DIR" "$XIAOZHI_BOARD_SLUG" <<'PY'
+import json
+import pathlib
+import sys
+
+firmware_dir = pathlib.Path(sys.argv[1])
+slug = sys.argv[2]
+matches = sorted(firmware_dir.glob(f"*_{slug}.zip"))
+if not matches:
+    raise SystemExit(f"No cached XiaoZhi firmware zip found in {firmware_dir}")
+zip_path = matches[-1]
+asset_name = zip_path.name
+tag = asset_name.split("_", 1)[0] if "_" in asset_name else "cached"
+print(json.dumps({
+    "tag": tag,
+    "release_name": tag,
+    "asset_name": asset_name,
+    "download_url": f"cached:{zip_path}",
+    "size": zip_path.stat().st_size,
+    "source": "cache",
+}, ensure_ascii=True))
+PY
+}
+
+latest_asset_json() {
+  local live_output live_status
+  set +e
+  live_output="$(latest_asset_json_live 2>&1)"
+  live_status=$?
+  set -e
+  if [[ "$live_status" -eq 0 ]]; then
+    printf '%s\n' "$live_output"
+    return 0
+  fi
+
+  if [[ "${XIAOZHI_RELEASE_CACHE_FALLBACK:-1}" != "1" ]]; then
+    printf '%s\n' "$live_output" >&2
+    return "$live_status"
+  fi
+
+  echo "XiaoZhi release lookup failed; using cached firmware metadata. Set XIAOZHI_RELEASE_CACHE_FALLBACK=0 to require live release metadata." >&2
+  printf '%s\n' "$live_output" | tail -n 1 >&2
+  cached_asset_json
+}
+
 asset_field() {
-  latest_asset_json | python3 -c "import json,sys; print(json.load(sys.stdin)['$1'])"
+  local payload
+  if [[ -n "${XIAOZHI_ASSET_JSON:-}" ]]; then
+    payload="$XIAOZHI_ASSET_JSON"
+  else
+    payload="$(latest_asset_json)"
+  fi
+  printf '%s\n' "$payload" | python3 -c "import json,sys; print(json.load(sys.stdin)['$1'])"
 }
 
 firmware_zip_path() {
@@ -191,6 +245,10 @@ download_firmware() {
   zip_path="$(firmware_zip_path)"
   url="$(asset_field download_url)"
   if [[ ! -f "$zip_path" ]]; then
+    if [[ "$url" == cached:* ]]; then
+      echo "Cached XiaoZhi metadata pointed to missing firmware zip: $zip_path" >&2
+      exit 1
+    fi
     echo "Downloading $url -> $zip_path" >&2
     curl -fL "$url" -o "$zip_path"
   fi
@@ -226,6 +284,7 @@ PY
 preflight() {
   local esptool source_status idf_status latest_json
   latest_json="$(latest_asset_json)"
+  XIAOZHI_ASSET_JSON="$latest_json"
   inspect_firmware
   esptool="$(find_esptool)"
 
@@ -254,6 +313,7 @@ latest = json.loads(sys.argv[1])
 print(
     "xiaozhi_preflight_summary "
     f"tag={latest['tag']} asset={latest['asset_name']} asset_size={latest['size']} "
+    f"release_source={latest.get('source', 'unknown')} "
     f"slug={sys.argv[2]} port={sys.argv[3] or 'missing'} esptool={sys.argv[4]} "
     f"source={sys.argv[5]} idf={sys.argv[6]} destructive=0 audio=0"
 )

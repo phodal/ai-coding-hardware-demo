@@ -25,6 +25,8 @@ CONFIRM=--yes make xiaozhi-flash
 
 Use `latest`, `inspect`, `preflight`, and `backup` first. They only query/download the release asset, confirm the firmware archive shape, hash `merged-binary.bin`, inspect local source/ESP-IDF readiness, confirm the serial/esptool environment, and read the current board flash to a local backup. `CONFIRM=--yes make xiaozhi-flash` is the first destructive XiaoZhi firmware step.
 
+`make xiaozhi-preflight` prefers live GitHub release metadata, but falls back to an existing matching zip under `.vendor/xiaozhi/firmware` when the release lookup fails. The summary reports `release_source=live` or `release_source=cache`; set `XIAOZHI_RELEASE_CACHE_FALLBACK=0` when a live release lookup is required.
+
 After an approved XiaoZhi flash, run:
 
 ```bash
@@ -128,7 +130,8 @@ Flashing XiaoZhi replaces the Arduino demo currently on the board. To return to 
 - Matched asset: `v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip`.
 - `make xiaozhi-inspect` confirmed the downloaded asset contains `merged-binary.bin` with size `11240285` bytes.
 - `make xiaozhi-preflight` verifies the current release asset, `merged-binary.bin` SHA-256, esptool path, serial port, source checkout marker, and ESP-IDF availability without flashing firmware or using audio hardware.
-- Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=/Users/phodal/hardware/arduino/.vendor/esp-idf-v5.5.4/tools/idf.py destructive=0 audio=0`.
+- Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 release_source=live slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=/Users/phodal/hardware/arduino/.vendor/esp-idf-v5.5.4/tools/idf.py destructive=0 audio=0`.
+- `XIAOZHI_RELEASE_REPO=invalid/invalid make xiaozhi-preflight`: passed the non-destructive cache fallback path and reported `release_source=cache`, proving preflight can still validate the locally cached firmware zip during release API/TLS failures.
 - Latest `merged-binary.bin` SHA-256: `c08f389e2650b2076d2155fa62c0b34c5f3359e07833a8fca5f0f53c6e8bf7dd`.
 - `make xiaozhi-backup`: read the current board flash without writing or using audio hardware.
 - Latest `xiaozhi_backup_summary`: `path=/Users/phodal/hardware/arduino/.vendor/xiaozhi/backups/esp32s3-flash-20260614-081746.bin address=0x0 size=0x1000000 baud=115200 no_stub=1 bytes=16777216 sha256=8b411598bb4d2ab2142f0dd63f64d3fd9a71d9e78077b1d34a706b6463d02638 destructive=0 audio=0`.

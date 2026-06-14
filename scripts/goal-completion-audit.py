@@ -92,13 +92,13 @@ def next_action(row: dict[str, str], state: str) -> str:
     if state == "missing-doc-evidence":
         return "Add exact Verified Locally evidence to the feature doc."
     if state == "quiet-window-required":
-        return "Run the physical audio smoke during an allowed quiet-window and record the suite result."
+        return "Safe now: run `make audio-afe-readiness` and `make audio-vad-preflight`; during an allowed audio window run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS=\"--target audio-front-end --allow-audio\"` and record the result."
     if state == "external-required":
-        return "Run the external firmware/source route, flash only with explicit approval, and capture runtime evidence."
+        return "Keep `make xiaozhi-preflight` and `make xiaozhi-backup` current; after explicit flash approval run `CONFIRM=--yes make xiaozhi-flash`, then `make xiaozhi-runtime-visual-check` before any audio interaction."
     if state == "partial-implementation":
         return "Finish the remaining feature behavior, then promote matrix status only after broad hardware evidence."
     if state == "conditional-physical-evidence-required":
-        return "Collect the remaining conditional physical evidence, especially official audio demo input/output checks."
+        return "Run `make official-audio-physical-plan`; during an allowed audio window run `ALLOW_AUDIO=1 make official-audio-physical-smoke`, adding `OFFICIAL_AUDIO_OUTPUT_CONFIRM=heard` for supervised ES8311 output evidence."
     if state == "audio-physical-evidence-required":
         return "Collect supervised audio hardware evidence."
     if state == "missing-suite-evidence":

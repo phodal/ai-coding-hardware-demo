@@ -8,8 +8,8 @@ Summary: `9` of `12` feature directions are currently complete under this strict
 
 | ID | Priority | Matrix status | Audio mode | Suite | Completion | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| official-demos | P0 | verified | conditional | passed `.logs/hardware-smoke-suite/20260614-084339/summary.json` | conditional-physical-evidence-required | Collect the remaining conditional physical evidence, especially official audio demo input/output checks. |
-| xiaozhi-ai | P0 | required_external | audio | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-required | Run the external firmware/source route, flash only with explicit approval, and capture runtime evidence. |
+| official-demos | P0 | verified | conditional | passed `.logs/hardware-smoke-suite/20260614-084339/summary.json` | conditional-physical-evidence-required | Run `make official-audio-physical-plan`; during an allowed audio window run `ALLOW_AUDIO=1 make official-audio-physical-smoke`, adding `OFFICIAL_AUDIO_OUTPUT_CONFIRM=heard` for supervised ES8311 output evidence. |
+| xiaozhi-ai | P0 | required_external | audio | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-required | Keep `make xiaozhi-preflight` and `make xiaozhi-backup` current; after explicit flash approval run `CONFIRM=--yes make xiaozhi-flash`, then `make xiaozhi-runtime-visual-check` before any audio interaction. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | complete | No immediate action. |
 | offline-voice | P1 | verified | non_audio_control | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | complete | No immediate action. |
 | lvgl-visual-agent | P1 | verified | none | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | complete | No immediate action. |
@@ -19,4 +19,4 @@ Summary: `9` of `12` feature directions are currently complete under this strict
 | iot-panel | P1 | verified | none | passed `.logs/hardware-smoke-suite/20260614-053656/summary.json` | complete | No immediate action. |
 | esp-claw-agent | P2 | verified | none | passed `.logs/hardware-smoke-suite/20260614-055205/summary.json` | complete | No immediate action. |
 | tinyml-imu | P2 | verified | none | passed `.logs/hardware-smoke-suite/20260614-054530/summary.json` | complete | No immediate action. |
-| audio-front-end | P2 | required_quiet_window | audio | missing | quiet-window-required | Run the physical audio smoke during an allowed quiet-window and record the suite result. |
+| audio-front-end | P2 | required_quiet_window | audio | missing | quiet-window-required | Safe now: run `make audio-afe-readiness` and `make audio-vad-preflight`; during an allowed audio window run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target audio-front-end --allow-audio"` and record the result. |
