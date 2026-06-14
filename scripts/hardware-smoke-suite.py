@@ -160,6 +160,61 @@ def run_target(row: dict[str, str], args: argparse.Namespace, log_dir: pathlib.P
     return result
 
 
+def run_camera_ready(args: argparse.Namespace, log_dir: pathlib.Path) -> dict[str, Any]:
+    target_log = log_dir / "camera-ready.log"
+    command = ["make", "camera-ready"]
+    env = os.environ.copy()
+    env["LOG_DIR"] = str(log_dir / "camera-ready")
+
+    started = dt.datetime.now(dt.timezone.utc)
+    print(f"suite_preflight_start id=camera-ready target=camera-ready log={target_log}", flush=True)
+    target_log.parent.mkdir(parents=True, exist_ok=True)
+    timed_out = False
+    with target_log.open("w", encoding="utf-8") as handle:
+        handle.write(f"$ {' '.join(command)}\n")
+        handle.flush()
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=ROOT,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=args.camera_ready_timeout,
+            )
+            output = completed.stdout or ""
+            returncode = completed.returncode
+        except subprocess.TimeoutExpired as exc:
+            output = "Timed out after %.1f seconds\n" % args.camera_ready_timeout
+            if isinstance(exc.output, str):
+                output = exc.output + output
+            returncode = 124
+            timed_out = True
+        handle.write(output)
+        handle.flush()
+        print(output, end="")
+
+    finished = dt.datetime.now(dt.timezone.utc)
+    elapsed = (finished - started).total_seconds()
+    status = "timeout" if timed_out else ("passed" if returncode == 0 else "failed")
+    result: dict[str, Any] = {
+        "id": "camera-ready",
+        "target": "camera-ready",
+        "kind": "preflight",
+        "status": status,
+        "returncode": returncode,
+        "seconds": round(elapsed, 3),
+        "log": str(target_log),
+    }
+    print(
+        "suite_preflight_done "
+        f"id=camera-ready status={status} returncode={returncode} seconds={elapsed:.1f} log={target_log}",
+        flush=True,
+    )
+    return result
+
+
 def write_summary(results: list[dict[str, Any]], log_dir: pathlib.Path) -> None:
     summary_path = log_dir / "summary.json"
     payload = {
@@ -190,6 +245,12 @@ def main() -> int:
         default=True,
         help="Allow per-target visual OCR env vars from the current environment.",
     )
+    parser.add_argument(
+        "--skip-camera-ready",
+        action="store_true",
+        help="Skip the camera-ready preflight even when --with-visual is set.",
+    )
+    parser.add_argument("--camera-ready-timeout", type=float, default=30.0)
     parser.add_argument("--log-dir", default=str(DEFAULT_LOG_ROOT / timestamp()))
     parser.add_argument("--max-failures", type=int, default=1)
     parser.add_argument("--per-target-timeout", type=float, default=900.0)
@@ -205,6 +266,8 @@ def main() -> int:
         raise SystemExit("No hardware smoke targets selected.")
 
     if args.dry_run:
+        if not args.no_visual and not args.skip_camera_ready:
+            print("dry_run id=camera-ready command=make camera-ready")
         for row in selected:
             print(f"dry_run id={row['id']} command=make {row['smoke_target']}")
         return 0
@@ -212,6 +275,14 @@ def main() -> int:
     log_dir = pathlib.Path(args.log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
+    if not args.no_visual and not args.skip_camera_ready:
+        preflight = run_camera_ready(args, log_dir)
+        results.append(preflight)
+        if preflight["status"] != "passed":
+            print("suite_abort reason=camera-ready-failed", flush=True)
+            write_summary(results, log_dir)
+            return 1
+
     failures = 0
     for row in selected:
         result = run_target(row, args, log_dir)

@@ -9,7 +9,7 @@ It exists to keep board validation deterministic:
 - It defaults to non-audio lanes only: `audio_mode=none` and `audio_mode=non_audio_control`.
 - It skips `conditional` and `required_external` lanes unless explicitly allowed.
 - It only requires `--allow-audio` for smoke targets that use physical microphone or speaker hardware.
-- It forces `*_VISUAL_SMOKE=0` by default so a suite run does not depend on camera framing. Use `--with-visual` only when the camera is positioned.
+- It forces `*_VISUAL_SMOKE=0` by default so a suite run does not depend on camera framing. Use `--with-visual` only when the camera is positioned. Visual suite runs call `make camera-ready` before uploading any target; if the camera cannot save a frame, the suite aborts before changing board firmware.
 - Use `--skip-build` only when the relevant `.arduino-build/<name>` artifacts already exist. If upload reports a missing `*.partitions.bin`, rerun that target without `--skip-build`.
 
 ## Commands
@@ -21,6 +21,7 @@ make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--targets power-lifecycle,imu-interaction"
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional"
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external"
+make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target cloud-ai-terminal --with-visual"
 ```
 
 Audio lanes require explicit opt-in:
@@ -35,6 +36,7 @@ Do not run audio lanes late at night unless the user explicitly asks for them.
 
 - `make hardware-smoke-list`: selected only `none` and `non_audio_control` lanes by default; skipped `audio`, `conditional`, and external lanes.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"`: printed the default non-audio command plan without running hardware.
+- `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target cloud-ai-terminal --with-visual --skip-build --per-target-timeout 10 --camera-ready-timeout 8"`: aborted at the `camera-ready` preflight before uploading because the host camera returned `running=true frames=0 drops=0`; summary `.logs/hardware-smoke-suite/20260614-102834/summary.json` recorded only `camera-ready` as failed.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build --per-target-timeout 180"`: uploaded to `/dev/cu.usbmodem83101`, ran `iot-panel-relay-smoke`, and wrote `.logs/hardware-smoke-suite/20260614-043837/summary.json` with `passed=1 failed=0`.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target official-demos --allow-conditional --per-target-timeout 420 --max-failures 1"`: built, uploaded, and passed the default official `01-helloworld` display/serial baseline without running audio demos; summary `.logs/hardware-smoke-suite/20260614-050454/summary.json` has `passed=1 failed=0`.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external --per-target-timeout 180 --max-failures 1"`: ran the non-destructive XiaoZhi preflight without flashing firmware or using audio hardware; summary `.logs/hardware-smoke-suite/20260614-062838/summary.json` has `passed=1 failed=0` and records the `merged-binary.bin` SHA-256 plus `destructive=0 audio=0`.

@@ -99,7 +99,7 @@ The visual calibration sketch includes large `OK` text plus red/green/blue/yello
 
 `make hardware-evidence-audit` reports which feature lanes have documented verification evidence and latest smoke-suite evidence. `make hardware-evidence-doc` regenerates `docs/hardware-evidence-audit.md`.
 
-`make hardware-smoke-list` shows which feature smokes are selected by the default non-audio suite. `make hardware-smoke-suite` runs those selected smokes serially and writes logs under `.logs/hardware-smoke-suite/`; pass `HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"` for a narrow lane. Details are in `docs/hardware-smoke-suite.md`.
+`make hardware-smoke-list` shows which feature smokes are selected by the default non-audio suite. `make hardware-smoke-suite` runs those selected smokes serially and writes logs under `.logs/hardware-smoke-suite/`; pass `HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"` for a narrow lane. When `--with-visual` is set, the suite runs `make camera-ready` first and aborts before any upload if the host camera cannot save a frame. Details are in `docs/hardware-smoke-suite.md`.
 
 `make official-demos` lists the Waveshare official Arduino examples tracked in `config/official-demos.tsv`.
 Use `make official-build DEMO=<id>` for compile-only validation, and `make official-smoke DEMO=<id>` to upload a vendor demo and verify its expected serial output. Start with `DEMO=01-helloworld`, then move through PMU, IMU, LVGL, and audio demos.

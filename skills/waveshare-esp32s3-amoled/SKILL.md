@@ -68,7 +68,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make goal-completion-audit` for the stricter requirement-level completion gate; use `python3 scripts/goal-completion-audit.py --strict` only when a non-zero result should fail CI or handoff.
    - Run `make goal-completion-doc` to regenerate `docs/goal-completion-audit.md`.
    - Run `make hardware-smoke-list` to inspect the default serialized non-audio smoke selection.
-   - Run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target <id>"` for a narrow serialized hardware lane; the default suite skips audio, conditional, and external lanes.
+   - Run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target <id>"` for a narrow serialized hardware lane; the default suite skips audio, conditional, and external lanes. If `--with-visual` is used, the suite runs `make camera-ready` before any target upload and aborts when the host camera cannot save a frame.
    - Run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external"` for the non-destructive XiaoZhi firmware archive check; it does not flash firmware or use audio hardware.
    - Treat matrix status values as coverage metadata, not proof that a partial or external feature is complete.
 
