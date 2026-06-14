@@ -20,6 +20,7 @@ case "$ACTION" in
         "$PROJECT_DIR/scripts/xiaozhi.sh" preflight
       fi
       make cloud-ai-build
+      make web-ai-button-build
       make audio-afe-readiness
       make speaker-output-build
       make sensor-status-build
@@ -188,6 +189,29 @@ case "$ACTION" in
           ;;
         relay)
           exec python3 "$PROJECT_DIR/scripts/cloud-ai-relay.py" "${EXTRA_ARGS[@]:1}"
+          ;;
+      esac
+    fi
+    ;;
+  web-ai-button)
+    if [[ -x "$PROJECT_DIR/scripts/web-ai-button-smoke.sh" ]]; then
+      if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
+        exec "$PROJECT_DIR/scripts/web-ai-button-smoke.sh"
+      fi
+      case "${EXTRA_ARGS[0]}" in
+        build)
+          cd "$PROJECT_DIR"
+          exec make web-ai-button-build
+          ;;
+        smoke)
+          exec "$PROJECT_DIR/scripts/web-ai-button-smoke.sh"
+          ;;
+        server)
+          cd "$PROJECT_DIR"
+          exec make local-ai-server
+          ;;
+        check)
+          exec python3 "$PROJECT_DIR/scripts/web-ai-button-check.py" "${EXTRA_ARGS[@]:1}"
           ;;
       esac
     fi
@@ -613,6 +637,10 @@ case "$ACTION" in
     echo "No project cloud AI terminal runner found. Use a project that provides scripts/cloud-ai-terminal-smoke.sh." >&2
     exit 2
     ;;
+  web-ai-button)
+    echo "No project web AI button runner found. Use a project that provides scripts/web-ai-button-smoke.sh." >&2
+    exit 2
+    ;;
   audio-vad)
     echo "No project audio VAD runner found. Use a project that provides scripts/audio-vad-smoke.sh." >&2
     exit 2
@@ -670,7 +698,7 @@ case "$ACTION" in
     exit 2
     ;;
   *)
-    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|feature-matrix|hardware-evidence|visual-evidence|goal-completion|hardware-smoke-suite|camera-aligner|camera-ready|camera-diagnose|ok-qoder-evidence|official-demos|official-demo|xiaozhi|cloud-ai|audio-vad|speaker-output|sensor-status|power-lifecycle|wifi-connectivity|touch-status|interaction-dashboard|imu-interaction|lvgl-visual-agent|desk-widget|iot-panel|offline-voice|tinyml-imu|esp-claw-agent} [project-dir] [action-args...]" >&2
+    echo "Usage: $0 {setup|build|upload|monitor|smoke|verify|doctor|visual-smoke|feature-matrix|hardware-evidence|visual-evidence|goal-completion|hardware-smoke-suite|camera-aligner|camera-ready|camera-diagnose|ok-qoder-evidence|official-demos|official-demo|xiaozhi|cloud-ai|web-ai-button|audio-vad|speaker-output|sensor-status|power-lifecycle|wifi-connectivity|touch-status|interaction-dashboard|imu-interaction|lvgl-visual-agent|desk-widget|iot-panel|offline-voice|tinyml-imu|esp-claw-agent} [project-dir] [action-args...]" >&2
     exit 2
     ;;
 esac

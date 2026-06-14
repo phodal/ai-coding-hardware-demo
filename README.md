@@ -160,6 +160,9 @@ CLOUD_AI_PIPELINE=1 make cloud-ai-smoke
 make cloud-ai-pipeline-smoke
 make cloud-ai-cache-smoke
 CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make cloud-ai-smoke
+make local-ai-server
+make web-ai-button-build
+make web-ai-button-smoke
 make audio-vad-build
 make audio-afe-readiness
 make audio-vad-preflight
@@ -199,6 +202,10 @@ make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 ```
 
 `make cloud-ai-smoke` uploads the self-developed `cloud_ai_terminal` sketch, runs the host serial relay in mock mode, and verifies the board displays an AI response. `make cloud-ai-pipeline-smoke` drives the silent ASR -> LLM -> TTS serial pipeline and verifies `PIPELINE_DONE` without using the microphone or speaker. `make cloud-ai-cache-smoke` additionally validates board-local NVS cache and runtime state commands. These slices validate the display and host/cloud protocol shape; real audio capture and speaker playback are tracked in `docs/p0-cloud-ai-terminal.md`.
+
+`make web-ai-button-smoke` starts a local Mac HTTP AI server, uploads `sketches/web_ai_button`, sends Wi-Fi credentials from the ignored `.env` file over serial, and verifies that the board can trigger the server and display the returned AI text. The AMOLED also shows a large `ASK AI` touch button for manual triggering after the smoke has configured Wi-Fi and the endpoint. Use `make local-ai-server` for a long-running server; details are in `docs/p1-web-ai-button.md`.
+
+Latest saved web-button evidence: `docs/evidence/web-ai-button-20260614-124803/summary.md`.
 
 `make audio-afe-readiness` rebuilds the ES7210/VAD probe and reports no-audio readiness for the AFE lane: implemented ES7210 capture and ESP-SR VAD source/build/checker status, plus planned AEC, NS, and WakeNet source-integration/physical-audio requirements. `make audio-vad-preflight` includes the same readiness report and remains safe when audio should stay quiet. `make audio-vad-smoke` uploads the ES7210 microphone probe, plays a host-side `say` stimulus, and validates serial RMS/peak metrics from the board. This is the microphone capture gate before full ASR streaming; details are in `docs/p0-audio-vad-probe.md`.
 

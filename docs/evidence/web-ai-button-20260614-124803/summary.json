@@ -1,0 +1,22 @@
+{
+  "id": "web-ai-button-20260614-124803",
+  "timestamp": "20260614-124803",
+  "sketch": "sketches/web_ai_button",
+  "build": "passed",
+  "upload": "passed",
+  "touch": "ready",
+  "wifi_join": "passed",
+  "http_ai_trigger": "passed",
+  "camera_ocr": "passed",
+  "manual_touch_event": "pending",
+  "expected_ocr": "AI",
+  "ocr_rotation": 180,
+  "destructive": 0,
+  "audio": 0,
+  "artifacts": {
+    "raw_image": "camera-ocr-20260614-124803.jpg",
+    "processed_image": "camera-ocr-20260614-124803.processed.png",
+    "ocr_text": "camera-ocr-20260614-124803.txt",
+    "server_log": "server.log"
+  }
+}

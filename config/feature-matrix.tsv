@@ -2,6 +2,7 @@ id	priority	name	build_target	smoke_target	check_script	sketch	doc	skill_action	
 official-demos	P0	Official demos	official-build-all	official-smoke	scripts/official-demo.sh	config/official-demos.tsv	docs/p0-official-demos.md	official-demo	conditional	verified
 xiaozhi-ai	P0	XiaoZhi AI	xiaozhi-idf-build	xiaozhi-preflight	scripts/xiaozhi.sh	config/xiaozhi-sdkconfig.defaults	docs/p0-xiaozhi-ai.md	xiaozhi	audio	required_external
 cloud-ai-terminal	P0	Cloud AI terminal	cloud-ai-build	cloud-ai-cache-smoke	scripts/cloud-ai-relay.py	sketches/cloud_ai_terminal	docs/p0-cloud-ai-terminal.md	cloud-ai	non_audio_control	verified
+web-ai-button	P1	Web AI button	web-ai-button-build	web-ai-button-smoke	scripts/web-ai-button-check.py	sketches/web_ai_button	docs/p1-web-ai-button.md	web-ai-button	none	required_external
 offline-voice	P1	Offline voice control	offline-voice-build	offline-voice-smoke	scripts/offline-voice-check.py	sketches/offline_voice_control	docs/p1-offline-voice-control.md	offline-voice	non_audio_control	verified
 lvgl-visual-agent	P1	Touch UI visual agent	lvgl-visual-agent-build	lvgl-visual-agent-smoke	scripts/lvgl-visual-agent-check.py	sketches/lvgl_visual_agent	docs/p1-lvgl-visual-agent.md	lvgl-visual-agent	none	verified
 imu-interaction	P1	IMU interaction	imu-interaction-build	imu-interaction-smoke	scripts/imu-interaction-check.py	sketches/imu_interaction_probe	docs/p1-imu-interaction-probe.md	imu-interaction	none	verified

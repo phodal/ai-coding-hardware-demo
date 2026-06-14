@@ -6,9 +6,10 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 
 | ID | Priority | Matrix status | Audio mode | Doc evidence | Latest suite | Posture | Next gap |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| official-demos | P0 | verified | conditional | 22 item(s) | passed `.logs/hardware-smoke-suite/20260614-084339/summary.json` | suite-passed | No immediate evidence gap. |
-| xiaozhi-ai | P0 | required_external | audio | 23 item(s) | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-gated | Needs external firmware/source environment evidence. |
+| official-demos | P0 | verified | conditional | 24 item(s) | passed `.logs/hardware-smoke-suite/20260614-084339/summary.json` | suite-passed | No immediate evidence gap. |
+| xiaozhi-ai | P0 | required_external | audio | 27 item(s) | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | suite-passed | No immediate evidence gap. |
+| web-ai-button | P1 | required_external | none | 5 item(s) | missing | external-gated | Needs external firmware/source environment evidence. |
 | offline-voice | P1 | verified | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
 | lvgl-visual-agent | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
 | imu-interaction | P1 | verified | none | 9 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
@@ -29,6 +30,8 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `make official-build DEMO=01-helloworld`: passed on the current Arduino CLI setup.
   - `make official-build-all`: passed for all 7 Arduino examples on the current Arduino CLI setup.
   - `make official-audio-preflight`: passed for `06-es7210-audio-in` and `07-es8311-audio-out`, with `official_audio_preflight_summary demos=2 failed=0 destructive=0 audio=0`.
+  - `make official-audio-physical-plan`: passed without uploading or using audio devices and reported both official audio demos as gated by `ALLOW_AUDIO`.
+  - `make official-audio-physical-smoke` without `ALLOW_AUDIO=1`: refused with `official_audio_physical_smoke status=refused ... destructive=0 audio=0`.
   - `make official-coverage`: passed read-only audit with `official_coverage_summary demos=7 built=7 physical_smoke=5 missing_physical=2 audio_demos=2 audio_quiet_ready=2 destructive=0 audio=0`.
   - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh official-demo /Users/phodal/hardware/arduino coverage`: passed the same read-only audit through the global Skill helper.
   - `SMOKE_SECONDS=8 make official-smoke DEMO=01-helloworld`: uploaded to `/dev/cu.usbmodem83101` and matched serial text `loop`.
@@ -58,10 +61,14 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - Matched asset: `v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip`.
   - `make xiaozhi-inspect` confirmed the downloaded asset contains `merged-binary.bin` with size `11240285` bytes.
   - `make xiaozhi-preflight` verifies the current release asset, `merged-binary.bin` SHA-256, esptool path, serial port, source checkout marker, and ESP-IDF availability without flashing firmware or using audio hardware.
-  - Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=/Users/phodal/hardware/arduino/.vendor/esp-idf-v5.5.4/tools/idf.py destructive=0 audio=0`.
+  - Latest `xiaozhi_preflight_summary`: `tag=v2.2.6 asset=v2.2.6_waveshare-esp32-s3-touch-amoled-1.75c.zip asset_size=3116104 release_source=live slug=waveshare-esp32-s3-touch-amoled-1.75c port=/dev/cu.usbmodem83101 esptool=/Users/phodal/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool source=v2.2.6-37-g3f9e5fc idf=/Users/phodal/hardware/arduino/.vendor/esp-idf-v5.5.4/tools/idf.py destructive=0 audio=0`.
+  - `XIAOZHI_RELEASE_REPO=invalid/invalid make xiaozhi-preflight`: passed the non-destructive cache fallback path and reported `release_source=cache`, proving preflight can still validate the locally cached firmware zip during release API/TLS failures.
   - Latest `merged-binary.bin` SHA-256: `c08f389e2650b2076d2155fa62c0b34c5f3359e07833a8fca5f0f53c6e8bf7dd`.
   - `make xiaozhi-backup`: read the current board flash without writing or using audio hardware.
   - Latest `xiaozhi_backup_summary`: `path=/Users/phodal/hardware/arduino/.vendor/xiaozhi/backups/esp32s3-flash-20260614-081746.bin address=0x0 size=0x1000000 baud=115200 no_stub=1 bytes=16777216 sha256=8b411598bb4d2ab2142f0dd63f64d3fd9a71d9e78077b1d34a706b6463d02638 destructive=0 audio=0`.
+  - `make xiaozhi-runtime-check`, `make xiaozhi-visual-check`, and `make xiaozhi-runtime-visual-check` are wired for the post-flash no-audio runtime gate, but they have not been run against XiaoZhi firmware yet because flashing was not approved during this update.
+  - Offline checker validation used a fixture log with `XiaoZhi`/`验证码` markers and emitted `xiaozhi_runtime_summary ... destructive=0 audio=0`; `XIAOZHI_RUNTIME_INPUT_LOG=<path> make xiaozhi-runtime-check` provides the same no-serial fixture path for Skill/helper smoke tests.
+  - Camera OCR matcher validation used an existing captured image with `OCR_EXPECTED_ANY=OK`, proving the multi-marker path without recapturing or using audio devices.
   - Standalone `esptool.py` is not installed, but Arduino ESP32 core provides `~/Library/Arduino15/packages/esp32/tools/esptool_py/5.1.0/esptool`.
   - `make xiaozhi-source-clone` cloned official source to `.vendor/xiaozhi/source` at `v2.2.6-37-g3f9e5fc`.
   - `make xiaozhi-source-check` confirmed the source tree contains `CONFIG_BOARD_TYPE_WAVESHARE_ESP32_S3_TOUCH_AMOLED_1_75C`.
@@ -96,6 +103,17 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - Latest visual artifact: `.logs/camera-ocr-20260613-225433.jpg`.
   - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target cloud-ai-terminal --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-060731/summary.json`.
   - Observed relay result: `{"status": "ok", "mode": "mock", "pipeline": true, "cache": true, "response": "AI OK", "tts": "tts frame ready", "session": "codex-session", "request_id": "req-codex-1"}`.
+
+## web-ai-button
+
+- Doc: `docs/p1-web-ai-button.md`
+- Latest suite summary: missing
+- Verified Locally:
+  - `make web-ai-button-build`: passed with `1136107 bytes` program storage and `47224 bytes` dynamic memory.
+  - `SKIP_BUILD=1 make web-ai-button-smoke`: uploaded to `/dev/cu.usbmodem83101`, started the local mock AI server, configured the board endpoint to `http://<mac-lan-ip>:8787/ask`, joined Wi-Fi with credentials from `.env`, reached `WEB_AI_RESPONSE status=ok code=200 text=AI OK from Mac`, and reported `web_ai_button_summary connected=1 ip=192.168.31.65 triggers=1 touch=1`.
+  - `OCR_EXPECTED=AI OCR_ROTATE=180 LOG_DIR=.logs/web-ai-button-visual ./scripts/camera-ocr.sh`: passed against the AI response screen and OCR saw `WEB AI` plus `ASK AI`.
+  - Evidence pack: `docs/evidence/web-ai-button-20260614-124803/summary.md`.
+  - Physical human tap on the AMOLED button is still pending; the touch controller is ready and the same `triggerAi()` path is wired to touch and serial trigger events.
 
 ## offline-voice
 

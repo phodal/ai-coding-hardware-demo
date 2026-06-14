@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 DEMO ?= 01-helloworld
 
-.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-color-check camera-aligner camera-diagnose camera-ready ok-qoder-evidence claude-skill-smoke feature-matrix-check feature-matrix-doc hardware-evidence-audit hardware-evidence-doc visual-evidence-audit visual-evidence-doc goal-completion-audit goal-completion-doc remaining-gates-preflight remaining-gates-list hardware-smoke-list hardware-smoke-suite official-demos official-build official-upload official-smoke official-build-all official-audio-preflight official-audio-physical-plan official-audio-physical-smoke official-coverage xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-preflight xiaozhi-backup xiaozhi-runtime-check xiaozhi-visual-check xiaozhi-runtime-visual-check xiaozhi-restore xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check xiaozhi-idf-env xiaozhi-idf-build cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-pipeline-smoke cloud-ai-cache-smoke cloud-ai-relay audio-vad-build audio-afe-readiness audio-vad-preflight audio-vad-smoke speaker-output-build speaker-output-smoke sensor-status-build sensor-status-smoke power-lifecycle-build power-lifecycle-smoke wifi-connectivity-build wifi-connectivity-smoke touch-status-build touch-status-smoke interaction-dashboard-build interaction-dashboard-smoke imu-interaction-build imu-interaction-smoke desk-widget-build desk-widget-smoke desk-widget-relay-smoke iot-panel-build iot-panel-smoke iot-panel-relay-smoke tinyml-imu-build tinyml-imu-model-check tinyml-imu-smoke esp-claw-agent-build esp-claw-agent-smoke offline-voice-build offline-voice-smoke lvgl-visual-agent-build lvgl-visual-agent-smoke install-hooks hook-smoke board-list clean
+.PHONY: setup build upload monitor smoke visual-smoke camera-ocr camera-color-check camera-aligner camera-diagnose camera-ready ok-qoder-evidence claude-skill-smoke feature-matrix-check feature-matrix-doc hardware-evidence-audit hardware-evidence-doc visual-evidence-audit visual-evidence-doc goal-completion-audit goal-completion-doc remaining-gates-preflight remaining-gates-list hardware-smoke-list hardware-smoke-suite official-demos official-build official-upload official-smoke official-build-all official-audio-preflight official-audio-physical-plan official-audio-physical-smoke official-coverage xiaozhi-latest xiaozhi-download xiaozhi-inspect xiaozhi-preflight xiaozhi-backup xiaozhi-runtime-check xiaozhi-visual-check xiaozhi-runtime-visual-check xiaozhi-restore xiaozhi-flash xiaozhi-source-clone xiaozhi-source-check xiaozhi-idf-env xiaozhi-idf-build cloud-ai-build cloud-ai-upload cloud-ai-smoke cloud-ai-pipeline-smoke cloud-ai-cache-smoke cloud-ai-relay local-ai-server web-ai-button-build web-ai-button-upload web-ai-button-smoke audio-vad-build audio-afe-readiness audio-vad-preflight audio-vad-smoke speaker-output-build speaker-output-smoke sensor-status-build sensor-status-smoke power-lifecycle-build power-lifecycle-smoke wifi-connectivity-build wifi-connectivity-smoke touch-status-build touch-status-smoke interaction-dashboard-build interaction-dashboard-smoke imu-interaction-build imu-interaction-smoke desk-widget-build desk-widget-smoke desk-widget-relay-smoke iot-panel-build iot-panel-smoke iot-panel-relay-smoke tinyml-imu-build tinyml-imu-model-check tinyml-imu-smoke esp-claw-agent-build esp-claw-agent-smoke offline-voice-build offline-voice-smoke lvgl-visual-agent-build lvgl-visual-agent-smoke install-hooks hook-smoke board-list clean
 
 setup:
 	./scripts/setup.sh
@@ -164,6 +164,18 @@ cloud-ai-cache-smoke:
 
 cloud-ai-relay:
 	python3 ./scripts/cloud-ai-relay.py --port $(ARDUINO_PORT)
+
+local-ai-server:
+	python3 ./scripts/local-ai-webserver.py --host $${WEB_AI_SERVER_HOST:-0.0.0.0} --port $${WEB_AI_SERVER_PORT:-8787} --mode $${WEB_AI_SERVER_MODE:-mock}
+
+web-ai-button-build:
+	SKETCH=sketches/web_ai_button BUILD_PATH=.arduino-build/web_ai_button ./scripts/build.sh
+
+web-ai-button-upload:
+	SKETCH=sketches/web_ai_button BUILD_PATH=.arduino-build/web_ai_button ./scripts/upload.sh
+
+web-ai-button-smoke:
+	./scripts/web-ai-button-smoke.sh
 
 audio-vad-build:
 	SKETCH=sketches/audio_vad_probe BUILD_PATH=.arduino-build/audio_vad_probe ./scripts/build.sh

@@ -61,7 +61,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - The project runner stages vendor examples under `.arduino-build/official-sketches/<id>` because several official `.ino` filenames do not match their parent folder names, which `arduino-cli` requires.
 
 8. For feature coverage auditing:
-   - Run `make feature-matrix-check` to verify all 12 requested feature directions have matching Makefile targets, scripts/sketches, docs, and Skill helper wiring.
+   - Run `make feature-matrix-check` to verify all tracked feature directions have matching Makefile targets, scripts/sketches, docs, and Skill helper wiring.
    - Run `make feature-matrix-doc` after changing `config/feature-matrix.tsv` to regenerate `docs/hardware-verification-matrix.md`.
    - Run `make hardware-evidence-audit` to identify lanes with missing `Verified Locally` sections or missing smoke-suite evidence.
    - Run `make hardware-evidence-doc` to regenerate `docs/hardware-evidence-audit.md`.
@@ -98,7 +98,15 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make cloud-ai-smoke` when the camera is positioned for OCR; serial verifies `AI OK`, while OCR should at least see stable `OK`.
    - Treat this as the verified non-audio cloud terminal control-plane slice; pipeline smoke does not use microphone or speaker hardware. ES7210 microphone input and ES8311 speaker output still need dedicated audio stream validation in an allowed audio window.
 
-11. For microphone/audio-front-end validation:
+11. For the local web AI button:
+   - Run `make local-ai-server` to start the Mac-side HTTP AI trigger server.
+   - Run `make web-ai-button-build` to compile the Wi-Fi + touch-button sketch.
+   - Run `make web-ai-button-smoke` to start the local server, upload the sketch, pass ignored `.env` Wi-Fi credentials over serial, configure the board endpoint to the Mac LAN IP, and verify `WEB_AI_RESPONSE status=ok`.
+   - Use `WEB_AI_BUTTON_VISUAL_SMOKE=1 make web-ai-button-smoke` when camera OCR should also verify the board reaches the AI response screen.
+   - Do not hard-code or commit SSIDs, passwords, local IPs, or AI command credentials. The default local server mode is mock; use `WEB_AI_SERVER_MODE=command` and `AI_TRIGGER_COMMAND=...` only for supervised local AI experiments.
+   - This path is safe for late-night validation because it does not play audio or use the host microphone.
+
+12. For microphone/audio-front-end validation:
    - Run `make audio-vad-build` to compile the ES7210 microphone probe.
    - Run `make audio-afe-readiness` when audio should stay quiet and you only need machine-readable AFE readiness; it rebuilds and reports implemented source/build/checker readiness versus source-integration and physical-audio requirements.
    - Run `make audio-vad-preflight` when audio should stay quiet; it rebuilds and checks artifacts, serial port, ES7210 source markers, checker options, and `config/audio-afe-profile.tsv` without uploading, playing stimulus, or opening audio devices.
@@ -107,80 +115,80 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Use `AUDIO_VAD_REQUIRE_SPEECH=1 make audio-vad-smoke` only when the host speaker is close enough for reliable VAD.
    - Use `AUDIO_VAD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make audio-vad-smoke` when camera OCR should verify the screen reaches `OK`.
 
-12. For speaker/audio-output validation:
+13. For speaker/audio-output validation:
    - Run `make speaker-output-build` to compile the ES8311 speaker tone probe.
    - Run `make speaker-output-smoke` to upload it, trigger a 1 kHz / 1.5 kHz tone over serial, and validate the output through host microphone capture.
    - Use `SPEAKER_AUDIO_DEVICE=<avfoundation audio index>` when the default camera microphone is not close to the board speaker.
    - Use `SPEAKER_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make speaker-output-smoke` when camera OCR should verify the screen reaches `OK`.
    - Do not run audible speaker or microphone smoke tests late at night unless the user explicitly asks for them.
 
-13. For PMU/IMU sensor validation:
+14. For PMU/IMU sensor validation:
    - Run `make sensor-status-build` to compile the AXP2101 + QMI8658 status probe.
    - Run `make sensor-status-smoke` to upload it and validate silent serial metrics from the PMU and IMU.
    - Use `SENSOR_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make sensor-status-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-14. For battery and low-power lifecycle validation:
+15. For battery and low-power lifecycle validation:
    - Run `make power-lifecycle-build` to compile the AXP2101 power lifecycle probe.
    - Run `make power-lifecycle-smoke` to upload it and validate DIM, STANDBY, ACTIVE, brightness, capacity, load-profile, wake, and runtime-estimate serial behavior.
    - Use `POWER_REQUIRE_BATTERY=1 make power-lifecycle-smoke` only when a battery is physically connected; the default smoke should not fail USB-only benches.
    - Use `POWER_LIFECYCLE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make power-lifecycle-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone. Its standby mode keeps serial alive and should not be treated as proof of true ESP32 deep sleep or measured current draw.
 
-15. For Wi-Fi connectivity validation:
+16. For Wi-Fi connectivity validation:
    - Run `make wifi-connectivity-build` to compile the ESP32-S3 Wi-Fi scan/join probe.
    - Run `make wifi-connectivity-smoke` to upload it and validate Wi-Fi radio initialization plus scan completion without storing credentials.
    - Use `WIFI_TEST_SSID=... WIFI_TEST_PASSWORD=... make wifi-connectivity-smoke` only for a supervised join check; never commit SSIDs or passwords.
    - Use `WIFI_CONNECTIVITY_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make wifi-connectivity-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone. The default serial log avoids printing SSID names.
 
-16. For touch controller validation:
+17. For touch controller validation:
    - Run `make touch-status-build` to compile the CST92xx touch controller probe.
    - Run `make touch-status-smoke` to upload it and validate the touch controller is online through serial status and AMOLED OCR.
    - Use `TOUCH_REQUIRE_EVENT=1 make touch-status-smoke` only when a human can touch the screen during the smoke window.
    - Use `TOUCH_STATUS_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make touch-status-smoke` when camera OCR should verify the screen reaches `OK`.
 
-17. For combined non-audio app validation:
+18. For combined non-audio app validation:
    - Run `make interaction-dashboard-build` to compile the combined display, touch-controller, PMU, and IMU dashboard.
    - Run `make interaction-dashboard-smoke` to upload it and drive page changes, serial-simulated IMU gesture handling, brightness, standby, and wake transitions without requiring a human tap.
    - Use `INTERACTION_DASHBOARD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make interaction-dashboard-smoke` when camera OCR should verify the final dashboard page reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-18. For dedicated IMU interaction validation:
+19. For dedicated IMU interaction validation:
    - Run `make imu-interaction-build` to compile the QMI8658 wrist wake, shake switch, posture menu, and step counter probe.
    - Run `make imu-interaction-smoke` to upload it and validate deterministic serial-injected IMU samples for `WRIST_WAKE`, `SHAKE_SWITCH`, `POSE_MENU`, `STEP`, and `MENU_NEXT`.
    - Use `IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make imu-interaction-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio, use the host microphone, or require physically shaking the board.
 
-19. For LVGL visual-agent validation:
+20. For LVGL visual-agent validation:
    - Run `make lvgl-visual-agent-build` to compile the repo-owned LVGL tabview app.
    - Run `make lvgl-visual-agent-smoke` to upload it and validate LVGL initialization, display flush, CST92xx touch input registration, chat bubbles, cards, settings, agent thoughts, and tab/page changes over serial.
    - Use `LVGL_VISUAL_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make lvgl-visual-agent-smoke` when camera OCR should verify the screen reaches `OK`.
    - Treat this as the agent-specific LVGL UI slice; the official `05-lvgl-widgets` demo remains the vendor baseline.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-20. For desktop AI widget validation:
+21. For desktop AI widget validation:
    - Run `make desk-widget-build` to compile the serial-driven desktop widget.
    - Run `make desk-widget-smoke` to upload it and validate CI/GitHub/alert/calendar/timer/AI-summary pages without network credentials.
    - Run `make desk-widget-relay-smoke` to validate the host event adapter that maps mock, JSON, or HTTP events into the widget serial protocol.
    - Use `DESK_WIDGET_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make desk-widget-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-21. For IoT control panel validation:
+22. For IoT control panel validation:
    - Run `make iot-panel-build` to compile the serial-driven Home Assistant / MQTT / HTTP control panel.
    - Run `make iot-panel-smoke` to upload it and validate device state changes, explicit `IOT_HA` Home Assistant service calls, MQTT-style inbound updates, HTTP-style outbound actions, and scenes without Wi-Fi credentials.
    - Run `make iot-panel-relay-smoke` to validate the host event adapter that maps mock, JSON, or HTTP smart-home events into the panel serial protocol, including board-side `IOT_HA` output and the `ha=` state counter.
    - Use `IOT_PANEL_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make iot-panel-smoke` when camera OCR should verify the screen reaches `OK`.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-22. For offline voice-control state-machine validation:
+23. For offline voice-control state-machine validation:
    - Run `make offline-voice-build` to compile the WakeNet/MultiNet-facing serial harness.
    - Run `make offline-voice-smoke` to upload it and validate pre-wake command rejection, wake events, command recognition, runtime command add/modify/delete, continuous mode, sleep/wake state, and local actions without using the microphone.
    - Use `OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make offline-voice-smoke` when camera OCR should verify the screen reaches `OK`.
    - Treat this as the deterministic control-plane gate before wiring real ESP-SR audio frames and models.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-23. For TinyML / IMU classifier validation:
+24. For TinyML / IMU classifier validation:
    - Run `make tinyml-imu-model-check` to validate the checked-in nearest-centroid model metadata and validation set.
    - Run `make tinyml-imu-build` to compile the QMI8658 TinyML classifier.
    - Run `make tinyml-imu-smoke` to upload it, verify the board-reported model hash, disable live IMU mode, inject deterministic serial feature vectors, and verify `REST`, `TILT_LEFT`, `TILT_RIGHT`, `FACE_UP`, and `SHAKE` labels.
@@ -188,16 +196,16 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Treat this as a small TinyML automation model. The current embedded nearest-centroid classifier can be replaced by ESP-DL or a larger trained model later without removing the deterministic serial sample gate.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-24. For ESP-Claw / OpenClaw agent harness validation:
+25. For ESP-Claw / OpenClaw agent harness validation:
    - Run `make esp-claw-agent-build` to compile the Arduino compatibility harness for the ESP-Claw/OpenClaw direction.
    - Run `make esp-claw-agent-smoke` to upload it and validate local rule add, Lua-style rule loading, event sensing, rule decision, MCP-style tool registration/invocation, IM chat input, tagged memory put/get, and LLM fallback routing over serial.
    - Use `ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make esp-claw-agent-smoke` when camera OCR should verify the screen reaches `OK`.
    - Treat this as a deterministic compatibility harness, not the official ESP-Claw firmware image. It exists so automation can prove the agent loop before IM credentials, Wi-Fi, and full ESP-Claw source builds are introduced.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 
-25. For Skill automation wiring:
-   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile `cloud_ai_terminal`, `audio_vad_probe`, `speaker_output_probe`, `sensor_status_probe`, `power_lifecycle_probe`, `wifi_connectivity_probe`, `touch_status_probe`, `interaction_dashboard`, `imu_interaction_probe`, `lvgl_visual_agent`, `desk_widget`, `iot_control_panel`, `offline_voice_control`, `tinyml_imu_classifier`, and `esp_claw_agent`.
-   - Run `scripts/waveshare-arduino-cli.sh feature-matrix <project-dir> check` to validate coverage metadata before claiming all 12 requested directions are wired.
+26. For Skill automation wiring:
+   - Run `scripts/waveshare-arduino-cli.sh verify <project-dir>` from this skill to prove the agent-facing entrypoint can inspect the toolchain, see the USB board, list official demos, and clean-compile `cloud_ai_terminal`, `web_ai_button`, `audio_vad_probe`, `speaker_output_probe`, `sensor_status_probe`, `power_lifecycle_probe`, `wifi_connectivity_probe`, `touch_status_probe`, `interaction_dashboard`, `imu_interaction_probe`, `lvgl_visual_agent`, `desk_widget`, `iot_control_panel`, `offline_voice_control`, `tinyml_imu_classifier`, and `esp_claw_agent`.
+   - Run `scripts/waveshare-arduino-cli.sh feature-matrix <project-dir> check` to validate coverage metadata before claiming all tracked directions are wired.
    - Run `scripts/waveshare-arduino-cli.sh visual-evidence <project-dir> audit` to check camera/OCR evidence coverage through the Skill helper.
    - Run `scripts/waveshare-arduino-cli.sh ok-qoder-evidence <project-dir>` to build, upload, serial-smoke, and camera-OCR the default `OK Qoder` hello sketch into a committed evidence pack under `docs/evidence/`.
    - Run `make claude-skill-smoke` from this repo to ask the local Claude CLI to read the repo Skill and invoke this helper for the non-audio visual smoke path. The wrapper records Claude's transcript plus the command log under `.logs/`, and `CLAUDE_SKILL_SMOKE_MODE=audit` switches to a no-upload feature-matrix check.
@@ -206,6 +214,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
      `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> smoke`
      `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> pipeline`
      `scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> cache`
+     `WEB_AI_BUTTON_VISUAL_SMOKE=1 scripts/waveshare-arduino-cli.sh web-ai-button <project-dir> smoke`
      `scripts/waveshare-arduino-cli.sh audio-vad <project-dir> readiness`
      `AUDIO_VAD_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh audio-vad <project-dir> smoke`
      `SPEAKER_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh speaker-output <project-dir> smoke`
@@ -289,6 +298,9 @@ make cloud-ai-build
 make cloud-ai-smoke
 make cloud-ai-pipeline-smoke
 make cloud-ai-cache-smoke
+make local-ai-server
+make web-ai-button-build
+make web-ai-button-smoke
 make audio-vad-build
 make audio-afe-readiness
 make audio-vad-preflight

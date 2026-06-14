@@ -19,3 +19,5 @@ Use `ALLOW_PARTIAL=1 make ok-qoder-evidence` only when you intentionally want to
 Serial logs prove firmware control flow. Camera/OCR artifacts prove the AMOLED rendered the expected screen.
 
 Current passing baseline: `ok-qoder-20260614-120532`. It records `display_rotation=0` and `ocr_rotation=180` for the current desk camera mount.
+
+`web-ai-button-*` packs record the Mac local webserver plus ESP32-S3 Wi-Fi AI button lane. `web-ai-button-20260614-124803` proves build/upload, Wi-Fi join, local HTTP AI response, touch-controller readiness, and camera OCR of the `WEB AI` / `ASK AI` screen; supervised physical tap evidence is tracked separately from serial-trigger evidence.
