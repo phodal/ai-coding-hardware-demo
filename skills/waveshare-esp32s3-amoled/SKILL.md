@@ -186,7 +186,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 23. For offline voice-control state-machine validation:
    - Run `make offline-voice-build` to compile the WakeNet/MultiNet-facing serial harness.
    - Run `make offline-voice-smoke` to upload it and validate pre-wake command rejection, wake events, command recognition, runtime command add/modify/delete, continuous mode, sleep/wake state, and local actions without using the microphone.
-   - Use `OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make offline-voice-smoke` when camera OCR should verify the screen reaches `OK`.
+   - Use `OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 make offline-voice-smoke` when camera OCR should verify the screen reaches the stable `VOICE` marker.
    - Treat this as the deterministic control-plane gate before wiring real ESP-SR audio frames and models.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 

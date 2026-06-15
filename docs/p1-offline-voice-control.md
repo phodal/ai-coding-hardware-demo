@@ -19,7 +19,7 @@ Reference context:
 ```bash
 make offline-voice-build
 make offline-voice-smoke
-OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make offline-voice-smoke
+OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 make offline-voice-smoke
 ```
 
 The smoke script uploads the harness, sends `WAKE:` and `CMD:` events, validates command rejection before wake, adds/modifies/deletes a runtime command, toggles continuous mode, and checks final state.
@@ -52,7 +52,7 @@ The smoke script uploads the harness, sends `WAKE:` and `CMD:` events, validates
   - runtime command `VOICE_COMMAND_MODIFIED id=FOCUS`
   - runtime command `VOICE_COMMAND_DELETED id=FOCUS`
   - final `VOICE_STATE ... mode=CONTINUOUS`
-- Visual: optional OCR sees `OK` on the AMOLED.
+- Visual: optional OCR sees the stable `VOICE` marker on the AMOLED. `OK` remains visible, but Vision can misread its `K` as a non-ASCII glyph in the current camera mount.
 
 ## Notes
 
@@ -65,3 +65,4 @@ The smoke script uploads the harness, sends `WAKE:` and `CMD:` events, validates
 - `SKIP_BUILD=1 make offline-voice-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated pre-wake rejection, WakeNet/MultiNet serial simulation, runtime command add/modify/delete, continuous mode, sleep/wake, and light state.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target offline-voice --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-055754/summary.json`.
 - Observed summary: `offline_voice_summary states=3 page_flow=COMMANDS,STATE,LOG,HOME commands=5 enabled=4 recognized=6 rejected=2 actions=6 mode=CONTINUOUS light=0 asleep=0`.
+- `SKIP_BUILD=1 OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 OFFLINE_VOICE_SECONDS=4 CAMERA_CAPTURE_TIMEOUT=8 make offline-voice-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated the same WakeNet/MultiNet serial state-machine path, saved `.logs/camera-ocr-20260616-074553.jpg`, and passed camera OCR on `VOICE`.

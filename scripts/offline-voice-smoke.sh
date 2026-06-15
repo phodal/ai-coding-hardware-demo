@@ -31,5 +31,5 @@ fi
 python3 "$ROOT_DIR/scripts/offline-voice-check.py" "${OFFLINE_VOICE_CHECK_ARGS[@]}"
 
 if [[ "${OFFLINE_VOICE_VISUAL_SMOKE:-0}" == "1" ]]; then
-  OCR_EXPECTED="${OFFLINE_VOICE_OCR_EXPECTED:-OK}" "$ROOT_DIR/scripts/camera-ocr.sh"
+  OCR_EXPECTED="${OFFLINE_VOICE_OCR_EXPECTED:-VOICE}" "$ROOT_DIR/scripts/camera-ocr.sh"
 fi

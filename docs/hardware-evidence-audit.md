@@ -10,7 +10,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | xiaozhi-ai | P0 | required_external | audio | 27 item(s) | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | suite-passed | No immediate evidence gap. |
 | web-ai-button | P1 | required_external | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260615-081705/summary.json` | external-gated | Needs external firmware/source environment evidence. |
-| offline-voice | P1 | verified | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
+| offline-voice | P1 | verified | non_audio_control | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
 | lvgl-visual-agent | P1 | verified | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
 | imu-interaction | P1 | verified | none | 9 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
 | power-lifecycle | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
@@ -127,6 +127,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `SKIP_BUILD=1 make offline-voice-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated pre-wake rejection, WakeNet/MultiNet serial simulation, runtime command add/modify/delete, continuous mode, sleep/wake, and light state.
   - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target offline-voice --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-055754/summary.json`.
   - Observed summary: `offline_voice_summary states=3 page_flow=COMMANDS,STATE,LOG,HOME commands=5 enabled=4 recognized=6 rejected=2 actions=6 mode=CONTINUOUS light=0 asleep=0`.
+  - `SKIP_BUILD=1 OFFLINE_VOICE_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 OFFLINE_VOICE_SECONDS=4 CAMERA_CAPTURE_TIMEOUT=8 make offline-voice-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated the same WakeNet/MultiNet serial state-machine path, saved `.logs/camera-ocr-20260616-074553.jpg`, and passed camera OCR on `VOICE`.
 
 ## lvgl-visual-agent
 
