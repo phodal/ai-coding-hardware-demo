@@ -1,0 +1,64 @@
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=14
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=14
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=2 mode=mock source=board-get chars=14
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_request count=3 mode=mock source=board-get chars=14
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET / HTTP/1.1" 404 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=4 mode=mock source=board-get chars=14
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_request count=2 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_request count=3 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=4 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_server_ready host=0.0.0.0 port=8787 mode=mock
+local_ai_http 127.0.0.1 "GET /health HTTP/1.1" 200 -
+local_ai_request count=1 mode=mock source=board-get chars=17
+local_ai_http <esp32-lan-ip> "GET /ask?question=touch+button&source=esp32-web-ai-button HTTP/1.1" 200 -

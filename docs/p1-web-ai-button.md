@@ -93,11 +93,9 @@ Manual validation is the same runtime path: leave the local server running, tap 
 
 ## Verified Locally
 
-- `make web-ai-button-build`: passed with `1136687 bytes` program storage and `47224 bytes` dynamic memory.
-- `SKIP_BUILD=1 WEB_AI_KEEP_SERVER=1 make web-ai-button-smoke`: uploaded to `/dev/cu.usbmodem83101`, started the local mock AI server, configured the board endpoint to `http://<mac-lan-ip>:8787/ask`, joined Wi-Fi with credentials from `.env`, reached `WEB_AI_RESPONSE status=ok code=200 text=Qoder OK from Mac`, and reported `web_ai_button_summary connected=1 ip=<esp32-lan-ip> triggers=1 touch=1`.
+- `WEB_AI_KEEP_SERVER=1 WEB_AI_BUTTON_VISUAL_SMOKE=1 OCR_ROTATE=180 make web-ai-button-smoke`: built and uploaded `1136975 bytes` of program storage to `/dev/cu.usbmodem83101`, started the local mock AI server, configured the board endpoint to `http://<mac-lan-ip>:8787/ask`, joined Wi-Fi with credentials from `.env`, reached `WEB_AI_RESPONSE status=ok code=200 text=Qoder OK from Mac`, reported `web_ai_button_summary connected=1 ip=<esp32-lan-ip> triggers=1 touch=1`, saved `docs/evidence/web-ai-button-qoder-20260615-081421/camera-ocr-20260615-081421.jpg`, and passed camera OCR on `OK`.
 - `WEB_AI_KEEP_SERVER=1` was verified after the smoke: the detached server process was still running and `GET /health` returned HTTP 200.
-- `WEB_AI_KEEP_SERVER=1 WEB_AI_BUTTON_VISUAL_SMOKE=1 OCR_ROTATE=180 make web-ai-button-smoke` saved the Qoder screen at `docs/evidence/web-ai-button-qoder-20260614-145545/camera-ocr-20260614-145545.jpg`, but exact OCR remained partial: Vision read the large `OK` marker as `Bol` in this camera position, so the visual command exited non-zero after the functional serial/HTTP checks passed.
-- Evidence pack: `docs/evidence/web-ai-button-qoder-20260614-145545/summary.md`.
+- Evidence pack: `docs/evidence/web-ai-button-qoder-20260615-081421/summary.md`.
 - A real pre-config tap was captured before this guard existed and returned `wifi_missing`; the current firmware now ignores pre-config button taps with `WEB_AI_TOUCH_IGNORED reason=not_ready` instead of treating them as failed AI requests. Touch remains wired to the same `triggerAi()` path after Wi-Fi and endpoint configuration.
 
 ## Notes

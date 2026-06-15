@@ -11,6 +11,10 @@
 #define DISPLAY_ROTATION 0
 #endif
 
+#ifndef DISPLAY_BRIGHTNESS
+#define DISPLAY_BRIGHTNESS 96
+#endif
+
 Arduino_DataBus *bus = new Arduino_ESP32QSPI(
   LCD_CS, LCD_SCLK, LCD_SDIO0, LCD_SDIO1, LCD_SDIO2, LCD_SDIO3);
 
@@ -88,6 +92,19 @@ void drawScreen(const char *status, uint16_t statusColor = RGB565_WHITE) {
   }
   gfx->fillScreen(RGB565_BLACK);
   gfx->drawRoundRect(14, 14, LCD_WIDTH - 28, LCD_HEIGHT - 28, 22, RGB565_BLUE);
+
+  if (strcmp(status, "AI OK") == 0) {
+    centerText("Qoder", 50, 6, RGB565_CYAN);
+    centerText("OK", 136, 9, RGB565_WHITE);
+    centerText("AI OK", 238, 3, RGB565_GREEN);
+    drawWrapped(lastResponse, 54, 304, 2, RGB565_WHITE);
+    gfx->setTextSize(2);
+    gfx->setTextColor(wifiReady ? RGB565_GREEN : RGB565_YELLOW, RGB565_BLACK);
+    gfx->setCursor(54, 396);
+    gfx->print("WiFi ");
+    gfx->print(wifiReady ? "ready" : "missing");
+    return;
+  }
 
   centerText("Qoder", 42, 6, RGB565_CYAN);
   centerText("OK", 104, 5, RGB565_WHITE);
@@ -432,7 +449,7 @@ void setup() {
   Wire.begin(IIC_SDA, IIC_SCL);
   if (gfx->begin()) {
     gfx->setRotation(DISPLAY_ROTATION);
-    gfx->setBrightness(180);
+    gfx->setBrightness(DISPLAY_BRIGHTNESS);
     displayReady = true;
   } else {
     Serial.println("WEB_AI_DISPLAY_FAILED");

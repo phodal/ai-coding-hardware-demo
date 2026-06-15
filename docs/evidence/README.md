@@ -20,4 +20,4 @@ Serial logs prove firmware control flow. Camera/OCR artifacts prove the AMOLED r
 
 Current passing baseline: `ok-qoder-20260614-120532`. It records `display_rotation=0` and `ocr_rotation=180` for the current desk camera mount.
 
-`web-ai-button-*` packs record the Mac local webserver plus ESP32-S3 Wi-Fi AI button lane. `web-ai-button-qoder-20260614-145545` proves build/upload, Wi-Fi join, local HTTP AI response, touch-controller readiness, server keepalive, and camera capture of the `Qoder` / `OK` screen; exact camera OCR remained partial because Vision read the marker as `Bol`. Supervised physical tap evidence is tracked separately from serial-trigger evidence.
+`web-ai-button-*` packs record the Mac local webserver plus ESP32-S3 Wi-Fi AI button lane. `web-ai-button-qoder-20260615-081421` proves build/upload, Wi-Fi join, local HTTP AI response, touch-controller readiness, server keepalive, camera capture of the `Qoder` / `OK` screen, and camera OCR on the stable `OK` marker. Supervised physical tap evidence is tracked separately from serial-trigger evidence.
