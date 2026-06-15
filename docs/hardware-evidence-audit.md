@@ -17,7 +17,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | desk-widget | P1 | verified | none | 17 item(s) | passed `.logs/hardware-smoke-suite/20260614-052802/summary.json` | suite-passed | No immediate evidence gap. |
 | iot-panel | P1 | verified | none | 6 item(s) | passed `.logs/hardware-smoke-suite/20260614-053656/summary.json` | suite-passed | No immediate evidence gap. |
 | esp-claw-agent | P2 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055205/summary.json` | suite-passed | No immediate evidence gap. |
-| tinyml-imu | P2 | verified | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-054530/summary.json` | suite-passed | No immediate evidence gap. |
+| tinyml-imu | P2 | verified | none | 6 item(s) | passed `.logs/hardware-smoke-suite/20260614-054530/summary.json` | suite-passed | No immediate evidence gap. |
 | audio-front-end | P2 | required_quiet_window | audio | 14 item(s) | missing | quiet-window-gated | Needs an explicit quiet-window audio run. |
 
 ## official-demos
@@ -227,6 +227,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `SKIP_BUILD=1 make tinyml-imu-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated `hash=tinyml-imu-centroid-v1`, `prototypes=5`, `validation_accuracy=1.000`, and labels `REST,TILT_LEFT,TILT_RIGHT,FACE_UP,SHAKE`.
   - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target tinyml-imu --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-054530/summary.json`.
   - Observed summary: `tinyml_imu_summary classifications=5 labels=REST,TILT_LEFT,TILT_RIGHT,FACE_UP,SHAKE model=tinyml-imu-centroid-v1 min_confidence=0.914`.
+  - `SKIP_BUILD=1 TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 TINYML_IMU_SECONDS=3 CAMERA_CAPTURE_TIMEOUT=8 make tinyml-imu-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated the same five serial-injected IMU labels with `min_confidence=0.914`, saved `.logs/camera-ocr-20260616-074921.jpg`, and passed camera OCR on `TINY`.
 
 ## audio-front-end
 

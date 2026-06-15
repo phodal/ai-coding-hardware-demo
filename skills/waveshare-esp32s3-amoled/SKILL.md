@@ -194,7 +194,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make tinyml-imu-model-check` to validate the checked-in nearest-centroid model metadata and validation set.
    - Run `make tinyml-imu-build` to compile the QMI8658 TinyML classifier.
    - Run `make tinyml-imu-smoke` to upload it, verify the board-reported model hash, disable live IMU mode, inject deterministic serial feature vectors, and verify `REST`, `TILT_LEFT`, `TILT_RIGHT`, `FACE_UP`, and `SHAKE` labels.
-   - Use `TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make tinyml-imu-smoke` when camera OCR should verify the screen reaches `OK`.
+   - Use `TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 make tinyml-imu-smoke` when camera OCR should verify the screen reaches the stable `TINY` marker.
    - Treat this as a small TinyML automation model. The current embedded nearest-centroid classifier can be replaced by ESP-DL or a larger trained model later without removing the deterministic serial sample gate.
    - This path is safe for late-night validation because it does not play audio or use the host microphone.
 

@@ -31,5 +31,8 @@ fi
 python3 "$ROOT_DIR/scripts/tinyml-imu-check.py" "${TINYML_CHECK_ARGS[@]}"
 
 if [[ "${TINYML_IMU_VISUAL_SMOKE:-0}" == "1" ]]; then
-  OCR_EXPECTED="${TINYML_IMU_OCR_EXPECTED:-OK}" "$ROOT_DIR/scripts/camera-ocr.sh"
+  OCR_EXPECTED="${TINYML_IMU_OCR_EXPECTED:-TINY}" \
+    OCR_PREPROCESS_MODE="${OCR_PREPROCESS_MODE:-color}" \
+    OCR_SCALE_WIDTH="${OCR_SCALE_WIDTH:-2400}" \
+    "$ROOT_DIR/scripts/camera-ocr.sh"
 fi

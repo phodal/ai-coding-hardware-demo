@@ -15,7 +15,7 @@ The `tinyml_imu_classifier` sketch is a deterministic TinyML classifier for the 
 make tinyml-imu-build
 make tinyml-imu-model-check
 make tinyml-imu-smoke
-TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make tinyml-imu-smoke
+TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 make tinyml-imu-smoke
 ```
 
 `make tinyml-imu-model-check` validates the checked-in nearest-centroid model metadata and validation set. The smoke script uploads the sketch, waits for `TINYML_READY`, verifies the board-reported model hash, disables live mode, sends known IMU samples, and verifies `REST`, `TILT_LEFT`, `TILT_RIGHT`, `FACE_UP`, and `SHAKE` classifications.
@@ -39,7 +39,7 @@ TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make tinyml-imu-smoke
   - `TINYML_CLASS source=serial label=TILT_RIGHT`
   - `TINYML_CLASS source=serial label=FACE_UP`
   - `TINYML_CLASS source=serial label=SHAKE`
-- Visual: optional OCR sees `OK` on the AMOLED.
+- Visual: optional OCR sees the stable `TINY` marker on the AMOLED. The visual wrapper uses color preprocessing and wider scaling by default because gray preprocessing can drop the cyan/red AMOLED text.
 
 ## Notes
 
@@ -55,3 +55,4 @@ TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make tinyml-imu-smoke
 - `SKIP_BUILD=1 make tinyml-imu-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated `hash=tinyml-imu-centroid-v1`, `prototypes=5`, `validation_accuracy=1.000`, and labels `REST,TILT_LEFT,TILT_RIGHT,FACE_UP,SHAKE`.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target tinyml-imu --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-054530/summary.json`.
 - Observed summary: `tinyml_imu_summary classifications=5 labels=REST,TILT_LEFT,TILT_RIGHT,FACE_UP,SHAKE model=tinyml-imu-centroid-v1 min_confidence=0.914`.
+- `SKIP_BUILD=1 TINYML_IMU_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 OCR_ROTATE=180 TINYML_IMU_SECONDS=3 CAMERA_CAPTURE_TIMEOUT=8 make tinyml-imu-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated the same five serial-injected IMU labels with `min_confidence=0.914`, saved `.logs/camera-ocr-20260616-074921.jpg`, and passed camera OCR on `TINY`.
