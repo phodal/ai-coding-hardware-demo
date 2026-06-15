@@ -22,5 +22,5 @@ make remaining-gates-preflight
 ## Verified Locally
 
 - `make remaining-gates-list`: listed all 3 remaining safe preflight gates with `destructive=0 audio=0`.
-- `make remaining-gates-preflight`: passed all 3 safe gates with `remaining_gates_preflight_summary gates=3 passed=3 failed=0 summary=/Users/phodal/hardware/arduino/.logs/remaining-gates-preflight/20260614-105424/summary.json destructive=0 audio=0`.
+- `make remaining-gates-preflight`: passed all 3 safe gates with `remaining_gates_preflight_summary gates=3 passed=3 failed=0 summary=/Users/phodal/hardware/arduino/.logs/remaining-gates-preflight/20260615-080652/summary.json destructive=0 audio=0`.
 - Latest summary records `official-demos` as plan-only, `xiaozhi-ai` as preflight-only with `release_source=live`, and `audio-front-end` as compile/artifact preflight with `audio_devices_used=0 stimulus_played=0 uploaded=0`.

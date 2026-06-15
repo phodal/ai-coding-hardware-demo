@@ -9,7 +9,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | official-demos | P0 | verified | conditional | 24 item(s) | passed `.logs/hardware-smoke-suite/20260614-084339/summary.json` | suite-passed | No immediate evidence gap. |
 | xiaozhi-ai | P0 | required_external | audio | 27 item(s) | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | suite-passed | No immediate evidence gap. |
-| web-ai-button | P1 | required_external | none | 5 item(s) | missing | external-gated | Needs external firmware/source environment evidence. |
+| web-ai-button | P1 | required_external | none | 6 item(s) | missing | external-gated | Needs external firmware/source environment evidence. |
 | offline-voice | P1 | verified | non_audio_control | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
 | lvgl-visual-agent | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
 | imu-interaction | P1 | verified | none | 9 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
@@ -109,11 +109,12 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 - Doc: `docs/p1-web-ai-button.md`
 - Latest suite summary: missing
 - Verified Locally:
-  - `make web-ai-button-build`: passed with `1136107 bytes` program storage and `47224 bytes` dynamic memory.
-  - `SKIP_BUILD=1 make web-ai-button-smoke`: uploaded to `/dev/cu.usbmodem83101`, started the local mock AI server, configured the board endpoint to `http://<mac-lan-ip>:8787/ask`, joined Wi-Fi with credentials from `.env`, reached `WEB_AI_RESPONSE status=ok code=200 text=AI OK from Mac`, and reported `web_ai_button_summary connected=1 ip=192.168.31.65 triggers=1 touch=1`.
-  - `OCR_EXPECTED=AI OCR_ROTATE=180 LOG_DIR=.logs/web-ai-button-visual ./scripts/camera-ocr.sh`: passed against the AI response screen and OCR saw `WEB AI` plus `ASK AI`.
-  - Evidence pack: `docs/evidence/web-ai-button-20260614-124803/summary.md`.
-  - Physical human tap on the AMOLED button is still pending; the touch controller is ready and the same `triggerAi()` path is wired to touch and serial trigger events.
+  - `make web-ai-button-build`: passed with `1136687 bytes` program storage and `47224 bytes` dynamic memory.
+  - `SKIP_BUILD=1 WEB_AI_KEEP_SERVER=1 make web-ai-button-smoke`: uploaded to `/dev/cu.usbmodem83101`, started the local mock AI server, configured the board endpoint to `http://<mac-lan-ip>:8787/ask`, joined Wi-Fi with credentials from `.env`, reached `WEB_AI_RESPONSE status=ok code=200 text=Qoder OK from Mac`, and reported `web_ai_button_summary connected=1 ip=<esp32-lan-ip> triggers=1 touch=1`.
+  - `WEB_AI_KEEP_SERVER=1` was verified after the smoke: the detached server process was still running and `GET /health` returned HTTP 200.
+  - `WEB_AI_KEEP_SERVER=1 WEB_AI_BUTTON_VISUAL_SMOKE=1 OCR_ROTATE=180 make web-ai-button-smoke` saved the Qoder screen at `docs/evidence/web-ai-button-qoder-20260614-145545/camera-ocr-20260614-145545.jpg`, but exact OCR remained partial: Vision read the large `OK` marker as `Bol` in this camera position, so the visual command exited non-zero after the functional serial/HTTP checks passed.
+  - Evidence pack: `docs/evidence/web-ai-button-qoder-20260614-145545/summary.md`.
+  - A real pre-config tap was captured before this guard existed and returned `wifi_missing`; the current firmware now ignores pre-config button taps with `WEB_AI_TOUCH_IGNORED reason=not_ready` instead of treating them as failed AI requests. Touch remains wired to the same `triggerAi()` path after Wi-Fi and endpoint configuration.
 
 ## offline-voice
 
