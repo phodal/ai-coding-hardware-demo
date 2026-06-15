@@ -12,7 +12,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 MATRIX_PATH = ROOT / "config" / "feature-matrix.tsv"
 SMOKE_SUITE_LOG_ROOT = ROOT / ".logs" / "hardware-smoke-suite"
 CAMERA_DIAGNOSE_ROOT = ROOT / ".logs"
-CAMERA_PATH_RE = re.compile(r"(?:/Users/[^`\\s)]*/hardware/arduino/)?\.logs/camera-ocr-[0-9-]+\.(?:jpg|jpeg|png|txt)")
+CAMERA_PATH_RE = re.compile(
+    r"(?:/Users/[^`\\s)]*/hardware/arduino/)?"
+    r"(?:\.logs|docs/evidence/[^`\\s)]*)/camera-ocr-[0-9-]+\.(?:jpg|jpeg|png|txt)"
+)
 VISUAL_TERMS = (
     "VISUAL_SMOKE",
     "camera OCR",
@@ -158,6 +161,9 @@ def visual_status(row: dict[str, str], doc_text: str, verified_text: str) -> tup
         missing = [item for item in verified_artifacts if not normalize_artifact(item).exists()]
         if missing:
             return "artifact-missing", f"Referenced camera artifact is missing: {', '.join(missing[:2])}"
+        verified_lower = verified_text.lower()
+        if "ocr remained partial" in verified_lower or "exited non-zero" in verified_lower:
+            return "camera-captured-ocr-partial", "Camera artifact is recorded, but exact OCR did not pass."
         return "camera-verified", "Verified Locally references camera OCR artifact(s)."
 
     for line in verified_text.splitlines():

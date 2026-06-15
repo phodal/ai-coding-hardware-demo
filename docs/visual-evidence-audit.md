@@ -14,13 +14,13 @@ Latest camera-ready preflight:
 
 Latest camera diagnose:
 
-- Directory: `.logs/camera-diagnose-20260614-111923`
-- Summary: `.logs/camera-diagnose-20260614-111923/summary.txt`
+- Directory: `.logs/camera-diagnose-20260614-143802`
+- Summary: `.logs/camera-diagnose-20260614-143802/summary.txt`
 - Device: `0` at `1280x720`
-- Swift capture status: `1`
+- Swift capture status: `0`
 - FFmpeg capture status: `skipped`
-- Recommendation: `no_video_frame_captured_close_camera_apps_or_reconnect_usb_camera`
-- Swift diagnostics: `CameraSnapshot: Timed out before a camera frame was captured. diagnostics{running=true frames=0 drops=0 last_drop=none preset=AVCaptureSessionPreset1280x720 active_preset=AVCaptureSessionPreset1280x720 device=罗技高清网络摄像机_C930c,connected=1,suspended=0,in_use=0 active_format=1920x1080@30-30fps|24-24fps|20-20fps|15-15fps|10-10fps|7-7fps|5-5fps}`
+- Recommendation: `ok`
+- Swift diagnostics: `CameraSnapshotDiagnostics: first_frame_received warmup_frames=3`
 
 
 | ID | Priority | Matrix status | Audio mode | Visual status | Artifacts | Next visual gap |
@@ -28,7 +28,7 @@ Latest camera diagnose:
 | official-demos | P0 | verified | conditional | visual-gate-documented | none | Visual smoke path is documented but no local camera artifact is recorded. |
 | xiaozhi-ai | P0 | required_external | audio | post-flash-required | none | Visual gate is documented, but needs approved external firmware/runtime evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | camera-verified | `.logs/camera-ocr-20260613-225433.jpg` | Verified Locally references camera OCR artifact(s). |
-| web-ai-button | P1 | required_external | none | post-flash-required | none | Visual gate is documented, but needs approved external firmware/runtime evidence. |
+| web-ai-button | P1 | required_external | none | camera-captured-ocr-partial | `docs/evidence/web-ai-button-qoder-20260614-145545/camera-ocr-20260614-145545.jpg` | Camera artifact is recorded, but exact OCR did not pass. |
 | offline-voice | P1 | verified | non_audio_control | visual-gate-documented | none | Visual smoke path is documented but no local camera artifact is recorded. |
 | lvgl-visual-agent | P1 | verified | none | visual-gate-documented | none | Visual smoke path is documented but no local camera artifact is recorded. |
 | imu-interaction | P1 | verified | none | visual-gate-documented | none | Visual smoke path is documented but no local camera artifact is recorded. |
@@ -64,9 +64,10 @@ Latest camera diagnose:
 ## web-ai-button
 
 - Doc: `docs/p1-web-ai-button.md`
-- Visual status: `post-flash-required`
-- Camera artifacts: none recorded in `## Verified Locally`.
-- Next visual gap: Visual gate is documented, but needs approved external firmware/runtime evidence.
+- Visual status: `camera-captured-ocr-partial`
+- Camera artifacts:
+  - `docs/evidence/web-ai-button-qoder-20260614-145545/camera-ocr-20260614-145545.jpg`
+- Next visual gap: Camera artifact is recorded, but exact OCR did not pass.
 
 ## offline-voice
 
