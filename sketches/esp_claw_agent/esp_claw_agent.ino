@@ -9,6 +9,10 @@
 #define DISPLAY_ROTATION 0
 #endif
 
+#ifndef DISPLAY_BRIGHTNESS
+#define DISPLAY_BRIGHTNESS 96
+#endif
+
 Arduino_DataBus *bus = new Arduino_ESP32QSPI(
   LCD_CS, LCD_SCLK, LCD_SDIO0, LCD_SDIO1, LCD_SDIO2, LCD_SDIO3);
 
@@ -150,7 +154,7 @@ void drawPage() {
   switch (currentPage) {
     case PAGE_HOME:
       drawFrame(RGB565_CYAN);
-      centerText("CLAW", 44, 6, RGB565_CYAN);
+      centerText("AGENT", 44, 5, RGB565_CYAN);
       centerText("OK", 130, 9, RGB565_WHITE);
       drawLine("event=", 292, RGB565_GREEN);
       gfx->print(lastEvent);
@@ -554,7 +558,7 @@ void setupDisplay() {
     return;
   }
   gfx->setRotation(DISPLAY_ROTATION);
-  gfx->setBrightness(200);
+  gfx->setBrightness(DISPLAY_BRIGHTNESS);
   displayReady = true;
   drawPage();
 }

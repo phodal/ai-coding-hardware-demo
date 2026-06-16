@@ -9,7 +9,7 @@ Reference context:
 
 ## What It Proves
 
-- The AMOLED can render an agent status surface with OCR-friendly `CLAW OK` text.
+- The AMOLED can render an agent status surface with `AGENT` and `OK` markers.
 - The CST9217 touch controller initializes and can cycle agent pages.
 - A host-side relay can drive the same conceptual loop that ESP-Claw uses: `CLAW_SENSE`, `CLAW_REASON`, `CLAW_DECIDE`, and `CLAW_ACT`.
 - The serial protocol can validate MCP-style tool registration/calls, IM chat commands, Lua-style rule loading, local rule execution, memory writes, and memory reads without Wi-Fi credentials or audio devices.
@@ -19,10 +19,12 @@ Reference context:
 ```bash
 make esp-claw-agent-build
 make esp-claw-agent-smoke
-ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make esp-claw-agent-smoke
+ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 DISPLAY_BRIGHTNESS=96 make esp-claw-agent-smoke
 ```
 
 The smoke script uploads the harness, adds a deterministic rule, loads a Lua-style rule, emits events, registers and calls an MCP-style tool, sends one chat message, writes and reads one memory item, and verifies that unmatched events fall back to an `LLM:REQUEST` action.
+
+When `ESP_CLAW_AGENT_VISUAL_SMOKE=1` is set, camera OCR checks the stable `OK` marker on the returned home page. Serial remains the authoritative proof for rules, MCP, IM chat, memory, and fallback actions.
 
 ## Serial Protocol
 
@@ -67,3 +69,6 @@ The smoke script uploads the harness, adds a deterministic rule, loads a Lua-sty
 - `SKIP_BUILD=1 make esp-claw-agent-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated Lua-style rule loading, MCP tool registration/call, IM chat rule creation, memory put/get, and `LLM:REQUEST` fallback.
 - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target esp-claw-agent --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-055205/summary.json`.
 - Observed summary: `esp_claw_agent_summary states=3 page_flow=RULES,MCP,MEMORY,HOME rules=5 events=4 actions=5 mcp=1 tools=1 chats=1 memory=1 lua=1 latest_action=LLM:REQUEST`.
+- `ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 DISPLAY_BRIGHTNESS=96 ESP_CLAW_AGENT_SECONDS=4 CAMERA_CAPTURE_TIMEOUT=8 make esp-claw-agent-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated local rules, Lua loading, MCP register/call, IM chat, memory put/get, and `LLM:REQUEST` fallback, then camera OCR matched `OK`.
+- Camera OCR artifacts: `.logs/camera-ocr-20260616-083338.jpg`, `.logs/camera-ocr-20260616-083338.processed.png`, `.logs/camera-ocr-20260616-083338.txt`.
+- Latest visual build size: `439395 bytes` program storage and `24264 bytes` dynamic memory.

@@ -85,6 +85,7 @@ Recoding changes to the AGENTS.md file for better organization and clarity.
 - The offline voice-control harness is a P1 non-audio gate for WakeNet/MultiNet behavior. Preserve the serial `WAKE:`, `CMD:`, `ADDCMD:`, `MODCMD:`, and `DELCMD:` simulation path when adding real ESP-SR audio so late-night validation can still prove the command state machine without microphone or speaker use.
 - The TinyML IMU classifier now has a checked-in nearest-centroid model in `config/tinyml-imu-model.json`. Run `make tinyml-imu-model-check` before board smoke, and keep deterministic serial `SAMPLE:` vectors as the Skill-facing acceptance path even after replacing the embedded model with ESP-DL or a larger trained model.
 - The ESP-Claw/OpenClaw agent harness is a P2 compatibility path, not the official ESP-Claw firmware. Preserve the serial `LUA:LOAD`, `RULE:ADD`, `MCP:REGISTER`, `MCP:CALL`, `MEM:PUT`, `MEM:GET`, and `EVENT` gates so Skill automation can prove sense/reason/decide/act behavior without IM credentials, Wi-Fi, camera, or audio.
+- For ESP-Claw/OpenClaw visual checks, OCR the stable `OK` marker with `DISPLAY_BRIGHTNESS=96 OCR_PREPROCESS_MODE=color OCR_SCALE_WIDTH=2400`; use serial output as the authoritative proof for local rules, MCP calls, IM chat, memory, and LLM fallback because `AGENT` can still be misread on the current camera/font path.
 
 ## Feature Push README Hook
 

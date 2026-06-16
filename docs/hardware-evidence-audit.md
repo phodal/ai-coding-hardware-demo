@@ -16,7 +16,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | power-lifecycle | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
 | desk-widget | P1 | verified | none | 19 item(s) | passed `.logs/hardware-smoke-suite/20260614-052802/summary.json` | suite-passed | No immediate evidence gap. |
 | iot-panel | P1 | verified | none | 8 item(s) | passed `.logs/hardware-smoke-suite/20260614-053656/summary.json` | suite-passed | No immediate evidence gap. |
-| esp-claw-agent | P2 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-055205/summary.json` | suite-passed | No immediate evidence gap. |
+| esp-claw-agent | P2 | verified | none | 7 item(s) | passed `.logs/hardware-smoke-suite/20260614-055205/summary.json` | suite-passed | No immediate evidence gap. |
 | tinyml-imu | P2 | verified | none | 6 item(s) | passed `.logs/hardware-smoke-suite/20260614-054530/summary.json` | suite-passed | No immediate evidence gap. |
 | audio-front-end | P2 | required_quiet_window | audio | 14 item(s) | missing | quiet-window-gated | Needs an explicit quiet-window audio run. |
 
@@ -222,6 +222,9 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `SKIP_BUILD=1 make esp-claw-agent-smoke`: uploaded to `/dev/cu.usbmodem83101` and validated Lua-style rule loading, MCP tool registration/call, IM chat rule creation, memory put/get, and `LLM:REQUEST` fallback.
   - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target esp-claw-agent --skip-build --per-target-timeout 240 --max-failures 1"`: passed with summary `.logs/hardware-smoke-suite/20260614-055205/summary.json`.
   - Observed summary: `esp_claw_agent_summary states=3 page_flow=RULES,MCP,MEMORY,HOME rules=5 events=4 actions=5 mcp=1 tools=1 chats=1 memory=1 lua=1 latest_action=LLM:REQUEST`.
+  - `ESP_CLAW_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 DISPLAY_BRIGHTNESS=96 ESP_CLAW_AGENT_SECONDS=4 CAMERA_CAPTURE_TIMEOUT=8 make esp-claw-agent-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated local rules, Lua loading, MCP register/call, IM chat, memory put/get, and `LLM:REQUEST` fallback, then camera OCR matched `OK`.
+  - Camera OCR artifacts: `.logs/camera-ocr-20260616-083338.jpg`, `.logs/camera-ocr-20260616-083338.processed.png`, `.logs/camera-ocr-20260616-083338.txt`.
+  - Latest visual build size: `439395 bytes` program storage and `24264 bytes` dynamic memory.
 
 ## tinyml-imu
 
