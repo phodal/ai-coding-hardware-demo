@@ -163,6 +163,10 @@ case "$ACTION" in
       if [[ "${#EXTRA_ARGS[@]}" -eq 0 ]]; then
         exec "$PROJECT_DIR/scripts/xiaozhi.sh" latest
       fi
+      if [[ "${EXTRA_ARGS[0]}" == "readiness" ]]; then
+        cd "$PROJECT_DIR"
+        exec make xiaozhi-readiness
+      fi
       exec "$PROJECT_DIR/scripts/xiaozhi.sh" "${EXTRA_ARGS[@]}"
     fi
     ;;

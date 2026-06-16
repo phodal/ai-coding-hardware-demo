@@ -82,6 +82,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make xiaozhi-latest` to locate the latest official `waveshare-esp32-s3-touch-amoled-1.75c` release asset.
    - Run `make xiaozhi-inspect` before flashing; it should confirm the zip contains `merged-binary.bin`.
    - Run `make xiaozhi-preflight` for the non-destructive readiness gate; it hashes `merged-binary.bin`, reports esptool/serial/source/ESP-IDF readiness, and confirms `destructive=0 audio=0`.
+   - Run `make xiaozhi-readiness` for the default no-audio readiness bundle. It runs preflight, source check, ESP-IDF env/build, and verifies the latest rollback image. Set `XIAOZHI_READINESS_BACKUP=1` immediately before an approved flash when the current board flash must be freshly captured.
    - If `make xiaozhi-preflight` reports `release_source=cache`, it used a local firmware zip because live release metadata failed; set `XIAOZHI_RELEASE_CACHE_FALLBACK=0` when live upstream freshness is required.
    - Run `make xiaozhi-backup` before any XiaoZhi flash; it reads the current board flash to `.vendor/xiaozhi/backups/` and prints `xiaozhi_backup_summary ... destructive=0 audio=0`. The backup path defaults to `--no-stub` at `XIAOZHI_BACKUP_BAUD=115200` because long stub reads can stop on this USB Serial/JTAG path.
    - Run `BACKUP=<path> CONFIRM=--yes make xiaozhi-restore` only when you intentionally want to write a saved flash image back to the board.
@@ -218,6 +219,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
      `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> smoke`
      `CLOUD_AI_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> pipeline`
      `scripts/waveshare-arduino-cli.sh cloud-ai <project-dir> cache`
+     `scripts/waveshare-arduino-cli.sh xiaozhi <project-dir> readiness`
      `WEB_AI_BUTTON_VISUAL_SMOKE=1 scripts/waveshare-arduino-cli.sh web-ai-button <project-dir> smoke`
      `scripts/waveshare-arduino-cli.sh web-ai-button <project-dir> tap-smoke`
      `scripts/waveshare-arduino-cli.sh audio-vad <project-dir> readiness`
@@ -296,6 +298,7 @@ OFFICIAL_VISUAL_STABLE_MARKER=1 OFFICIAL_VISUAL_SMOKE=1 SMOKE_SECONDS=8 make off
 make xiaozhi-latest
 make xiaozhi-inspect
 make xiaozhi-preflight
+make xiaozhi-readiness
 make xiaozhi-backup
 make xiaozhi-runtime-check
 make xiaozhi-visual-check

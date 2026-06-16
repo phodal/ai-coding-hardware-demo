@@ -7,7 +7,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | ID | Priority | Matrix status | Audio mode | Doc evidence | Latest suite | Posture | Next gap |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | official-demos | P0 | verified | conditional | 27 item(s) | passed `.logs/hardware-smoke-suite/20260614-084339/summary.json` | suite-passed | No immediate evidence gap. |
-| xiaozhi-ai | P0 | required_external | audio | 27 item(s) | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-gated | Needs external firmware/source environment evidence. |
+| xiaozhi-ai | P0 | required_external | audio | 31 item(s) | passed `.logs/hardware-smoke-suite/20260614-071849/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | cloud-ai-terminal | P0 | verified | non_audio_control | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-060731/summary.json` | suite-passed | No immediate evidence gap. |
 | web-ai-button | P1 | required_external | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260615-081705/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | offline-voice | P1 | verified | non_audio_control | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
@@ -78,9 +78,13 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - `make xiaozhi-idf-env` on 2026-06-16 activated ESP-IDF `v5.5.4` from `.vendor/esp-idf-v5.5.4` with Python env `~/.espressif/python_env/idf5.5_py3.14_env`.
   - `make xiaozhi-idf-build` on 2026-06-16 compiled the official XiaoZhi source without flashing firmware or using audio hardware.
   - Latest `xiaozhi_idf_build_summary`: `idf=ESP-IDF_v5.5.4 app_bin=/Users/phodal/hardware/arduino/.vendor/xiaozhi/source/build/xiaozhi.bin app_size=2944176 bootloader_size=16256 partition_size=3072 assets_size=2851677 destructive=0 audio=0`.
+  - `make xiaozhi-readiness`: passed the bundled no-audio readiness chain with live preflight, source check, ESP-IDF env/build, and latest rollback-image verification.
+  - Latest `xiaozhi_readiness_summary`: `status=ok backup_mode=0 build=1 destructive=0 audio=0`.
   - Earlier ESP-IDF `v5.4.4` was rejected by the XiaoZhi component solver because `main/idf_component.yml` requires `idf >=5.5.2`.
   - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino idf-build`: passed through the repo Skill helper.
   - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino idf-build`: passed through the global Skill helper.
+  - `skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino readiness`: passed through the repo Skill helper.
+  - `/Users/phodal/.codex/skills/waveshare-esp32s3-amoled/scripts/waveshare-arduino-cli.sh xiaozhi /Users/phodal/hardware/arduino readiness`: passed through the global Skill helper.
   - Flashing was not run during this documentation update.
   - `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external --per-target-timeout 180 --max-failures 1"`: ran the non-destructive `xiaozhi-preflight` suite target without flashing firmware or using audio hardware.
   - Latest suite summary: `.logs/hardware-smoke-suite/20260614-071849/summary.json`.

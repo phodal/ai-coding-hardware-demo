@@ -26,8 +26,8 @@ GATES = [
     {
         "id": "xiaozhi-ai",
         "reason": "external-required",
-        "command": ["make", "xiaozhi-preflight"],
-        "safe_scope": "preflight-only",
+        "command": ["make", "xiaozhi-readiness"],
+        "safe_scope": "preflight-source-build-existing-backup",
         "destructive": "0",
         "audio": "0",
         "physical_followup": "CONFIRM=--yes make xiaozhi-flash && make xiaozhi-runtime-visual-check",

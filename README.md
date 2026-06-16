@@ -133,6 +133,7 @@ make xiaozhi-latest
 make xiaozhi-download
 make xiaozhi-inspect
 make xiaozhi-preflight
+make xiaozhi-readiness
 make xiaozhi-backup
 make xiaozhi-idf-env
 make xiaozhi-idf-build
@@ -141,7 +142,7 @@ make xiaozhi-source-clone
 make xiaozhi-source-check
 ```
 
-`make xiaozhi-latest`, `make xiaozhi-download`, `make xiaozhi-inspect`, `make xiaozhi-preflight`, and `make xiaozhi-backup` automate the non-destructive prebuilt XiaoZhi AI firmware route for `waveshare-esp32-s3-touch-amoled-1.75c`. `make xiaozhi-backup` reads the current board flash into `.vendor/xiaozhi/backups/` with `destructive=0 audio=0`. `CONFIRM=--yes make xiaozhi-flash` writes the downloaded merged binary to the board and is intentionally explicit because it replaces the Arduino sketch currently on the device.
+`make xiaozhi-latest`, `make xiaozhi-download`, `make xiaozhi-inspect`, `make xiaozhi-preflight`, and `make xiaozhi-backup` automate the non-destructive prebuilt XiaoZhi AI firmware route for `waveshare-esp32-s3-touch-amoled-1.75c`. `make xiaozhi-readiness` bundles preflight, source check, ESP-IDF env/build, and latest rollback-image verification without flashing or using audio; set `XIAOZHI_READINESS_BACKUP=1` to refresh the 16MB board backup before an approved flash. `make xiaozhi-backup` reads the current board flash into `.vendor/xiaozhi/backups/` with `destructive=0 audio=0`. `CONFIRM=--yes make xiaozhi-flash` writes the downloaded merged binary to the board and is intentionally explicit because it replaces the Arduino sketch currently on the device.
 
 The source route uses `make xiaozhi-idf-env`, `make xiaozhi-idf-build`, `scripts/xiaozhi.sh idf-flash`, and `scripts/xiaozhi.sh idf-monitor`. See `docs/p0-xiaozhi-ai.md` for the current XiaoZhi acceptance notes.
 
