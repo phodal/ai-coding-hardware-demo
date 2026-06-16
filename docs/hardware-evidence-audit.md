@@ -12,7 +12,7 @@ This report audits evidence surfaces only. It does not prove completion by itsel
 | web-ai-button | P1 | required_external | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260615-081705/summary.json` | external-gated | Needs external firmware/source environment evidence. |
 | offline-voice | P1 | verified | non_audio_control | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-055754/summary.json` | suite-passed | No immediate evidence gap. |
 | lvgl-visual-agent | P1 | verified | none | 5 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
-| imu-interaction | P1 | verified | none | 9 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
+| imu-interaction | P1 | verified | none | 12 item(s) | passed `.logs/hardware-smoke-suite/20260614-045308/summary.json` | suite-passed | No immediate evidence gap. |
 | power-lifecycle | P1 | verified | none | 4 item(s) | passed `.logs/hardware-smoke-suite/20260614-044244/summary.json` | suite-passed | No immediate evidence gap. |
 | desk-widget | P1 | verified | none | 17 item(s) | passed `.logs/hardware-smoke-suite/20260614-052802/summary.json` | suite-passed | No immediate evidence gap. |
 | iot-panel | P1 | verified | none | 6 item(s) | passed `.logs/hardware-smoke-suite/20260614-053656/summary.json` | suite-passed | No immediate evidence gap. |
@@ -156,6 +156,9 @@ This report audits evidence surfaces only. It does not prove completion by itsel
   - Latest target log: `.logs/hardware-smoke-suite/20260614-045308/imu-interaction.log`.
   - Observed build size: `439115 bytes` program storage and `23120 bytes` dynamic memory.
   - Observed summary: `imu_interaction_summary events=MENU_NEXT,POSE_MENU,SHAKE_SWITCH,SLEEP,STEP,WRIST_WAKE steps=1 shakes=1 wrist_wakes=1 menu_changes=2`.
+  - `SKIP_BUILD=1 IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 IMU_INTERACTION_SECONDS=2 CAMERA_CAPTURE_TIMEOUT=8 make imu-interaction-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated `WRIST_WAKE`, `SHAKE_SWITCH`, `POSE_MENU`, `STEP`, and `MENU_NEXT`, and camera OCR matched `OK`.
+  - Camera OCR artifacts: `.logs/camera-ocr-20260616-080027.jpg`, `.logs/camera-ocr-20260616-080027.processed.png`, `.logs/camera-ocr-20260616-080027.txt`.
+  - Latest visual build size: `439111 bytes` program storage and `23120 bytes` dynamic memory.
 
 ## power-lifecycle
 

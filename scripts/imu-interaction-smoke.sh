@@ -31,5 +31,8 @@ fi
 python3 "$ROOT_DIR/scripts/imu-interaction-check.py" "${CHECK_ARGS[@]}"
 
 if [[ "${IMU_INTERACTION_VISUAL_SMOKE:-0}" == "1" ]]; then
-  OCR_EXPECTED="${IMU_INTERACTION_OCR_EXPECTED:-OK}" "$ROOT_DIR/scripts/camera-ocr.sh"
+  OCR_EXPECTED="${IMU_INTERACTION_OCR_EXPECTED:-OK}" \
+    OCR_PREPROCESS_MODE="${OCR_PREPROCESS_MODE:-color}" \
+    OCR_SCALE_WIDTH="${OCR_SCALE_WIDTH:-2400}" \
+    "$ROOT_DIR/scripts/camera-ocr.sh"
 fi

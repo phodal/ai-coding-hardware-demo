@@ -65,6 +65,9 @@ The board emits:
 - Latest target log: `.logs/hardware-smoke-suite/20260614-045308/imu-interaction.log`.
 - Observed build size: `439115 bytes` program storage and `23120 bytes` dynamic memory.
 - Observed summary: `imu_interaction_summary events=MENU_NEXT,POSE_MENU,SHAKE_SWITCH,SLEEP,STEP,WRIST_WAKE steps=1 shakes=1 wrist_wakes=1 menu_changes=2`.
+- `SKIP_BUILD=1 IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 IMU_INTERACTION_SECONDS=2 CAMERA_CAPTURE_TIMEOUT=8 make imu-interaction-smoke`: uploaded to `/dev/cu.usbmodem83101`, validated `WRIST_WAKE`, `SHAKE_SWITCH`, `POSE_MENU`, `STEP`, and `MENU_NEXT`, and camera OCR matched `OK`.
+- Camera OCR artifacts: `.logs/camera-ocr-20260616-080027.jpg`, `.logs/camera-ocr-20260616-080027.processed.png`, `.logs/camera-ocr-20260616-080027.txt`.
+- Latest visual build size: `439111 bytes` program storage and `23120 bytes` dynamic memory.
 
 ## Notes
 

@@ -159,7 +159,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
 19. For dedicated IMU interaction validation:
    - Run `make imu-interaction-build` to compile the QMI8658 wrist wake, shake switch, posture menu, and step counter probe.
    - Run `make imu-interaction-smoke` to upload it and validate deterministic serial-injected IMU samples for `WRIST_WAKE`, `SHAKE_SWITCH`, `POSE_MENU`, `STEP`, and `MENU_NEXT`.
-   - Use `IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make imu-interaction-smoke` when camera OCR should verify the screen reaches `OK`.
+   - Use `IMU_INTERACTION_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 make imu-interaction-smoke` when camera OCR should verify the screen reaches `OK`; serial verifies the IMU event details.
    - This path is safe for late-night validation because it does not play audio, use the host microphone, or require physically shaking the board.
 
 20. For LVGL visual-agent validation:

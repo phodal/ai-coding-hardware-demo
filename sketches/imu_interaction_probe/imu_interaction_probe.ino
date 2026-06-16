@@ -100,7 +100,7 @@ void drawInteractionScreen() {
   uint16_t border = awake ? RGB565_GREEN : RGB565_DARKGREY;
   gfx->fillScreen(RGB565_BLACK);
   gfx->drawRect(8, 8, LCD_WIDTH - 16, LCD_HEIGHT - 16, border);
-  centerText("IMU", 42, 7, RGB565_CYAN);
+  centerText("STEP", 42, 6, RGB565_CYAN);
   centerText(awake ? "OK" : "DIM", 126, 8, RGB565_WHITE);
 
   gfx->setTextSize(3);
