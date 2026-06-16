@@ -73,6 +73,7 @@ Use this skill to bring up Waveshare ESP32-S3 Touch AMOLED Arduino projects thro
    - Run `make goal-completion-audit` for the stricter requirement-level completion gate; use `python3 scripts/goal-completion-audit.py --strict` only when a non-zero result should fail CI or handoff.
    - Run `make goal-completion-doc` to regenerate `docs/goal-completion-audit.md`.
    - Run `make remaining-gates-preflight` to refresh the safe side of incomplete lanes without flashing XiaoZhi or using audio hardware, then `make remaining-gates-doc` to regenerate `docs/remaining-gates-preflight.md` from the latest summary. It must still leave strict completion at 9/13 until approved physical/external/manual evidence exists. Web AI Button physical tap is recorded as skipped/manual-required by default unless `REMAINING_GATES_ARGS=--include-manual` is passed.
+   - Run `make remaining-gates-runbook` to regenerate `docs/remaining-gates-supervised-runbook.md` before handing off the four remaining gates. It keeps the required approval, supervised command, expected evidence, and completion boundary visible for audio, XiaoZhi flash, and physical tap work.
    - Run `make hardware-smoke-list` to inspect the default serialized non-audio smoke selection.
    - Run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target <id>"` for a narrow serialized hardware lane; the default suite skips audio, conditional, and external lanes. If `--with-visual` is used, the suite runs `make camera-ready` before any target upload and aborts when the host camera cannot save a frame.
    - Run `make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target xiaozhi-ai --allow-external"` for the non-destructive XiaoZhi firmware archive check; it does not flash firmware or use audio hardware.
@@ -285,6 +286,7 @@ make goal-completion-doc
 make remaining-gates-list
 make remaining-gates-preflight
 make remaining-gates-doc
+make remaining-gates-runbook
 make hardware-smoke-list
 make hardware-smoke-suite
 make visual-smoke

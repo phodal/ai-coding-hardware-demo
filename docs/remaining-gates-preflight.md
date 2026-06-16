@@ -11,7 +11,7 @@ Summary: `passed=3` `skipped=1` `failed=0` `destructive=0` `audio=0`
 | ID | Safe scope | Status | Log | Follow-up required |
 | --- | --- | --- | --- | --- |
 | official-demos | plan-only | passed | `.logs/remaining-gates-preflight/20260616-231338/official-demos.log` | ALLOW_AUDIO=1 OFFICIAL_AUDIO_OUTPUT_CONFIRM=heard make official-audio-physical-smoke |
-| xiaozhi-ai | preflight-source-build-existing-backup | passed | `.logs/remaining-gates-preflight/20260616-231338/xiaozhi-ai.log` | CONFIRM=--yes make xiaozhi-flash && make xiaozhi-runtime-visual-check |
+| xiaozhi-ai | preflight-source-build-existing-backup | passed | `.logs/remaining-gates-preflight/20260616-231338/xiaozhi-ai.log` | XIAOZHI_READINESS_BACKUP=1 make xiaozhi-readiness && CONFIRM=--yes make xiaozhi-flash && make xiaozhi-runtime-visual-check |
 | audio-front-end | compile-and-artifact-preflight | passed | `.logs/remaining-gates-preflight/20260616-231338/audio-front-end.log` | make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--target audio-front-end --allow-audio" |
 | web-ai-button | supervised-physical-tap | skipped (manual-required) | `.logs/remaining-gates-preflight/20260616-231338/web-ai-button.log` | make web-ai-button-tap-smoke |
 
@@ -30,5 +30,6 @@ This evidence still does not complete the remaining gates. Strict completion sti
 make remaining-gates-list
 make remaining-gates-preflight
 make remaining-gates-doc
+make remaining-gates-runbook
 make remaining-gates-preflight REMAINING_GATES_ARGS=--include-manual
 ```

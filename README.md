@@ -36,6 +36,7 @@ make feature-matrix-check
 make hardware-evidence-audit
 make hardware-evidence-doc
 make remaining-gates-doc
+make remaining-gates-runbook
 make hardware-smoke-list
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 make official-demos
@@ -118,7 +119,7 @@ Latest saved run: `docs/evidence/ok-qoder-20260614-120532/summary.md`. It proves
 
 `make hardware-evidence-audit` reports which feature lanes have documented verification evidence and latest smoke-suite evidence. `make hardware-evidence-doc` regenerates `docs/hardware-evidence-audit.md`.
 
-`make remaining-gates-preflight` refreshes the safe side of the still-incomplete gates without audio, XiaoZhi flashing, or unsupervised physical taps. `make remaining-gates-doc` regenerates `docs/remaining-gates-preflight.md` from the latest summary so these blocked completion requirements stay explicit.
+`make remaining-gates-preflight` refreshes the safe side of the still-incomplete gates without audio, XiaoZhi flashing, or unsupervised physical taps. `make remaining-gates-doc` regenerates `docs/remaining-gates-preflight.md` from the latest summary so these blocked completion requirements stay explicit. `make remaining-gates-runbook` regenerates `docs/remaining-gates-supervised-runbook.md`, which is the operator checklist for the four gates that still need an allowed audio window, explicit XiaoZhi flash approval, or a supervised AMOLED tap.
 
 `make hardware-smoke-list` shows which feature smokes are selected by the default non-audio suite. `make hardware-smoke-suite` runs those selected smokes serially and writes logs under `.logs/hardware-smoke-suite/`; pass `HARDWARE_SMOKE_ARGS="--target iot-panel --skip-build"` for a narrow lane. When `--with-visual` is set, the suite runs `make camera-ready` first and aborts before any upload if the host camera cannot save a frame. Details are in `docs/hardware-smoke-suite.md`.
 
@@ -204,6 +205,7 @@ make lvgl-visual-agent-smoke
 make hardware-evidence-audit
 make hardware-evidence-doc
 make remaining-gates-doc
+make remaining-gates-runbook
 make hardware-smoke-list
 make hardware-smoke-suite HARDWARE_SMOKE_ARGS="--dry-run"
 ```
