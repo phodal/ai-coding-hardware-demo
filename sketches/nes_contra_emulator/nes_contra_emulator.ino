@@ -28,6 +28,7 @@ uint32_t touchEvents = 0;
 uint32_t lastFrameDraw = 0;
 String serialBuffer;
 char lastButtons[40] = "none";
+int16_t lastRunnerX = -1;
 int16_t touchX[5] = {0};
 int16_t touchY[5] = {0};
 
@@ -53,21 +54,45 @@ void drawStaticScreen() {
   gfx->drawRoundRect(28, 28, 410, 410, 16, RGB565_BLUE);
   centerText("NES", 58, 6, RGB565_CYAN);
   centerText("CONTRA", 132, 5, RGB565_GREEN);
-  centerText("OK", 236, 9, RGB565_WHITE);
+  centerText("OK", 224, 8, RGB565_WHITE);
+  gfx->drawRect(58, 308, 350, 34, RGB565_BLUE);
 
   gfx->setTextSize(2);
   gfx->setTextColor(RGB565_YELLOW, RGB565_BLACK);
-  gfx->setCursor(58, 344);
+  gfx->setCursor(58, 352);
   gfx->print("mapper=2 rom=missing");
-  gfx->setCursor(58, 374);
+  gfx->setCursor(58, 378);
   gfx->print("mode=diagnostic");
 }
 
+void drawRunnerAnimation() {
+  const int16_t trackX = 58;
+  const int16_t trackY = 308;
+  const int16_t trackW = 350;
+  const int16_t runnerW = 30;
+  const int16_t travel = trackW - runnerW - 4;
+  const int16_t phase = (frame * 7) % (travel * 2);
+  const int16_t runnerX = trackX + 2 + (phase < travel ? phase : (travel * 2 - phase));
+  const int16_t runnerY = trackY + 10;
+
+  if (lastRunnerX >= 0) {
+    gfx->fillRect(lastRunnerX - 3, trackY + 1, runnerW + 8, 32, RGB565_BLACK);
+  }
+
+  gfx->drawRect(trackX, trackY, trackW, 34, RGB565_BLUE);
+  gfx->fillRect(runnerX, runnerY, runnerW, 9, RGB565_GREEN);
+  gfx->fillRect(runnerX + 5, runnerY - 6, 11, 6, RGB565_CYAN);
+  gfx->fillRect(runnerX + 19, runnerY + 9, 7, 6, RGB565_YELLOW);
+  gfx->fillRect(runnerX + (((frame / 5) % 2) == 0 ? 3 : 15), runnerY + 9, 7, 6, RGB565_RED);
+  lastRunnerX = runnerX;
+}
+
 void drawDynamicStatus() {
-  if (!displayReady || millis() - lastFrameDraw < 250) {
+  if (!displayReady || millis() - lastFrameDraw < 100) {
     return;
   }
   lastFrameDraw = millis();
+  drawRunnerAnimation();
   gfx->fillRect(54, 404, 360, 28, RGB565_BLACK);
   gfx->setTextSize(2);
   gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
