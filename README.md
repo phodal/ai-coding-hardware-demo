@@ -256,3 +256,17 @@ Latest saved web-button evidence: `docs/evidence/web-ai-button-qoder-20260615-08
 `make lvgl-visual-agent-smoke` uploads the repo-owned LVGL visual-agent surface and validates LVGL tabview pages for chat bubbles, cards, settings, and agent thoughts over serial. `LVGL_VISUAL_AGENT_VISUAL_SMOKE=1 DISPLAY_ROTATION=2 DISPLAY_BRIGHTNESS=96 make lvgl-visual-agent-smoke` also captures the AMOLED and OCRs the stable large `OK` marker; serial remains the proof for LVGL behavior. This complements the official LVGL widgets demo with an automatable agent UI; details are in `docs/p1-lvgl-visual-agent.md`.
 
 `make nes-contra-preflight` inspects the local `/Users/phodal/hardware/nes-contra-us` disassembly checkout, cc65 tools, and legally supplied ROM state. `make nes-contra-build` compiles the diagnostic emulator scaffold, and `make nes-contra-smoke` uploads it and validates the `NES_CONTRA_*` serial protocol, display readiness, touch readiness, input injection, and frame progress. This lane is partial until a reviewed emulator core boots a Mapper 2 ROM; details are in `docs/p2-nes-contra-emulator.md`.
+
+<!-- feat-push-readme:start -->
+## Feature Push Notes
+
+This section is maintained by `.githooks/pre-push` when outgoing push refs or commit subjects include `feat`.
+
+Outgoing feature commits:
+
+| Commit | Subject |
+| --- | --- |
+| `6123df7` | feat: add NES Contra emulator scaffold |
+
+Commit this README update, then run `git push` again.
+<!-- feat-push-readme:end -->
